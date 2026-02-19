@@ -3,178 +3,284 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('titulo_pagina', 'tools365 - Todas tus herramientas en un solo lugar')</title>
+    <title>@yield('titulo_pagina', 'Tools365 - Todas tus herramientas en un solo lugar')</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 
-    <style>
-        :root {
-            --color-primary: #1F3A93;
-            --color-secondary: #7F8C8D;
-            --color-accent: #F39C12;
-            --color-dark: #2C3E50;
-        }
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
 
-        .navbar-tools {
-            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-dark) 100%);
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-        }
+    :root {
+        --color-primary: #1F3A93;
+        --color-secondary: #7F8C8D;
+        --color-accent: #F39C12;
+        --color-accent-hover: #E67E22;
+        --color-dark: #2C3E50;
+    }
 
-        .navbar-brand {
-            font-weight: 800;
-        }
+    * { font-family: 'Nunito', sans-serif; }
 
-        body {
-            padding-top: 100px;
-        }
+    body { padding-top: 90px; }
 
-        .bg-primary-custom {
-            background-color: var(--color-primary) !important;
-        }
+    /* === TOP BAR === */
+    .header-top {
+        background: linear-gradient(90deg, #1a2e7a 0%, #1F3A93 60%, #2a4ab5 100%);
+        padding: 6px 0;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.18);
+    }
 
-        .bg-accent {
-            background-color: var(--color-accent) !important;
-        }
+    .header-top-inner {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
 
-        .bg-dark-custom {
-            background-color: var(--color-dark) !important;
-        }
+    /* Logo */
+    .header-logo {
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+    }
+    .header-logo img { height: 62px; }
+    .header-logo .brand-text {
+        font-weight: 900;
+        font-size: 1.45rem;
+        color: #fff;
+        letter-spacing: -0.5px;
+    }
+    .header-logo .brand-text span { color: var(--color-accent); }
 
-        .text-accent {
-            color: var(--color-accent) !important;
-        }
+    /* Barra de búsqueda — centrada y grande */
+    .header-search-wrap {
+        flex: 1 1 0;
+        min-width: 0;
+        display: flex;
+        justify-content: center;
+    }
+    .header-search-group {
+        display: flex;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        height: 44px;
+        width: 100%;
+        max-width: 580px;
+    }
+    .header-search-input {
+        flex: 1;
+        border: none;
+        padding: 0 16px;
+        font-size: 0.97rem;
+        outline: none;
+        background: #fff;
+    }
+    .header-search-input::placeholder { color: #aaa; }
+    .header-search-btn {
+        background: var(--color-accent);
+        border: none;
+        padding: 0 22px;
+        color: #fff;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background 0.2s;
+        flex-shrink: 0;
+    }
+    .header-search-btn:hover { background: var(--color-accent-hover); }
 
-        .btn-accent {
-            background-color: var(--color-accent);
-            border-color: var(--color-accent);
-            color: white;
-        }
+    /* Botones ghost discretos */
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
+    }
+    .btn-ghost-nav {
+        color: rgba(255,255,255,0.7);
+        text-decoration: none;
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 5px 10px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: color 0.2s, background 0.2s;
+        white-space: nowrap;
+        letter-spacing: 0.01em;
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+    .btn-ghost-nav:hover {
+        color: #fff;
+        background: rgba(255,255,255,0.1);
+    }
+    .btn-ghost-nav--accent {
+        color: rgba(255,210,100,0.85);
+    }
+    .btn-ghost-nav--accent:hover {
+        color: var(--color-accent);
+        background: rgba(243,156,18,0.1);
+    }
 
-        .btn-accent:hover {
-            background-color: #E67E22;
-            border-color: #E67E22;
-            color: white;
-        }
+    /* === BOTTOM NAV BAR === */
+    .header-bottom { background: #162369; }
+    .header-bottom .container {
+        display: flex;
+        align-items: center;
+    }
+    .header-nav-link {
+        color: rgba(255,255,255,0.85);
+        text-decoration: none;
+        font-size: 0.83rem;
+        font-weight: 700;
+        padding: 9px 14px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: color 0.18s, background 0.18s;
+        white-space: nowrap;
+    }
+    .header-nav-link:hover {
+        color: var(--color-accent);
+        background: rgba(255,255,255,0.06);
+    }
 
-        .dropdown-menu-dark {
-            max-height: 400px;
-            overflow-y: auto;
-        }
+    /* Dropdown categorías */
+    .cat-dropdown-wrap { position: relative; }
+    .cat-dropdown-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: #fff;
+        border-radius: 0 0 10px 10px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.13);
+        z-index: 999;
+        min-width: 230px;
+        padding: 6px 0;
+    }
+    .cat-dropdown-wrap:hover .cat-dropdown-menu { display: block; }
+    .cat-dropdown-menu a {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 9px 18px;
+        color: #333;
+        text-decoration: none;
+        font-size: 0.87rem;
+        font-weight: 600;
+        transition: background 0.15s, color 0.15s;
+    }
+    .cat-dropdown-menu a:hover {
+        background: #f0f4ff;
+        color: var(--color-primary);
+    }
+    .cat-dropdown-menu hr { margin: 4px 12px; border-color: #eee; }
 
-        /* Estilos responsivos para el navbar */
-        @media (max-width: 991.98px) {
-            /* En móviles/tablets, la barra de búsqueda ocupa todo el ancho */
-            .search-container {
-                width: 100%;
-            }
-            
-            .search-container .input-group {
-                max-width: 100% !important;
-            }
-            
-            /* Espaciado entre elementos del menú colapsado */
-            .navbar-collapse {
-                padding-top: 1rem;
-            }
-            
-            /* Botones apilados en móvil */
-            .btn-outline-light,
-            .btn-accent {
-                width: 100%;
-            }
-        }
+    /* Utilidades */
+    .bg-primary-custom { background-color: var(--color-primary) !important; }
+    .bg-accent { background-color: var(--color-accent) !important; }
+    .bg-dark-custom { background-color: var(--color-dark) !important; }
+    .text-accent { color: var(--color-accent) !important; }
+    .btn-accent { background-color: var(--color-accent); border-color: var(--color-accent); color: white; }
+    .btn-accent:hover { background-color: var(--color-accent-hover); border-color: var(--color-accent-hover); color: white; }
 
-        @media (min-width: 992px) {
-            /* En desktop, centramos la búsqueda */
-            .search-container {
-                justify-content: center;
-            }
-        }
-
-        /* Mejora visual del input de búsqueda */
-        .search-container input:focus {
-            box-shadow: none;
-            border-color: #ced4da;
-        }
-
-        .search-container .input-group-text {
-            border-right: 0;
-        }
-
-        .search-container .form-control {
-            border-left: 0;
-        }
-
-        .search-container .form-control:focus + .input-group-text,
-        .search-container .input-group-text:has(+ .form-control:focus) {
-            border-color: var(--color-accent);
-        }
-    </style>
+    /* Responsive */
+    @media (max-width: 991.98px) {
+        .header-top-inner { flex-wrap: wrap; gap: 8px; }
+        .header-search-wrap { order: 3; width: 100%; }
+        .header-search-group { max-width: 100%; }
+        .header-actions { margin-left: auto; }
+        .header-bottom { overflow-x: auto; }
+        .header-bottom .container { flex-wrap: nowrap; }
+    }
+    @media (max-width: 575.98px) {
+        .btn-ghost-nav span { display: none; }
+        .btn-ghost-nav { padding: 6px 8px; }
+    }
+</style>
 
     @stack('css')
 </head>
 <body>
 
 <header class="fixed-top">
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-tools">
+
+    <!-- TOP BAR -->
+    <div class="header-top">
         <div class="container">
+            <div class="header-top-inner">
 
-            <a class="navbar-brand d-flex align-items-center gap-1 ms-3" href="{{ route('inicio') }}">
-                <img src="{{ asset('Imagenes/logo.png') }}" alt="logo" class="img-fluid" style="height:90px;">
-                <span class="fw-bold fs-4 ms-1">tools<span class="text-accent">365</span></span>
-            </a>
+                <!-- Logo -->
+                <a class="header-logo" href="{{ route('inicio') }}">
+                    <img src="{{ asset('Imagenes/logo.png') }}" alt="logo">
+                    <span class="brand-text">Tools<span>365</span></span>
+                </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="#inicio">Inicio</a></li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Categorías
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-building me-2"></i>Construcción</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-tree me-2"></i>Agricultura</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-egg me-2"></i>Ganadería</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-cup-straw me-2"></i>Alimentos</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-droplet me-2"></i>Plomería</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-lightning-charge me-2"></i>Electricidad</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-hammer me-2"></i>Carpintería</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-flower1 me-2"></i>Jardinería</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-fire me-2"></i>Soldadura</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-paint-bucket me-2"></i>Pintura</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-truck me-2"></i>Transporte</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Otros</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item"><a class="nav-link" href="#planes">Planes</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#contacto">Contacto</a></li>
-                </ul>
-
-                <!-- Barra de búsqueda - Responsiva -->
-                <div class="search-container d-flex align-items-center gap-3 flex-grow-1 mx-lg-3 my-3 my-lg-0">
-                    <div class="input-group w-100" style="max-width: 400px;">
-                        <span class="input-group-text bg-white border-end-0">
+                <!-- Barra de búsqueda centrada -->
+                <div class="header-search-wrap">
+                    <div class="header-search-group">
+                        <input class="header-search-input" type="text" placeholder="Buscar herramientas, maquinaria, equipos...">
+                        <button class="header-search-btn">
                             <i class="bi bi-search"></i>
-                        </span>
-                        <input type="text" class="form-control border-start-0" placeholder="Buscar herramientas...">
+                        </button>
                     </div>
                 </div>
 
-                <!-- Botones de acción -->
-                <div class="d-flex gap-2 flex-column flex-lg-row w-100 w-lg-auto">
-                    <button class="btn btn-outline-light">Iniciar Sesión</button>
-                    <button class="btn btn-accent">Comienza Gratis</button>
+                <!-- Botones discretos a la derecha -->
+                <div class="header-actions">
+                    <a href="" class="btn-ghost-nav">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        <span>Ingresa</span>
+                    </a>
+                    <a href="" class="btn-ghost-nav btn-ghost-nav--accent">
+                        <i class="bi bi-person-plus"></i>
+                        <span>Crea tu cuenta</span>
+                    </a>
                 </div>
+
             </div>
         </div>
-    </nav>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <div class="header-bottom">
+        <div class="container">
+            <div class="cat-dropdown-wrap">
+                <a href="#" class="header-nav-link">
+                    <i class="bi bi-grid-3x3-gap-fill"></i> Categorías <i class="bi bi-chevron-down" style="font-size:0.7rem;"></i>
+                </a>
+                <div class="cat-dropdown-menu">
+                    <a href="#"><i class="bi bi-building"></i>Construcción</a>
+                    <a href="#"><i class="bi bi-tree"></i>Agricultura</a>
+                    <a href="#"><i class="bi bi-egg"></i>Ganadería</a>
+                    <a href="#"><i class="bi bi-cup-straw"></i>Alimentos</a>
+                    <a href="#"><i class="bi bi-droplet"></i>Plomería</a>
+                    <a href="#"><i class="bi bi-lightning-charge"></i>Electricidad</a>
+                    <a href="#"><i class="bi bi-hammer"></i>Carpintería</a>
+                    <a href="#"><i class="bi bi-flower1"></i>Jardinería</a>
+                    <a href="#"><i class="bi bi-fire"></i>Soldadura</a>
+                    <a href="#"><i class="bi bi-paint-bucket"></i>Pintura</a>
+                    <a href="#"><i class="bi bi-truck"></i>Transporte</a>
+                    <hr>
+                    <a href="#"><i class="bi bi-gear"></i>Otros</a>
+                </div>
+            </div>
+            <a href="#inicio" class="header-nav-link"><i class="bi bi-house-fill"></i> Inicio</a>
+            <a href="#" class="header-nav-link"><i class="bi bi-tags-fill"></i> Ofertas</a>
+            <a href="#planes" class="header-nav-link"><i class="bi bi-star-fill"></i> Planes</a>
+            <a href="#contacto" class="header-nav-link"><i class="bi bi-chat-dots-fill"></i> Contacto</a>
+            <a href="#" class="header-nav-link ms-auto" style="color: var(--color-accent);">
+                <i class="bi bi-plus-circle-fill"></i> Publicar herramienta
+            </a>
+        </div>
+    </div>
+
 </header>
 
 @yield('contenido')
@@ -183,7 +289,7 @@
     <div class="container py-5">
         <div class="row">
             <div class="col-lg-4 mb-4">
-                <h4 class="fw-bold">tools<span class="text-accent">365</span></h4>
+                <h4 class="fw-bold">Tools<span class="text-accent">365</span></h4>
                 <p class="text-white-50">
                     Todas tus herramientas en un solo lugar. Renta, compra, vende o subasta maquinaria industrial.
                 </p>
@@ -238,7 +344,7 @@
         <hr class="border-secondary">
 
         <div class="text-center text-white-50">
-            <p class="mb-0">&copy; 2026 tools365. Todos los derechos reservados.</p>
+            <p class="mb-0">&copy; 2026 Tools365. Todos los derechos reservados.</p>
         </div>
     </div>
 </footer>

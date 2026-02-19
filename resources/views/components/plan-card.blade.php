@@ -1,44 +1,48 @@
 @props([
-    'nombre', 
-    'precio', 
-    'descripcion', 
-    'caracteristicas' => [], 
-    'destacado' => 'false',
-    'badge' => null,
-    'periodo' => ''
+    'nombre'        => '',
+    'precio'        => '',
+    'periodo'       => '/mes',
+    'descripcion'   => '',
+    'caracteristicas' => [],
+    'destacado'     => 'false',
+    'badge'         => null,
 ])
 
-<div class="card h-100 {{ $destacado === 'true' ? 'border-warning shadow-lg' : 'border' }}">
-    @if($badge)
-        <div class="position-absolute top-0 start-50 translate-middle">
-            <span class="badge bg-warning text-dark px-3 py-2">{{ $badge }}</span>
+<div class="plan-col">
+    {{-- Badge wrapper — siempre ocupa espacio para alinear las cards --}}
+    <div class="plan-badge-wrap">
+        @if($badge)
+            <span class="plan-badge">{{ $badge }}</span>
+        @endif
+    </div>
+
+    <div class="plan-card-inner {{ $destacado === 'true' ? 'destacado' : '' }}">
+
+        <div class="plan-header">
+            <div class="plan-name {{ $destacado === 'true' ? 'destacado-text' : '' }}">
+                {{ $nombre }}
+            </div>
+            <div class="plan-price-row">
+                <span class="plan-price">{{ $precio }}</span>
+                <span class="plan-period">{{ $periodo }}</span>
+            </div>
+            <p class="plan-desc">{{ $descripcion }}</p>
         </div>
-    @endif
-    
-    <div class="card-body {{ $badge ? 'pt-5' : '' }}">
-        <h3 class="card-title fw-bold text-center mb-2">{{ $nombre }}</h3>
-        <p class="text-center text-muted small mb-4">{{ $descripcion }}</p>
-        
-        <div class="text-center mb-4">
-            <span class="display-4 fw-bold text-primary">{{ $precio }}</span>
-            @if($periodo)
-                <span class="text-muted">{{ $periodo }}</span>
-            @endif
-        </div>
-        
-        <ul class="list-unstyled">
-            @foreach($caracteristicas as $caracteristica)
-                <li class="mb-3">
-                    <i class="bi bi-check-circle-fill text-success me-2"></i>
-                    {{ $caracteristica }}
+
+        <ul class="plan-features">
+            @foreach($caracteristicas as $item)
+                <li>
+                    <i class="bi bi-check-circle-fill"></i>
+                    {{ $item }}
                 </li>
             @endforeach
         </ul>
-    </div>
-    
-    <div class="card-footer bg-transparent border-0 pb-4">
-        <button class="btn {{ $destacado === 'true' ? 'btn-warning' : 'btn-outline-primary' }} w-100">
-            Seleccionar Plan
-        </button>
+
+        <div class="plan-footer">
+            <button class="btn-plan {{ $destacado === 'true' ? 'destacado-btn' : '' }}">
+                Seleccionar Plan
+            </button>
+        </div>
+
     </div>
 </div>
