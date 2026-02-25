@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +8,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+    <link rel="stylesheet" href="{{ asset('css/tools365.css') }}">
+
+    {{-- Aplicar tema antes de pintar la página (evita flash) --}}
+    <script>
+        const t = localStorage.getItem('tools365-theme')
+            ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+    </script>
 
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
@@ -22,7 +30,7 @@
 
     * { font-family: 'Nunito', sans-serif; }
 
-    body { padding-top: 90px; }
+    body { padding-top: 128px; }
 
     /* === TOP BAR === */
     .header-top {
@@ -30,159 +38,39 @@
         padding: 6px 0;
         box-shadow: 0 3px 12px rgba(0,0,0,0.18);
     }
+    .header-top-inner { display: flex; align-items: center; gap: 16px; }
 
-    .header-top-inner {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-    }
-
-    /* Logo */
-    .header-logo {
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        flex-shrink: 0;
-    }
+    .header-logo { text-decoration: none; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
     .header-logo img { height: 62px; }
-    .header-logo .brand-text {
-        font-weight: 900;
-        font-size: 1.45rem;
-        color: #fff;
-        letter-spacing: -0.5px;
-    }
+    .header-logo .brand-text { font-weight: 900; font-size: 1.45rem; color: #fff; letter-spacing: -0.5px; }
     .header-logo .brand-text span { color: var(--color-accent); }
 
-    /* Barra de búsqueda — centrada y grande */
-    .header-search-wrap {
-        flex: 1 1 0;
-        min-width: 0;
-        display: flex;
-        justify-content: center;
-    }
-    .header-search-group {
-        display: flex;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        height: 44px;
-        width: 100%;
-        max-width: 580px;
-    }
-    .header-search-input {
-        flex: 1;
-        border: none;
-        padding: 0 16px;
-        font-size: 0.97rem;
-        outline: none;
-        background: #fff;
-    }
+    .header-search-wrap { flex: 1 1 0; min-width: 0; display: flex; justify-content: center; }
+    .header-search-group { display: flex; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); height: 44px; width: 100%; max-width: 580px; }
+    .header-search-input { flex: 1; border: none; padding: 0 16px; font-size: 0.97rem; outline: none; background: #fff; }
     .header-search-input::placeholder { color: #aaa; }
-    .header-search-btn {
-        background: var(--color-accent);
-        border: none;
-        padding: 0 22px;
-        color: #fff;
-        font-size: 1.1rem;
-        cursor: pointer;
-        transition: background 0.2s;
-        flex-shrink: 0;
-    }
+    .header-search-btn { background: var(--color-accent); border: none; padding: 0 22px; color: #fff; font-size: 1.1rem; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
     .header-search-btn:hover { background: var(--color-accent-hover); }
 
-    /* Botones ghost discretos */
-    .header-actions {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        flex-shrink: 0;
-    }
-    .btn-ghost-nav {
-        color: rgba(255,255,255,0.7);
-        text-decoration: none;
-        font-size: 0.8rem;
-        font-weight: 600;
-        padding: 5px 10px;
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        transition: color 0.2s, background 0.2s;
-        white-space: nowrap;
-        letter-spacing: 0.01em;
-        background: none;
-        border: none;
-        cursor: pointer;
-    }
-    .btn-ghost-nav:hover {
-        color: #fff;
-        background: rgba(255,255,255,0.1);
-    }
-    .btn-ghost-nav--accent {
-        color: rgba(255,210,100,0.85);
-    }
-    .btn-ghost-nav--accent:hover {
-        color: var(--color-accent);
-        background: rgba(243,156,18,0.1);
-    }
+    .header-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+    .btn-ghost-nav { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.8rem; font-weight: 600; padding: 5px 10px; border-radius: 6px; display: flex; align-items: center; gap: 5px; transition: color 0.2s, background 0.2s; white-space: nowrap; background: none; border: none; cursor: pointer; }
+    .btn-ghost-nav:hover { color: #fff; background: rgba(255,255,255,0.1); }
+    .btn-ghost-nav--accent { color: rgba(255,210,100,0.85); }
+    .btn-ghost-nav--accent:hover { color: var(--color-accent); background: rgba(243,156,18,0.1); }
 
-    /* === BOTTOM NAV BAR === */
+    /* === BOTTOM NAV === */
     .header-bottom { background: #162369; }
-    .header-bottom .container {
-        display: flex;
-        align-items: center;
-    }
-    .header-nav-link {
-        color: rgba(255,255,255,0.85);
-        text-decoration: none;
-        font-size: 0.83rem;
-        font-weight: 700;
-        padding: 9px 14px;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        transition: color 0.18s, background 0.18s;
-        white-space: nowrap;
-    }
-    .header-nav-link:hover {
-        color: var(--color-accent);
-        background: rgba(255,255,255,0.06);
-    }
+    .header-bottom .container { display: flex; align-items: center; }
+    .header-nav-link { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.83rem; font-weight: 700; padding: 9px 14px; display: flex; align-items: center; gap: 5px; transition: color 0.18s, background 0.18s; white-space: nowrap; }
+    .header-nav-link:hover { color: var(--color-accent); background: rgba(255,255,255,0.06); }
 
-    /* Dropdown categorías */
     .cat-dropdown-wrap { position: relative; }
-    .cat-dropdown-menu {
-        display: none;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        background: #fff;
-        border-radius: 0 0 10px 10px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.13);
-        z-index: 999;
-        min-width: 230px;
-        padding: 6px 0;
-    }
+    .cat-dropdown-menu { display: none; position: absolute; top: 100%; left: 0; background: #fff; border-radius: 0 0 10px 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.13); z-index: 999; min-width: 230px; padding: 6px 0; }
     .cat-dropdown-wrap:hover .cat-dropdown-menu { display: block; }
-    .cat-dropdown-menu a {
-        display: flex;
-        align-items: center;
-        gap: 9px;
-        padding: 9px 18px;
-        color: #333;
-        text-decoration: none;
-        font-size: 0.87rem;
-        font-weight: 600;
-        transition: background 0.15s, color 0.15s;
-    }
-    .cat-dropdown-menu a:hover {
-        background: #f0f4ff;
-        color: var(--color-primary);
-    }
+    .cat-dropdown-menu a { display: flex; align-items: center; gap: 9px; padding: 9px 18px; color: #333; text-decoration: none; font-size: 0.87rem; font-weight: 600; transition: background 0.15s, color 0.15s; }
+    .cat-dropdown-menu a:hover { background: #f0f4ff; color: var(--color-primary); }
     .cat-dropdown-menu hr { margin: 4px 12px; border-color: #eee; }
 
-    /* Utilidades */
     .bg-primary-custom { background-color: var(--color-primary) !important; }
     .bg-accent { background-color: var(--color-accent) !important; }
     .bg-dark-custom { background-color: var(--color-dark) !important; }
@@ -190,7 +78,9 @@
     .btn-accent { background-color: var(--color-accent); border-color: var(--color-accent); color: white; }
     .btn-accent:hover { background-color: var(--color-accent-hover); border-color: var(--color-accent-hover); color: white; }
 
-    /* Responsive */
+    .stats-bar { background: #fff; border-bottom: 2px solid #f0f0f0; }
+    .stat-number { color: var(--color-primary); }
+
     @media (max-width: 991.98px) {
         .header-top-inner { flex-wrap: wrap; gap: 8px; }
         .header-search-wrap { order: 3; width: 100%; }
@@ -198,10 +88,12 @@
         .header-actions { margin-left: auto; }
         .header-bottom { overflow-x: auto; }
         .header-bottom .container { flex-wrap: nowrap; }
+        body { padding-top: 148px; }
     }
     @media (max-width: 575.98px) {
         .btn-ghost-nav span { display: none; }
         .btn-ghost-nav { padding: 6px 8px; }
+        body { padding-top: 115px; }
     }
 </style>
 
@@ -211,39 +103,43 @@
 
 <header class="fixed-top">
 
+    {{-- BARRA DE ACCESIBILIDAD --}}
+    <div class="a11y-bar">
+        <div class="container">
+            <div class="a11y-bar-inner">
+                <span class="a11y-label">Accesibilidad</span>
+                <button class="a11y-btn" data-zoom="sm" title="Texto pequeño">A-</button>
+                <button class="a11y-btn active" data-zoom="md" title="Texto normal">A</button>
+                <button class="a11y-btn" data-zoom="lg" title="Texto grande">A+</button>
+                <button class="a11y-btn" data-zoom="xl" title="Texto muy grande" style="font-size:0.9rem">A++</button>
+                <div class="a11y-divider"></div>
+                <button class="dark-toggle" id="darkToggle">
+                    <i class="bi bi-moon-stars-fill" id="darkIcon"></i>
+                    <div class="dark-switch"></div>
+                    <span id="darkLabel">Oscuro</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- TOP BAR -->
     <div class="header-top">
         <div class="container">
             <div class="header-top-inner">
-
-                <!-- Logo -->
                 <a class="header-logo" href="{{ route('inicio') }}">
                     <img src="{{ asset('Imagenes/logo.png') }}" alt="logo">
                     <span class="brand-text">Tools<span>365</span></span>
                 </a>
-
-                <!-- Barra de búsqueda centrada -->
                 <div class="header-search-wrap">
                     <div class="header-search-group">
                         <input class="header-search-input" type="text" placeholder="Buscar herramientas, maquinaria, equipos...">
-                        <button class="header-search-btn">
-                            <i class="bi bi-search"></i>
-                        </button>
+                        <button class="header-search-btn"><i class="bi bi-search"></i></button>
                     </div>
                 </div>
-
-                <!-- Botones discretos a la derecha -->
                 <div class="header-actions">
-                    <a href="" class="btn-ghost-nav">
-                        <i class="bi bi-box-arrow-in-right"></i>
-                        <span>Ingresa</span>
-                    </a>
-                    <a href="" class="btn-ghost-nav btn-ghost-nav--accent">
-                        <i class="bi bi-person-plus"></i>
-                        <span>Crea tu cuenta</span>
-                    </a>
+                    <a href="" class="btn-ghost-nav"><i class="bi bi-box-arrow-in-right"></i><span>Ingresa</span></a>
+                    <a href="" class="btn-ghost-nav btn-ghost-nav--accent"><i class="bi bi-person-plus"></i><span>Crea tu cuenta</span></a>
                 </div>
-
             </div>
         </div>
     </div>
@@ -252,9 +148,7 @@
     <div class="header-bottom">
         <div class="container">
             <div class="cat-dropdown-wrap">
-                <a href="#" class="header-nav-link">
-                    <i class="bi bi-grid-3x3-gap-fill"></i> Categorías <i class="bi bi-chevron-down" style="font-size:0.7rem;"></i>
-                </a>
+                <a href="#" class="header-nav-link"><i class="bi bi-grid-3x3-gap-fill"></i> Categorías <i class="bi bi-chevron-down" style="font-size:0.7rem;"></i></a>
                 <div class="cat-dropdown-menu">
                     <a href="#"><i class="bi bi-building"></i>Construcción</a>
                     <a href="#"><i class="bi bi-tree"></i>Agricultura</a>
@@ -290,9 +184,7 @@
         <div class="row">
             <div class="col-lg-4 mb-4">
                 <h4 class="fw-bold">Tools<span class="text-accent">365</span></h4>
-                <p class="text-white-50">
-                    Todas tus herramientas en un solo lugar. Renta, compra, vende o subasta maquinaria industrial.
-                </p>
+                <p class="text-white-50">Todas tus herramientas en un solo lugar. Renta, compra, vende o subasta maquinaria industrial.</p>
                 <div class="d-flex gap-3 mt-3">
                     <a href="#" class="text-white"><i class="fab fa-facebook fa-lg"></i></a>
                     <a href="#" class="text-white"><i class="fab fa-instagram fa-lg"></i></a>
@@ -300,7 +192,6 @@
                     <a href="#" class="text-white"><i class="fab fa-linkedin fa-lg"></i></a>
                 </div>
             </div>
-
             <div class="col-lg-2 col-md-4 mb-4">
                 <h6 class="text-accent mb-3">Empresa</h6>
                 <ul class="list-unstyled">
@@ -310,7 +201,6 @@
                     <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Contacto</a></li>
                 </ul>
             </div>
-
             <div class="col-lg-2 col-md-4 mb-4">
                 <h6 class="text-accent mb-3">Servicios</h6>
                 <ul class="list-unstyled">
@@ -320,7 +210,6 @@
                     <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Subastar</a></li>
                 </ul>
             </div>
-
             <div class="col-lg-2 col-md-4 mb-4">
                 <h6 class="text-accent mb-3">Soporte</h6>
                 <ul class="list-unstyled">
@@ -330,19 +219,16 @@
                     <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Términos</a></li>
                 </ul>
             </div>
-
             <div class="col-lg-2 col-md-12 mb-4">
                 <h6 class="text-accent mb-3">Contacto</h6>
                 <ul class="list-unstyled">
-                    <li class="mb-2 text-white-50"><i class="bi bi-envelope me-2"></i>contacto@tools365.com</li>
-                    <li class="mb-2 text-white-50"><i class="bi bi-telephone me-2"></i>999 104 1723</li>
-                    <li class="mb-2 text-white-50"><i class="bi bi-geo-alt me-2"></i>Mérida, Yucatán</li>
+                    <li><div class="footer-contact-item"><i class="bi bi-envelope"></i><span>contacto@tools365.com</span></div></li>
+                    <li><div class="footer-contact-item"><i class="bi bi-telephone"></i><span>999 104 1723</span></div></li>
+                    <li><div class="footer-contact-item"><i class="bi bi-geo-alt"></i><span>Mérida, Yucatán</span></div></li>
                 </ul>
             </div>
         </div>
-
         <hr class="border-secondary">
-
         <div class="text-center text-white-50">
             <p class="mb-0">&copy; 2026 Tools365. Todos los derechos reservados.</p>
         </div>
@@ -350,6 +236,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ asset('js/tools365.js') }}"></script>
 
 @stack('scripts')
 
