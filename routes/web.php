@@ -3,8 +3,5 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 
-Route::get('/', function () {
-    return view('inicio');
-});
-
-Route::get('/inicio', [HomeController::class, 'inicio'])->name('inicio');
+Route::get('/', [HomeController::class, 'inicio'])->name('inicio');
+Route::get('/buscar', [HomeController::class, 'buscar'])->name('buscar');

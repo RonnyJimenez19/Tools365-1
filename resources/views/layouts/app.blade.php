@@ -122,27 +122,35 @@
         </div>
     </div>
 
-    <!-- TOP BAR -->
-    <div class="header-top">
-        <div class="container">
-            <div class="header-top-inner">
-                <a class="header-logo" href="{{ route('inicio') }}">
-                    <img src="{{ asset('Imagenes/logo.png') }}" alt="logo">
-                    <span class="brand-text">Tools<span>365</span></span>
-                </a>
-                <div class="header-search-wrap">
-                    <div class="header-search-group">
-                        <input class="header-search-input" type="text" placeholder="Buscar herramientas, maquinaria, equipos...">
-                        <button class="header-search-btn"><i class="bi bi-search"></i></button>
-                    </div>
+<!-- TOP BAR -->
+<div class="header-top">
+    <div class="container">
+        <div class="header-top-inner">
+
+            <a class="header-logo" href="{{ route('inicio') }}">
+                <img src="{{ asset('Imagenes/logo.png') }}" alt="logo">
+                <span class="brand-text">Tools<span>365</span></span>
+            </a>
+
+            <form action="{{ route('buscar') }}" method="GET" class="header-search-wrap">
+                <div class="header-search-group">
+                    <input class="header-search-input" type="text" name="q"
+                           placeholder="Buscar herramientas, maquinaria, equipos..."
+                           value="{{ request('q') }}">
+                    <button class="header-search-btn" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
                 </div>
-                <div class="header-actions">
-                    <a href="" class="btn-ghost-nav"><i class="bi bi-box-arrow-in-right"></i><span>Ingresa</span></a>
-                    <a href="" class="btn-ghost-nav btn-ghost-nav--accent"><i class="bi bi-person-plus"></i><span>Crea tu cuenta</span></a>
-                </div>
+            </form>
+
+            <div class="header-actions">
+                <a href="" class="btn-ghost-nav"><i class="bi bi-box-arrow-in-right"></i><span>Ingresa</span></a>
+                <a href="" class="btn-ghost-nav btn-ghost-nav--accent"><i class="bi bi-person-plus"></i><span>Crea tu cuenta</span></a>
             </div>
+
         </div>
     </div>
+</div>
 
     <!-- BOTTOM NAV -->
     <div class="header-bottom">
