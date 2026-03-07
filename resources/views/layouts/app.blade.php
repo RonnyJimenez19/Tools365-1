@@ -46,11 +46,69 @@
     .header-logo .brand-text span { color: var(--color-accent); }
 
     .header-search-wrap { flex: 1 1 0; min-width: 0; display: flex; justify-content: center; }
-    .header-search-group { display: flex; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); height: 44px; width: 100%; max-width: 580px; }
-    .header-search-input { flex: 1; border: none; padding: 0 16px; font-size: 0.97rem; outline: none; background: #fff; }
+
+    /* El grupo ahora tiene: input + btn buscar + btn avanzada */
+    .header-search-group {
+        display: flex;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        height: 44px;
+        width: 100%;
+        max-width: 640px;
+    }
+    .header-search-input {
+        flex: 1;
+        border: none;
+        padding: 0 16px;
+        font-size: 0.97rem;
+        outline: none;
+        background: #fff;
+    }
     .header-search-input::placeholder { color: #aaa; }
-    .header-search-btn { background: var(--color-accent); border: none; padding: 0 22px; color: #fff; font-size: 1.1rem; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+
+    /* Botón buscar (lupa) - igual que antes */
+    .header-search-btn {
+        background: var(--color-accent);
+        border: none;
+        padding: 0 22px;
+        color: #fff;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background 0.2s;
+        flex-shrink: 0;
+    }
     .header-search-btn:hover { background: var(--color-accent-hover); }
+
+    /* ===== NUEVO: Botón búsqueda avanzada ===== */
+    .header-search-btn-avanzada {
+        background: #162369;
+        border: none;
+        border-left: 1px solid rgba(255,255,255,0.15);
+        padding: 0 16px;
+        color: rgba(255,255,255,0.85);
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        white-space: nowrap;
+        font-size: 0.8rem;
+        font-weight: 700;
+        font-family: 'Nunito', sans-serif;
+        text-decoration: none;
+    }
+    .header-search-btn-avanzada:hover {
+        background: #1F3A93;
+        color: var(--color-accent);
+    }
+    /* Resalta si estamos en la página de búsqueda avanzada */
+    .header-search-btn-avanzada.activa {
+        background: var(--color-accent);
+        color: #fff;
+    }
 
     .header-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
     .btn-ghost-nav { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.8rem; font-weight: 600; padding: 5px 10px; border-radius: 6px; display: flex; align-items: center; gap: 5px; transition: color 0.2s, background 0.2s; white-space: nowrap; background: none; border: none; cursor: pointer; }
@@ -93,6 +151,8 @@
     @media (max-width: 575.98px) {
         .btn-ghost-nav span { display: none; }
         .btn-ghost-nav { padding: 6px 8px; }
+        .header-search-btn-avanzada span { display: none; }
+        .header-search-btn-avanzada { padding: 0 12px; }
         body { padding-top: 115px; }
     }
 </style>
@@ -132,16 +192,29 @@
                 <span class="brand-text">Tools<span>365</span></span>
             </a>
 
-            <form action="{{ route('buscar') }}" method="GET" class="header-search-wrap">
+            {{-- Búsqueda simple: el form sólo envuelve input + botón lupa --}}
+            <div class="header-search-wrap">
                 <div class="header-search-group">
-                    <input class="header-search-input" type="text" name="q"
-                           placeholder="Buscar herramientas, maquinaria, equipos..."
-                           value="{{ request('q') }}">
-                    <button class="header-search-btn" type="submit">
-                        <i class="bi bi-search"></i>
-                    </button>
+                    <form action="{{ route('buscar') }}" method="GET"
+                          style="display:contents;">
+                        <input class="header-search-input" type="text" name="q"
+                               placeholder="Buscar herramientas, maquinaria, equipos..."
+                               value="{{ request('q') }}">
+                        <button class="header-search-btn" type="submit"
+                                title="Buscar">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </form>
+
+                    {{-- ★ BOTÓN BÚSQUEDA AVANZADA ★ --}}
+                    <a href="{{ route('busqueda.avanzada') }}"
+                       class="header-search-btn-avanzada {{ request()->routeIs('busqueda.avanzada') ? 'activa' : '' }}"
+                       title="Búsqueda avanzada">
+                        <i class="bi bi-sliders"></i>
+                        <span>Avanzada</span>
+                    </a>
                 </div>
-            </form>
+            </div>
 
             <div class="header-actions">
                 <a href="" class="btn-ghost-nav"><i class="bi bi-box-arrow-in-right"></i><span>Ingresa</span></a>
@@ -158,19 +231,20 @@
             <div class="cat-dropdown-wrap">
                 <a href="#" class="header-nav-link"><i class="bi bi-grid-3x3-gap-fill"></i> Categorías <i class="bi bi-chevron-down" style="font-size:0.7rem;"></i></a>
                 <div class="cat-dropdown-menu">
-                    <a href="#"><i class="bi bi-building"></i>Construcción</a>
-                    <a href="#"><i class="bi bi-tree"></i>Agricultura</a>
-                    <a href="#"><i class="bi bi-egg"></i>Ganadería</a>
-                    <a href="#"><i class="bi bi-cup-straw"></i>Alimentos</a>
-                    <a href="#"><i class="bi bi-droplet"></i>Plomería</a>
-                    <a href="#"><i class="bi bi-lightning-charge"></i>Electricidad</a>
-                    <a href="#"><i class="bi bi-hammer"></i>Carpintería</a>
-                    <a href="#"><i class="bi bi-flower1"></i>Jardinería</a>
-                    <a href="#"><i class="bi bi-fire"></i>Soldadura</a>
-                    <a href="#"><i class="bi bi-paint-bucket"></i>Pintura</a>
-                    <a href="#"><i class="bi bi-truck"></i>Transporte</a>
+                    {{-- ★ Cada categoría apunta a búsqueda avanzada con el combo preseleccionado ★ --}}
+                    <a href="{{ route('busqueda.avanzada', ['categoria' => 'construccion']) }}"><i class="bi bi-building"></i>Construcción</a>
+                    <a href="{{ route('busqueda.avanzada', ['categoria' => 'agricultura']) }}"><i class="bi bi-tree"></i>Agricultura</a>
+                    <a href="{{ route('busqueda.avanzada', ['categoria' => 'ganaderia']) }}"><i class="bi bi-egg"></i>Ganadería</a>
+                    <a href="{{ route('busqueda.avanzada', ['categoria' => 'alimentos']) }}"><i class="bi bi-cup-straw"></i>Alimentos</a>
+                    <a href="{{ route('busqueda.avanzada', ['categoria' => 'plomeria']) }}"><i class="bi bi-droplet"></i>Plomería</a>
+                    <a href="{{ route('busqueda.avanzada', ['categoria' => 'electricidad']) }}"><i class="bi bi-lightning-charge"></i>Electricidad</a>
+                    <a href="{{ route('busqueda.avanzada', ['categoria' => 'carpinteria']) }}"><i class="bi bi-hammer"></i>Carpintería</a>
+                    <a href="{{ route('busqueda.avanzada', ['categoria' => 'jardineria']) }}"><i class="bi bi-flower1"></i>Jardinería</a>
+                    <a href="{{ route('busqueda.avanzada', ['categoria' => 'soldadura']) }}"><i class="bi bi-fire"></i>Soldadura</a>
+                    <a href="{{ route('busqueda.avanzada', ['categoria' => 'pintura']) }}"><i class="bi bi-paint-bucket"></i>Pintura</a>
+                    <a href="{{ route('busqueda.avanzada', ['categoria' => 'transporte']) }}"><i class="bi bi-truck"></i>Transporte</a>
                     <hr>
-                    <a href="#"><i class="bi bi-gear"></i>Otros</a>
+                    <a href="{{ route('busqueda.avanzada', ['categoria' => 'otros']) }}"><i class="bi bi-gear"></i>Otros</a>
                 </div>
             </div>
             <a href="#inicio" class="header-nav-link"><i class="bi bi-house-fill"></i> Inicio</a>
