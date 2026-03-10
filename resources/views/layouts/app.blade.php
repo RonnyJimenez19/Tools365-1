@@ -206,7 +206,7 @@
                         </button>
                     </form>
 
-                    {{-- ★ BOTÓN BÚSQUEDA AVANZADA ★ --}}
+                    {{-- BOTÓN BÚSQUEDA AVANZADA --}}
                     <a href="{{ route('busqueda.avanzada') }}"
                        class="header-search-btn-avanzada {{ request()->routeIs('busqueda.avanzada') ? 'activa' : '' }}"
                        title="Búsqueda avanzada">
@@ -231,7 +231,7 @@
             <div class="cat-dropdown-wrap">
                 <a href="#" class="header-nav-link"><i class="bi bi-grid-3x3-gap-fill"></i> Categorías <i class="bi bi-chevron-down" style="font-size:0.7rem;"></i></a>
                 <div class="cat-dropdown-menu">
-                    {{-- ★ Cada categoría apunta a búsqueda avanzada con el combo preseleccionado ★ --}}
+                    {{--  Cada categoría apunta a búsqueda avanzada con el combo preseleccionado --}}
                     <a href="{{ route('busqueda.avanzada', ['categoria' => 'construccion']) }}"><i class="bi bi-building"></i>Construcción</a>
                     <a href="{{ route('busqueda.avanzada', ['categoria' => 'agricultura']) }}"><i class="bi bi-tree"></i>Agricultura</a>
                     <a href="{{ route('busqueda.avanzada', ['categoria' => 'ganaderia']) }}"><i class="bi bi-egg"></i>Ganadería</a>
