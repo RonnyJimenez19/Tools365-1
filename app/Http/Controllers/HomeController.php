@@ -13,7 +13,7 @@ class HomeController extends Controller
     public function inicio()
     {
         // Helper: 4 productos activos del tipo dado, con imagen y categoría
-        $porTipo = fn(string $tipo) => Producto::with(['categoria', 'imagenPrincipal'])
+        $porTipo = fn(string $tipo) => Producto::with(['categoria', 'imagenes'])
             ->where('estado', 'activo')
             ->where('tipo', $tipo)
             ->orderBy('created_at', 'desc')
@@ -21,7 +21,7 @@ class HomeController extends Controller
             ->get();
 
         // Subastas: las más urgentes primero (timer_fin más cercano)
-        $subastas = Producto::with(['categoria', 'imagenPrincipal'])
+        $subastas = Producto::with(['categoria', 'imagenes'])
             ->where('estado', 'activo')
             ->where('tipo', 'subasta')
             ->whereNotNull('timer_fin')
@@ -47,7 +47,7 @@ class HomeController extends Controller
         $productos = null;
 
         if ($buscando) {
-            $productos = Producto::with(['categoria', 'imagenPrincipal'])
+            $productos = Producto::with(['categoria', 'imagenes'])
                 ->where('estado', 'activo')
                 ->buscar($termino)
                 ->when($tipo, fn($q) => $q->where('tipo', $tipo))
@@ -76,7 +76,7 @@ class HomeController extends Controller
         $buscando = $request->hasAny(['q', 'categoria', 'tipo', 'precio_min', 'precio_max']);
 
         if ($buscando) {
-            $productos = Producto::with(['categoria', 'imagenPrincipal'])
+            $productos = Producto::with(['categoria', 'imagenes'])
                 ->where('estado', 'activo')
                 ->buscar($termino)
                 ->when($categoriaSlug, fn($q) =>
@@ -90,7 +90,7 @@ class HomeController extends Controller
                 ->withQueryString();
         } else {
             // Sin filtros: mostrar los últimos 20 productos registrados
-            $productos = Producto::with(['categoria', 'imagenPrincipal'])
+            $productos = Producto::with(['categoria', 'imagenes'])
                 ->where('estado', 'activo')
                 ->orderBy('created_at', 'desc')
                 ->take(20)

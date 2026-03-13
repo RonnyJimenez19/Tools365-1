@@ -230,7 +230,7 @@
                 @if($productos->count() > 0)
                     <div class="row g-3">
                         @foreach($productos as $producto)
-                            @include('partials.producto-card-avanzada', ['producto' => $producto])
+                            <x-product-card :producto="$producto" />
                         @endforeach
                     </div>
                 @else
@@ -271,7 +271,7 @@
 
                 <div class="row g-3">
                     @foreach($productos as $producto)
-                        @include('partials.producto-card-avanzada', ['producto' => $producto])
+                        <x-product-card :producto="$producto" />
                     @endforeach
                 </div>
 

@@ -192,14 +192,7 @@
         <x-section-header titulo="Subastas del día" icono="bi-hammer" color="danger" />
         <div class="row g-3">
             @forelse($subastas as $producto)
-                <x-product-card
-                    titulo="{{ $producto->titulo }}"
-                    precio="${{ number_format($producto->precio, 0, '.', ',') }}"
-                    unidad="{{ $producto->unidad }}"
-                    ubicacion="{{ $producto->ubicacion }}"
-                    timer="{{ $producto->timer_fin?->diffForHumans(null, true) }}"
-                    imagen="{{ $producto->imagenPrincipal ? $producto->imagenPrincipal->ruta : null }}"
-                />
+                <x-product-card :producto="$producto" />
             @empty
                 <div class="col-12 text-center text-muted py-4">
                     <i class="bi bi-hammer fs-2 mb-2 d-block"></i>
@@ -216,15 +209,7 @@
         <x-section-header titulo="Disponible para Rentar" icono="bi-clock-history" color="primary" />
         <div class="row g-3">
             @forelse($rentas as $producto)
-                <x-product-card
-                    titulo="{{ $producto->titulo }}"
-                    precio="${{ number_format($producto->precio, 0, '.', ',') }}"
-                    unidad="{{ $producto->unidad }}"
-                    ubicacion="{{ $producto->ubicacion }}"
-                    badge="Renta"
-                    badgeTipo="primary"
-                    imagen="{{ $producto->imagenPrincipal ? $producto->imagenPrincipal->ruta : null }}"
-                />
+                <x-product-card :producto="$producto" />
             @empty
                 <div class="col-12 text-center text-muted py-4">
                     <i class="bi bi-clock-history fs-2 mb-2 d-block"></i>
@@ -241,14 +226,7 @@
         <x-section-header titulo="Comprar" icono="bi-bag-check" color="success" />
         <div class="row g-3">
             @forelse($ventas as $producto)
-                <x-product-card
-                    titulo="{{ $producto->titulo }}"
-                    precio="${{ number_format($producto->precio, 0, '.', ',') }}"
-                    ubicacion="{{ $producto->ubicacion }}"
-                    badge="Venta"
-                    badgeTipo="success"
-                    imagen="{{ $producto->imagenPrincipal ? $producto->imagenPrincipal->ruta : null }}"
-                />
+                <x-product-card :producto="$producto" />
             @empty
                 <div class="col-12 text-center text-muted py-4">
                     <i class="bi bi-bag-check fs-2 mb-2 d-block"></i>
