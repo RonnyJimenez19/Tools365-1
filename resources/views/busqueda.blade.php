@@ -46,11 +46,41 @@
     .badge-subasta { background: #fdecea; color: #e74c3c; }
     .auction-timer { background: #fff3e0; border: 1px solid #ffe0b2; border-radius: 6px; padding: 3px 10px; font-size: 0.76rem; font-weight: 700; color: #e65100; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 6px; }
 
-    /* Empty state */
-    .empty-state { text-align: center; padding: 5rem 1rem; }
-    .empty-state .empty-icon { font-size: 4rem; color: #ddd; margin-bottom: 1rem; }
-    .empty-state h3 { font-weight: 800; color: #555; margin-bottom: 0.5rem; }
-    .empty-state p  { color: #aaa; font-size: 0.92rem; }
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 1rem 3rem;
+        max-width: 560px;
+        margin: 0 auto;
+    }
+    .empty-state .empty-icon-wrap {
+        width: 90px; height: 90px; border-radius: 50%;
+        background: linear-gradient(135deg, #e8eaf6, #c5cae9);
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 2.6rem; color: #7986cb;
+        margin-bottom: 1.5rem;
+    }
+    .empty-state h3 {
+        font-weight: 900; font-size: 1.25rem; color: #333; margin-bottom: 0.5rem;
+    }
+    .empty-state .empty-lead {
+        color: #777; font-size: 0.93rem; margin-bottom: 1.5rem; line-height: 1.6;
+    }
+    .empty-tips {
+        background: #f8f9ff; border: 1px solid #e8eaf6; border-radius: 12px;
+        padding: 1.2rem 1.5rem; text-align: left; margin-bottom: 1.5rem;
+    }
+    .empty-tips ul {
+        margin: 0; padding-left: 1.2rem; color: #555; font-size: 0.88rem; line-height: 1.8;
+    }
+    .empty-tips ul li::marker { color: var(--color-primary); }
+    .empty-help {
+        display: flex; align-items: center; justify-content: center;
+        gap: 6px; font-size: 0.85rem; color: #888; margin-top: 1.2rem;
+    }
+    .empty-help a { color: var(--color-primary); font-weight: 700; text-decoration: none; }
+    .empty-help a:hover { text-decoration: underline; }
+    .empty-help .divider { color: #ccc; }
 
     /* Highlight término buscado */
     mark { background: #fff3cd; padding: 0 2px; border-radius: 3px; font-weight: 700; }
@@ -102,7 +132,40 @@
 <section class="py-4">
     <div class="container">
 
-        @if($productos->count() > 0)
+        @if(!$buscando)
+            {{-- Sin término ni filtro: solo mostrar el mensaje --}}
+            <div class="empty-state">
+                <div class="empty-icon-wrap">
+                    <i class="bi bi-search"></i>
+                </div>
+                <h3>No hay resultados para tu consulta de búsqueda</h3>
+                <p class="empty-lead">
+                    Ingresa un término en la barra de búsqueda o intenta con alguna de las sugerencias de abajo.
+                </p>
+                <div class="empty-tips">
+                    <ul>
+                        <li>Revisa la ortografía o usa términos más generales.</li>
+                        <li>Prueba con palabras clave más cortas: <em>taladro</em>, <em>excavadora</em>, <em>generador</em>.</li>
+                        <li>Consulta la página de detalle del producto para ver otras opciones de compra.</li>
+                        <li>Usa la <a href="{{ route('busqueda.avanzada') }}">Búsqueda Avanzada</a> para filtrar por categoría, tipo o precio.</li>
+                    </ul>
+                </div>
+                <div class="d-flex gap-2 justify-content-center flex-wrap">
+                    <a href="{{ route('inicio') }}" class="btn btn-primary btn-sm px-4">
+                        <i class="bi bi-house me-1"></i>Volver al inicio
+                    </a>
+                </div>
+                <div class="empty-help">
+                    <i class="bi bi-question-circle"></i>
+                    <span>¿Necesitas ayuda?</span>
+                    <span class="divider">·</span>
+                    <a href="#">Visita la sección de ayuda</a>
+                    <span class="divider">·</span>
+                    <a href="#">Contáctanos</a>
+                </div>
+            </div>
+
+        @elseif($productos->count() > 0)
 
             <div class="results-meta mb-3">
                 Mostrando <strong>{{ $productos->firstItem() }}–{{ $productos->lastItem() }}</strong>
@@ -121,8 +184,8 @@
                         <div class="product-card">
 
                             {{-- Imagen --}}
-                            @if($producto->imagen)
-                                <img src="{{ asset($producto->imagen) }}"
+                            @if($producto->imagenPrincipal)
+                                <img src="{{ asset($producto->imagenPrincipal->ruta) }}"
                                      alt="{{ $producto->titulo }}"
                                      class="product-card-img">
                             @else
@@ -139,7 +202,6 @@
                                     <div class="auction-timer">
                                         <i class="bi bi-clock"></i>
                                         {{ \Carbon\Carbon::parse($producto->timer_fin)->locale('es')->diffForHumans(['parts' => 2, 'short' => true]) }}
-
                                     </div>
                                 @endif
 
@@ -189,24 +251,36 @@
             @endif
 
         @else
-            {{-- Estado vacío --}}
+            {{-- Buscó algo pero no encontró resultados --}}
             <div class="empty-state">
-                <div class="empty-icon"><i class="bi bi-search"></i></div>
-                <h3>No encontramos resultados</h3>
-                <p>
-                    @if($termino)
-                        No hay productos que coincidan con <strong>"{{ $termino }}"</strong>.
-                    @else
-                        No hay productos disponibles en este momento.
-                    @endif
+                <div class="empty-icon-wrap">
+                    <i class="bi bi-search"></i>
+                </div>
+                <h3>No hay resultados para "{{ $termino }}"</h3>
+                <p class="empty-lead">
+                    No encontramos productos que coincidan con tu búsqueda.<br>
+                    Aquí algunos consejos para mejorar tus resultados:
                 </p>
-                <div class="d-flex gap-2 justify-content-center mt-3 flex-wrap">
-                    <a href="{{ route('buscar') }}" class="btn btn-outline-primary btn-sm">
-                        <i class="bi bi-grid me-1"></i>Ver todos los productos
-                    </a>
-                    <a href="{{ route('inicio') }}" class="btn btn-primary btn-sm">
+                <div class="empty-tips">
+                    <ul>
+                        <li>Revisa la ortografía o usa términos más generales.</li>
+                        <li>Prueba con palabras clave más cortas: <em>taladro</em>, <em>excavadora</em>, <em>generador</em>.</li>
+                        <li>Consulta la página de detalle del producto para ver otras opciones de compra.</li>
+                        <li>Usa la <a href="{{ route('busqueda.avanzada') }}">Búsqueda Avanzada</a> para filtrar por categoría, tipo o precio.</li>
+                    </ul>
+                </div>
+                <div class="d-flex gap-2 justify-content-center flex-wrap">
+                    <a href="{{ route('inicio') }}" class="btn btn-primary btn-sm px-4">
                         <i class="bi bi-house me-1"></i>Volver al inicio
                     </a>
+                </div>
+                <div class="empty-help">
+                    <i class="bi bi-question-circle"></i>
+                    <span>¿Necesitas ayuda?</span>
+                    <span class="divider">·</span>
+                    <a href="#">Visita la sección de ayuda</a>
+                    <span class="divider">·</span>
+                    <a href="#">Contáctanos</a>
                 </div>
             </div>
         @endif

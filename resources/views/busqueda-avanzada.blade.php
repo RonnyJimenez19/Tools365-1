@@ -29,9 +29,10 @@
         border-radius: 14px;
         border: 1px solid #eee;
         box-shadow: 0 4px 18px rgba(0,0,0,0.07);
-        overflow: hidden;
         position: sticky;
         top: 148px;
+        max-height: calc(100vh - 168px);
+        overflow-y: auto;
     }
     .filtros-header {
         background: linear-gradient(135deg, #1F3A93, #2C3E50);
@@ -46,81 +47,50 @@
     .filtros-body { padding: 1.25rem; }
     .filtro-grupo { margin-bottom: 1.25rem; }
     .filtro-label {
-        font-size: 0.78rem;
-        font-weight: 800;
-        color: #1F3A93;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 0.4rem;
-        display: block;
+        font-size: 0.78rem; font-weight: 800; color: #1F3A93;
+        text-transform: uppercase; letter-spacing: 0.5px;
+        margin-bottom: 0.4rem; display: block;
     }
     .filtro-select, .filtro-input {
-        width: 100%;
-        border: 1.5px solid #ddd;
-        border-radius: 8px;
-        padding: 8px 12px;
-        font-size: 0.88rem;
-        color: #333;
-        outline: none;
-        transition: border-color 0.2s;
-        background: #fafafa;
+        width: 100%; border: 1.5px solid #ddd; border-radius: 8px;
+        padding: 8px 12px; font-size: 0.88rem; color: #333;
+        outline: none; transition: border-color 0.2s; background: #fafafa;
         font-family: 'Nunito', sans-serif;
     }
-    .filtro-select:focus, .filtro-input:focus {
-        border-color: #1F3A93;
-        background: #fff;
-    }
+    .filtro-select:focus, .filtro-input:focus { border-color: #1F3A93; background: #fff; }
     .filtro-precio-row { display: flex; gap: 8px; }
     .filtro-precio-row .filtro-input { width: 50%; }
 
     .btn-filtrar {
-        width: 100%;
-        background: var(--color-accent);
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        padding: 11px;
-        font-weight: 800;
-        font-size: 0.95rem;
-        cursor: pointer;
-        transition: background 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
+        width: 100%; background: var(--color-accent); color: #fff;
+        border: none; border-radius: 8px; padding: 11px; font-weight: 800;
+        font-size: 0.95rem; cursor: pointer; transition: background 0.2s;
+        display: flex; align-items: center; justify-content: center; gap: 6px;
     }
     .btn-filtrar:hover { background: var(--color-accent-hover); }
-
     .btn-limpiar {
-        width: 100%;
-        background: transparent;
-        color: #888;
-        border: 1.5px solid #ddd;
-        border-radius: 8px;
-        padding: 8px;
-        font-weight: 700;
-        font-size: 0.82rem;
-        cursor: pointer;
-        transition: all 0.2s;
-        margin-top: 8px;
-        font-family: 'Nunito', sans-serif;
+        width: 100%; background: transparent; color: #888;
+        border: 1.5px solid #ddd; border-radius: 8px; padding: 8px;
+        font-weight: 700; font-size: 0.82rem; cursor: pointer;
+        transition: all 0.2s; margin-top: 8px;
+        font-family: 'Nunito', sans-serif; text-align: center; display: block;
+        text-decoration: none;
     }
     .btn-limpiar:hover { border-color: #e74c3c; color: #e74c3c; background: #fdecea; }
 
-    /* ===== COLUMNA RESULTADOS (derecha) ===== */
+    /* ===== COLUMNA RESULTADOS ===== */
     .resultados-col { flex: 1; min-width: 0; }
 
-    /* Estado inicial (sin buscar aún) */
-    .inicio-state {
-        text-align: center;
-        padding: 4rem 1rem;
-        background: #fff;
-        border-radius: 14px;
-        border: 2px dashed #ddd;
+    /* Encabezado de sección de resultados por default */
+    .default-header {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 1.2rem; padding-bottom: 0.6rem;
+        border-bottom: 3px solid var(--color-accent);
     }
-    .inicio-state .inicio-icon { font-size: 4rem; color: #c5cae9; margin-bottom: 1rem; }
-    .inicio-state h3 { font-weight: 800; color: #555; margin-bottom: 0.5rem; }
-    .inicio-state p  { color: #aaa; font-size: 0.92rem; }
+    .default-header h3 {
+        font-size: 1.1rem; font-weight: 900; margin: 0;
+        display: flex; align-items: center; gap: 6px;
+    }
 
     /* Empty state */
     .empty-state { text-align: center; padding: 4rem 1rem; background: #fff; border-radius: 14px; border: 1px solid #eee; }
@@ -150,13 +120,7 @@
 
     /* Filtros activos chips */
     .filtros-activos { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1rem; }
-    .chip-filtro {
-        background: #e8f0fe; color: #1F3A93; border-radius: 20px;
-        padding: 4px 12px; font-size: 0.78rem; font-weight: 700;
-        display: inline-flex; align-items: center; gap: 5px;
-    }
-    .chip-filtro i { cursor: pointer; opacity: 0.7; }
-    .chip-filtro i:hover { opacity: 1; }
+    .chip-filtro { background: #e8f0fe; color: #1F3A93; border-radius: 20px; padding: 4px 12px; font-size: 0.78rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
 
     mark { background: #fff3cd; padding: 0 2px; border-radius: 3px; font-weight: 700; }
 
@@ -199,14 +163,15 @@
                                value="{{ $termino }}">
                     </div>
 
-                    {{-- Categoría --}}
+                    {{-- Categoría (desde BD) --}}
                     <div class="filtro-grupo">
                         <label class="filtro-label"><i class="bi bi-grid me-1"></i>Categoría</label>
                         <select name="categoria" class="filtro-select">
                             <option value="">-- Todas las categorías --</option>
-                            @foreach($categorias as $key => $nombre)
-                                <option value="{{ $key }}" {{ $categoria === $key ? 'selected' : '' }}>
-                                    {{ $nombre }}
+                            @foreach($categorias as $cat)
+                                <option value="{{ $cat->slug }}"
+                                    {{ $categoriaSlug === $cat->slug ? 'selected' : '' }}>
+                                    {{ $cat->nombre }}
                                 </option>
                             @endforeach
                         </select>
@@ -237,7 +202,7 @@
                     <button type="submit" class="btn-filtrar">
                         <i class="bi bi-search"></i> Buscar
                     </button>
-                    <a href="{{ route('busqueda.avanzada') }}" class="btn-limpiar d-block text-center text-decoration-none">
+                    <a href="{{ route('busqueda.avanzada') }}" class="btn-limpiar">
                         <i class="bi bi-x-circle me-1"></i> Limpiar filtros
                     </a>
 
@@ -251,21 +216,42 @@
         <section class="resultados-col">
 
             @if(!$buscando)
-                {{-- Estado inicial: aún no se buscó nada --}}
-                <div class="inicio-state">
-                    <div class="inicio-icon"><i class="bi bi-sliders"></i></div>
-                    <h3>Configura tu búsqueda</h3>
-                    <p>Selecciona una categoría, tipo o rango de precio en el panel de la izquierda<br>y presiona <strong>Buscar</strong> para ver los resultados.</p>
+                {{-- ── DEFAULT: últimos productos registrados ── --}}
+                <div class="default-header">
+                    <h3>
+                        <i class="bi bi-clock-history text-accent"></i>
+                        Últimos registros
+                    </h3>
+                    <span class="text-muted" style="font-size:0.82rem; font-weight:600;">
+                        {{ $productos->count() }} productos recientes
+                    </span>
                 </div>
 
+                @if($productos->count() > 0)
+                    <div class="row g-3">
+                        @foreach($productos as $producto)
+                            @include('partials.producto-card-avanzada', ['producto' => $producto])
+                        @endforeach
+                    </div>
+                @else
+                    <div class="empty-state">
+                        <div class="empty-icon"><i class="bi bi-box-seam"></i></div>
+                        <h3>Sin productos registrados</h3>
+                        <p>Aún no hay productos en la plataforma.</p>
+                    </div>
+                @endif
+
             @elseif($productos && $productos->count() > 0)
+                {{-- ── RESULTADOS CON FILTROS ── --}}
+
                 {{-- Chips de filtros activos --}}
                 <div class="filtros-activos">
                     @if($termino)
                         <span class="chip-filtro"><i class="bi bi-search"></i> "{{ $termino }}"</span>
                     @endif
-                    @if($categoria && isset($categorias[$categoria]))
-                        <span class="chip-filtro"><i class="bi bi-grid"></i> {{ $categorias[$categoria] }}</span>
+                    @if($categoriaSlug)
+                        @php $catNombre = $categorias->firstWhere('slug', $categoriaSlug)?->nombre ?? $categoriaSlug; @endphp
+                        <span class="chip-filtro"><i class="bi bi-grid"></i> {{ $catNombre }}</span>
                     @endif
                     @if($tipo)
                         <span class="chip-filtro"><i class="bi bi-tag"></i> {{ ucfirst($tipo) }}</span>
@@ -278,71 +264,17 @@
                     @endif
                 </div>
 
-                {{-- Contador resultados --}}
                 <div class="results-meta">
                     Mostrando <strong>{{ $productos->firstItem() }}–{{ $productos->lastItem() }}</strong>
                     de <strong>{{ $productos->total() }}</strong> resultados
                 </div>
 
-                {{-- Grid de productos --}}
                 <div class="row g-3">
                     @foreach($productos as $producto)
-                        <div class="col-lg-4 col-md-6">
-                            <div class="product-card">
-
-                                @if($producto->imagen)
-                                    <img src="{{ asset($producto->imagen) }}"
-                                         alt="{{ $producto->titulo }}"
-                                         class="product-card-img">
-                                @else
-                                    <div class="product-card-img-placeholder"
-                                         style="background: linear-gradient(135deg,#e8eaf6,#c5cae9); color:#9fa8da;">
-                                        <i class="bi bi-tools"></i>
-                                    </div>
-                                @endif
-
-                                <div class="product-card-body">
-                                    @if($producto->tipo === 'subasta' && $producto->timer_fin)
-                                        <div class="auction-timer">
-                                            <i class="bi bi-clock"></i>
-                                            {{ \Carbon\Carbon::parse($producto->timer_fin)->locale('es')->diffForHumans(['parts' => 2, 'short' => true]) }}
-                                        </div>
-                                    @endif
-
-                                    <span class="badge-tipo badge-{{ $producto->tipo }}">
-                                        @if($producto->tipo === 'renta') <i class="bi bi-clock-history me-1"></i>Renta
-                                        @elseif($producto->tipo === 'venta') <i class="bi bi-bag-check me-1"></i>Venta
-                                        @else <i class="bi bi-hammer me-1"></i>Subasta
-                                        @endif
-                                    </span>
-
-                                    <div class="product-card-title">
-                                        @if($termino)
-                                            {!! preg_replace('/(' . preg_quote($termino, '/') . ')/iu', '<mark>$1</mark>', e($producto->titulo)) !!}
-                                        @else
-                                            {{ $producto->titulo }}
-                                        @endif
-                                    </div>
-
-                                    <div class="product-card-price">
-                                        ${{ number_format($producto->precio, 0, '.', ',') }}
-                                        @if($producto->unidad)
-                                            <small>{{ $producto->unidad }}</small>
-                                        @endif
-                                    </div>
-
-                                    @if($producto->ubicacion)
-                                        <div class="product-card-location">
-                                            <i class="bi bi-geo-alt"></i> {{ $producto->ubicacion }}
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
+                        @include('partials.producto-card-avanzada', ['producto' => $producto])
                     @endforeach
                 </div>
 
-                {{-- Paginación --}}
                 @if($productos->hasPages())
                     <div class="d-flex justify-content-center mt-4">
                         {{ $productos->links() }}
@@ -350,7 +282,7 @@
                 @endif
 
             @else
-                {{-- Sin resultados --}}
+                {{-- ── SIN RESULTADOS ── --}}
                 <div class="empty-state">
                     <div class="empty-icon"><i class="bi bi-search"></i></div>
                     <h3>Sin resultados</h3>

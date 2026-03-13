@@ -6,72 +6,99 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Producto;
+use App\Models\Categoria;
 
 class HomeController extends Controller
 {
     public function inicio()
     {
-        return view('inicio');
+        // Helper: 4 productos activos del tipo dado, con imagen y categoría
+        $porTipo = fn(string $tipo) => Producto::with(['categoria', 'imagenPrincipal'])
+            ->where('estado', 'activo')
+            ->where('tipo', $tipo)
+            ->orderBy('created_at', 'desc')
+            ->take(4)
+            ->get();
+
+        // Subastas: las más urgentes primero (timer_fin más cercano)
+        $subastas = Producto::with(['categoria', 'imagenPrincipal'])
+            ->where('estado', 'activo')
+            ->where('tipo', 'subasta')
+            ->whereNotNull('timer_fin')
+            ->where('timer_fin', '>', now())
+            ->orderBy('timer_fin', 'asc')
+            ->take(4)
+            ->get();
+
+        $rentas = $porTipo('renta');
+        $ventas = $porTipo('venta');
+
+        return view('inicio', compact('subastas', 'rentas', 'ventas'));
     }
 
     public function buscar(Request $request)
     {
-        $termino = $request->get('q', '');
+        $termino = trim($request->get('q', ''));
         $tipo    = $request->get('tipo', '');
 
-        $productos = Producto::where('estado', 'activo')
-            ->buscar($termino)
-            ->when($tipo, fn($q) => $q->where('tipo', $tipo))
-            ->orderBy('created_at', 'desc')
-            ->paginate(12)
-            ->withQueryString();
-
-        return view('busqueda', compact('productos', 'termino', 'tipo'));
-    }
-
-    public function busquedaAvanzada(Request $request)
-    {
-        $termino   = $request->get('q', '');
-        $categoria = $request->get('categoria', '');
-        $tipo      = $request->get('tipo', '');
-        $precioMin = $request->get('precio_min', '');
-        $precioMax = $request->get('precio_max', '');
-
-        // Lista de categorías para el combo
-        $categorias = [
-            'construccion' => 'Construcción',
-            'agricultura'  => 'Agricultura',
-            'ganaderia'    => 'Ganadería',
-            'alimentos'    => 'Alimentos',
-            'plomeria'     => 'Plomería',
-            'electricidad' => 'Electricidad',
-            'carpinteria'  => 'Carpintería',
-            'jardineria'   => 'Jardinería',
-            'soldadura'    => 'Soldadura',
-            'pintura'      => 'Pintura',
-            'transporte'   => 'Transporte',
-            'otros'        => 'Otros',
-        ];
-
-        // Solo ejecutar búsqueda si se envió el formulario (hay algún parámetro)
-        $buscando = $request->hasAny(['q', 'categoria', 'tipo', 'precio_min', 'precio_max']);
+        // Si no hay término ni filtro de tipo, no ejecutar consulta
+        $buscando = $termino !== '' || $tipo !== '';
 
         $productos = null;
 
         if ($buscando) {
-            $query = Producto::where('estado', 'activo')
+            $productos = Producto::with(['categoria', 'imagenPrincipal'])
+                ->where('estado', 'activo')
                 ->buscar($termino)
-                ->when($categoria, fn($q) => $q->where('categoria', $categoria))
+                ->when($tipo, fn($q) => $q->where('tipo', $tipo))
+                ->orderBy('created_at', 'desc')
+                ->paginate(12)
+                ->withQueryString();
+        }
+
+        return view('busqueda', compact('productos', 'termino', 'tipo', 'buscando'));
+    }
+
+    public function busquedaAvanzada(Request $request)
+    {
+        $termino       = $request->get('q', '');
+        $categoriaSlug = $request->get('categoria', '');
+        $tipo          = $request->get('tipo', '');
+        $precioMin     = $request->get('precio_min', '');
+        $precioMax     = $request->get('precio_max', '');
+
+        // Catálogo de categorías desde la BD
+        $categorias = Categoria::where('estado', 'activo')
+            ->orderBy('nombre')
+            ->get();
+
+        // ¿Se envió el formulario con algún parámetro?
+        $buscando = $request->hasAny(['q', 'categoria', 'tipo', 'precio_min', 'precio_max']);
+
+        if ($buscando) {
+            $productos = Producto::with(['categoria', 'imagenPrincipal'])
+                ->where('estado', 'activo')
+                ->buscar($termino)
+                ->when($categoriaSlug, fn($q) =>
+                    $q->whereHas('categoria', fn($c) => $c->where('slug', $categoriaSlug))
+                )
                 ->when($tipo,      fn($q) => $q->where('tipo', $tipo))
                 ->when($precioMin, fn($q) => $q->where('precio', '>=', $precioMin))
                 ->when($precioMax, fn($q) => $q->where('precio', '<=', $precioMax))
-                ->orderBy('created_at', 'desc');
-
-            $productos = $query->paginate(12)->withQueryString();
+                ->orderBy('created_at', 'desc')
+                ->paginate(12)
+                ->withQueryString();
+        } else {
+            // Sin filtros: mostrar los últimos 20 productos registrados
+            $productos = Producto::with(['categoria', 'imagenPrincipal'])
+                ->where('estado', 'activo')
+                ->orderBy('created_at', 'desc')
+                ->take(20)
+                ->get();
         }
 
         return view('busqueda-avanzada', compact(
-            'productos', 'termino', 'categoria',
+            'productos', 'termino', 'categoriaSlug',
             'tipo', 'precioMin', 'precioMax',
             'categorias', 'buscando'
         ));
