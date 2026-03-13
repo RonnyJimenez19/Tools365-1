@@ -75,57 +75,17 @@
     .mv-values  { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1rem; }
     .mv-value-tag { background: #f0f4ff; color: var(--color-primary); font-size: 0.78rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
     .mv-value-tag--vision { background: #fff8e1; color: #E67E22; }
-    /* ===== MV CARD CON IMAGEN ===== */
-.mv-card--con-imagen {
-    padding: 0;
-    overflow: hidden;
-}
-.mv-card--con-imagen .mv-card-body {
-    padding: 1.8rem 2.5rem 2.5rem;
-}
-.mv-imagen-wrap {
-    position: relative;
-    height: 200px;
-    overflow: hidden;
-}
-.mv-imagen {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.4s ease;
-}
-.mv-card--con-imagen:hover .mv-imagen {
-    transform: scale(1.04);
-}
-/* Degradado oscuro sobre la imagen para que el ícono resalte */
-.mv-imagen-wrap::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.55) 100%);
-}
-/* Ícono flotante encima de la imagen */
-.mv-icon-flotante {
-    position: absolute;
-    bottom: -22px;
-    left: 2.5rem;
-    z-index: 2;
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
-    border: 3px solid #fff;
-}
-.mv-icon-flotante.mision { background: var(--color-primary); color: #fff; }
-.mv-icon-flotante.vision  { background: var(--color-accent);  color: #fff; }
-/* Espacio para que el ícono flotante no tape el texto */
-.mv-card--con-imagen .mv-card-body { padding-top: 2.5rem; }
-/* Sin imagen: el body no necesita padding extra */
-.mv-card-body { padding: 0; }
+    .mv-card--con-imagen { padding: 0; overflow: hidden; }
+    .mv-card--con-imagen .mv-card-body { padding: 1.8rem 2.5rem 2.5rem; }
+    .mv-imagen-wrap { position: relative; height: 200px; overflow: hidden; }
+    .mv-imagen { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+    .mv-card--con-imagen:hover .mv-imagen { transform: scale(1.04); }
+    .mv-imagen-wrap::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.55) 100%); }
+    .mv-icon-flotante { position: absolute; bottom: -22px; left: 2.5rem; z-index: 2; width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 14px rgba(0,0,0,0.2); border: 3px solid #fff; }
+    .mv-icon-flotante.mision { background: var(--color-primary); color: #fff; }
+    .mv-icon-flotante.vision  { background: var(--color-accent);  color: #fff; }
+    .mv-card--con-imagen .mv-card-body { padding-top: 2.5rem; }
+    .mv-card-body { padding: 0; }
 
     /* ===== PLANES ===== */
     .plans-row { display: flex; align-items: stretch; gap: 1.5rem; }
@@ -231,10 +191,21 @@
     <div class="container">
         <x-section-header titulo="Subastas del día" icono="bi-hammer" color="danger" />
         <div class="row g-3">
-            <x-product-card titulo="Excavadora Caterpillar 320D 2019"   precio="$320,000" unidad="puja actual" ubicacion="Mérida, Yuc."    timer="04:32:15" imagen="Imagenes/excavadora.jpg" />
-            <x-product-card titulo="Dron Agrícola DJI Agras T40"         precio="$85,000"  unidad="puja actual" ubicacion="Cancún, Q.R."    timer="01:14:05" imagen="Imagenes/dronagricola.png" iconoBg="linear-gradient(135deg,#e8f5e9,#c8e6c9)" iconoColor="#81c784" />
-            <x-product-card titulo="Generador Industrial 150 kW Cummins" precio="$55,000"  unidad="puja actual" ubicacion="CDMX"            timer="08:00:00" imagen="Imagenes/Generador.jpeg" iconoBg="linear-gradient(135deg,#fff3e0,#ffe0b2)" iconoColor="#ffb74d" />
-            <x-product-card titulo="Compresor Atlas Copco GA15 2021"     precio="$28,500"  unidad="puja actual" ubicacion="Monterrey, NL"   timer="02:45:30" imagen="Imagenes/compresor.png" iconoBg="linear-gradient(135deg,#fce4ec,#f8bbd0)" iconoColor="#f48fb1" />
+            @forelse($subastas as $producto)
+                <x-product-card
+                    titulo="{{ $producto->titulo }}"
+                    precio="${{ number_format($producto->precio, 0, '.', ',') }}"
+                    unidad="{{ $producto->unidad }}"
+                    ubicacion="{{ $producto->ubicacion }}"
+                    timer="{{ $producto->timer_fin?->diffForHumans(null, true) }}"
+                    imagen="{{ $producto->imagenPrincipal ? $producto->imagenPrincipal->ruta : null }}"
+                />
+            @empty
+                <div class="col-12 text-center text-muted py-4">
+                    <i class="bi bi-hammer fs-2 mb-2 d-block"></i>
+                    No hay subastas activas en este momento.
+                </div>
+            @endforelse
         </div>
     </div>
 </section>
@@ -244,10 +215,22 @@
     <div class="container">
         <x-section-header titulo="Disponible para Rentar" icono="bi-clock-history" color="primary" />
         <div class="row g-3">
-            <x-product-card titulo="Andamio Multidireccional 6m — Acero" precio="$450" unidad="/día" ubicacion="Mérida, Yuc."    badge="Renta" badgeTipo="primary" imagen="Imagenes/andamio.jpg" />
-            <x-product-card titulo="Bomba de Agua Sumergible 3HP"         precio="$180" unidad="/día" ubicacion="Valladolid, Yuc." badge="Renta" badgeTipo="primary" imagen="Imagenes/bombagua.png" iconoBg="linear-gradient(135deg,#e3f2fd,#bbdefb)" iconoColor="#64b5f6" />
-            <x-product-card titulo="Pistola Airless Wagner 2800 PSI"      precio="$220" unidad="/día" ubicacion="Progreso, Yuc."   badge="Renta" badgeTipo="primary" imagen="Imagenes/pistola.jpg" iconoBg="linear-gradient(135deg,#f3e5f5,#e1bee7)" iconoColor="#ce93d8" />
-            <x-product-card titulo="Motosierra Husqvarna 455 Rancher"     precio="$350" unidad="/día" ubicacion="Tizimín, Yuc."   badge="Renta" badgeTipo="primary" imagen="Imagenes/motosierra.jpg" />
+            @forelse($rentas as $producto)
+                <x-product-card
+                    titulo="{{ $producto->titulo }}"
+                    precio="${{ number_format($producto->precio, 0, '.', ',') }}"
+                    unidad="{{ $producto->unidad }}"
+                    ubicacion="{{ $producto->ubicacion }}"
+                    badge="Renta"
+                    badgeTipo="primary"
+                    imagen="{{ $producto->imagenPrincipal ? $producto->imagenPrincipal->ruta : null }}"
+                />
+            @empty
+                <div class="col-12 text-center text-muted py-4">
+                    <i class="bi bi-clock-history fs-2 mb-2 d-block"></i>
+                    No hay productos disponibles para renta.
+                </div>
+            @endforelse
         </div>
     </div>
 </section>
@@ -257,10 +240,21 @@
     <div class="container">
         <x-section-header titulo="Comprar" icono="bi-bag-check" color="success" />
         <div class="row g-3">
-            <x-product-card titulo="Taladro Percutor DeWalt 20V — Kit completo" precio="$3,200"  ubicacion="Mérida, Yuc."    badge="Venta" badgeTipo="success" imagen="Imagenes/taladro.jpg" />
-            <x-product-card titulo="Soldadora MIG Lincoln Electric 180"          precio="$12,500" ubicacion="Campeche, Camp." badge="Venta" badgeTipo="success" imagen="Imagenes/soldadora.jpg" iconoBg="linear-gradient(135deg,#fff3e0,#ffe0b2)" iconoColor="#ffb74d" />
-            <x-product-card titulo="Cortadora de Pasto Honda HRX217"             precio="$7,800"  ubicacion="Mérida, Yuc."    badge="Venta" badgeTipo="success" imagen="Imagenes/cortador.jpg" iconoBg="linear-gradient(135deg,#e0f2f1,#b2dfdb)" iconoColor="#4db6ac" />
-            <x-product-card titulo="Multímetro Digital Fluke 115"                precio="$1,950"  ubicacion="Cancún, Q.R."    badge="Venta" badgeTipo="success" imagen="Imagenes/multimetro.jpg" iconoBg="linear-gradient(135deg,#fce4ec,#f8bbd0)" iconoColor="#f48fb1" />
+            @forelse($ventas as $producto)
+                <x-product-card
+                    titulo="{{ $producto->titulo }}"
+                    precio="${{ number_format($producto->precio, 0, '.', ',') }}"
+                    ubicacion="{{ $producto->ubicacion }}"
+                    badge="Venta"
+                    badgeTipo="success"
+                    imagen="{{ $producto->imagenPrincipal ? $producto->imagenPrincipal->ruta : null }}"
+                />
+            @empty
+                <div class="col-12 text-center text-muted py-4">
+                    <i class="bi bi-bag-check fs-2 mb-2 d-block"></i>
+                    No hay productos en venta en este momento.
+                </div>
+            @endforelse
         </div>
     </div>
 </section>
