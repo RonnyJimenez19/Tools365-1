@@ -1,0 +1,208 @@
+
+        :root {
+            --primary:  #1F3A93;
+            --accent:   #F39C12;
+            --accent-h: #E67E22;
+            --dark:     #2C3E50;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            font-family: 'Nunito', sans-serif;
+            display: flex;
+            background: #0d1b2a;
+            overflow: hidden;
+        }
+
+        /* ── Panel izquierdo (ilustración) ── */
+        .auth-left {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: linear-gradient(145deg, #0f2044 0%, #1F3A93 55%, #162f6f 100%);
+        }
+        .auth-left-noise {
+            position: absolute; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            opacity: .25;
+        }
+        /* Círculos decorativos */
+        .auth-left::before, .auth-left::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            opacity: .12;
+        }
+        .auth-left::before {
+            width: 520px; height: 520px;
+            background: var(--accent);
+            top: -140px; right: -180px;
+        }
+        .auth-left::after {
+            width: 360px; height: 360px;
+            background: #fff;
+            bottom: -120px; left: -100px;
+        }
+
+        .auth-left-content {
+            position: relative; z-index: 2;
+            text-align: center; padding: 3rem 3.5rem;
+            max-width: 460px;
+        }
+        .auth-left-logo { text-decoration: none; display: inline-flex; align-items: center; gap: 10px; margin-bottom: 2.5rem; }
+        .auth-left-logo .brand { font-weight: 900; font-size: 2.2rem; color: #fff; letter-spacing: -1px; }
+        .auth-left-logo .brand span { color: var(--accent); }
+
+        .auth-left-badge {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: rgba(243,156,18,.18); border: 1px solid rgba(243,156,18,.35);
+            color: #fbd07a; font-size: .8rem; font-weight: 800;
+            padding: 5px 14px; border-radius: 30px; margin-bottom: 1.6rem;
+        }
+        .auth-left-headline {
+            font-size: 2.1rem; font-weight: 900; color: #fff; line-height: 1.2;
+            margin-bottom: 1.1rem;
+        }
+        .auth-left-headline span { color: var(--accent); }
+        .auth-left-sub { color: rgba(255,255,255,.6); font-size: .95rem; line-height: 1.6; margin-bottom: 2.2rem; }
+
+        .stat-pills { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .stat-pill {
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 12px; padding: 10px 18px;
+            display: flex; flex-direction: column; align-items: center;
+            min-width: 90px;
+        }
+        .stat-pill strong { font-size: 1.35rem; font-weight: 900; color: #fff; }
+        .stat-pill span   { font-size: .72rem; color: rgba(255,255,255,.55); font-weight: 600; }
+
+        @media (max-width: 767px) { .auth-left { display: none; } }
+
+        /* ── Panel derecho (formulario) ── */
+        .auth-right {
+            width: 480px;
+            flex-shrink: 0;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 3rem 3.5rem;
+            position: relative;
+            overflow-y: auto;
+        }
+        @media (max-width: 767px) {
+            .auth-right { width: 100%; padding: 2.5rem 1.75rem; }
+        }
+
+        .auth-right-header { margin-bottom: 2.2rem; }
+        .auth-right-header h1 {
+            font-weight: 900; font-size: 1.9rem; color: #0d1b2a;
+            margin-bottom: .35rem; line-height: 1.15;
+        }
+        .auth-right-header p { color: #8896a4; font-size: .92rem; }
+
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label {
+            display: block; font-size: .8rem; font-weight: 800;
+            color: #4a5568; text-transform: uppercase; letter-spacing: .5px;
+            margin-bottom: .45rem;
+        }
+        .form-control-custom {
+            width: 100%; padding: 12px 15px;
+            border: 2px solid #e8ecf0; border-radius: 10px;
+            font-size: .95rem; color: #0d1b2a;
+            font-family: 'Nunito', sans-serif;
+            outline: none; transition: border-color .2s, box-shadow .2s;
+            background: #fafbfc;
+        }
+        .form-control-custom:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(31,58,147,.1);
+            background: #fff;
+        }
+        .form-control-custom.is-invalid { border-color: #e74c3c; }
+
+        .input-icon-wrap { position: relative; }
+        .input-icon-wrap .form-control-custom { padding-left: 44px; }
+        .input-icon-wrap .input-icon {
+            position: absolute; left: 14px; top: 50%;
+            transform: translateY(-50%);
+            color: #b0bec5; font-size: 1rem;
+        }
+        .input-icon-wrap .toggle-pass {
+            position: absolute; right: 14px; top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer; color: #b0bec5;
+            background: none; border: none; font-size: 1rem;
+            transition: color .2s;
+        }
+        .input-icon-wrap .toggle-pass:hover { color: var(--primary); }
+
+        .invalid-text { color: #e74c3c; font-size: .78rem; font-weight: 700; margin-top: 5px; }
+
+        .forgot-link {
+            display: block; text-align: right;
+            font-size: .8rem; font-weight: 700;
+            color: var(--primary); text-decoration: none;
+            margin-top: -6px; margin-bottom: .8rem;
+            transition: color .2s;
+        }
+        .forgot-link:hover { color: var(--accent); }
+
+        .remember-row { display: flex; align-items: center; gap: 8px; margin-bottom: 1.4rem; }
+        .remember-row input[type="checkbox"] {
+            width: 17px; height: 17px; accent-color: var(--primary);
+            cursor: pointer;
+        }
+        .remember-row label { font-size: .88rem; color: #4a5568; cursor: pointer; }
+
+        .btn-submit {
+            width: 100%; padding: 14px;
+            background: linear-gradient(135deg, var(--primary) 0%, #2a4ab5 100%);
+            color: #fff; border: none; border-radius: 10px;
+            font-weight: 800; font-size: 1rem;
+            cursor: pointer; transition: all .25s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            font-family: 'Nunito', sans-serif;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(31,58,147,.35);
+        }
+        .btn-submit:active { transform: translateY(0); }
+
+        .divider {
+            display: flex; align-items: center; gap: 12px;
+            margin: 1.6rem 0; color: #c5cdd8; font-size: .8rem; font-weight: 700;
+        }
+        .divider::before, .divider::after {
+            content: ''; flex: 1; height: 1px; background: #edf0f4;
+        }
+
+        .auth-switch {
+            text-align: center; font-size: .9rem; color: #8896a4;
+        }
+        .auth-switch a {
+            font-weight: 800; color: var(--primary); text-decoration: none;
+            transition: color .2s;
+        }
+        .auth-switch a:hover { color: var(--accent); }
+
+        .alert-error {
+            background: #fff5f5; border: 1.5px solid #fed7d7;
+            border-radius: 10px; padding: 12px 15px;
+            color: #c53030; font-size: .87rem; font-weight: 700;
+            margin-bottom: 1.4rem; display: flex; align-items: flex-start; gap: 8px;
+        }
+
+        .alert-success {
+            background: #f0fff4; border: 1.5px solid #9ae6b4;
+            border-radius: 10px; padding: 12px 15px;
+            color: #276749; font-size: .87rem; font-weight: 700;
+            margin-bottom: 1.4rem; display: flex; align-items: flex-start; gap: 8px;
+        }
