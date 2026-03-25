@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\ProductoDetalle;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Producto extends Model
 {
@@ -50,4 +52,10 @@ class Producto extends Model
               );
         });
     }
+
+    public function detalles(): HasMany
+{
+    return $this->hasMany(ProductoDetalle::class)->orderBy('orden');
+}
+ 
 }

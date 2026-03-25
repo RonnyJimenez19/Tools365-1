@@ -40,7 +40,7 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('dashboard')->with('success', '¡Bienvenido a Tools365, ' . $user->name . '!');
+        return redirect()->route('inicio')->with('success', '¡Bienvenido a Tools365, ' . $user->name . '!');
     }
 
     // ── Login ────────────────────────────────────────────────────
@@ -66,7 +66,7 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
-            return redirect()->intended(route('dashboard'))
+            return redirect()->intended(route('inicio'))
                 ->with('success', 'Sesión iniciada correctamente.');
         }
 

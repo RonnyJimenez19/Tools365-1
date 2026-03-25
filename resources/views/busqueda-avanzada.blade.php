@@ -3,7 +3,7 @@
 @section('titulo_pagina', 'Búsqueda Avanzada - Tools365')
 
 @push('css')
-<link rel="stylesheet" href="{{ asset('css/busqueda-avanzada.css') }}">
+<link rel="stylesheet" href="{{ asset('css/busqueda_avanzada.css') }}">
 @endpush
 
 @section('contenido')

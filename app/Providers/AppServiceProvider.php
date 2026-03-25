@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use App\Models\Categoria;
+use App\Http\View\Composers\NavComposer;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -12,12 +13,14 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Inyecta $categoriasNav en TODAS las vistas que usen layouts.app
-        // Así el dropdown del header siempre refleja lo que hay en la BD
-        View::composer('layouts.app', function ($view) {
+        // Inyecta $categoriasNav en el partial del navbar
+        View::composer('partials.navbar', function ($view) {
             $view->with('categoriasNav', Categoria::where('estado', 'activo')
                 ->orderBy('nombre')
                 ->get());
         });
+
+        // Inyecta $navItems (desde nav_items en BD, ordenados por `orden`) en el partial
+        View::composer('partials.navbar', NavComposer::class);
     }
 }

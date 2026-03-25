@@ -53,7 +53,7 @@
         <div class="stat-icon orange"><i class="bi bi-hammer"></i></div>
         <div>
             <div class="stat-num">2</div>
-            <div class="stat-lbl">Pujas activas</div>
+            <div class="stat-lbl">Ofertas activas</div>
             <div class="stat-delta down"><i class="bi bi-arrow-down-short"></i> Cierra en 4h</div>
         </div>
     </div>
@@ -199,7 +199,7 @@
     {{-- Subastas en las que participo --}}
     <div class="dash-card">
         <div class="card-header-row">
-            <h3><i class="bi bi-hammer me-2" style="color:#e74c3c;"></i>Mis pujas activas</h3>
+            <h3><i class="bi bi-hammer me-2" style="color:#e74c3c;"></i>Mis ofertas activas</h3>
             <a href="#">Ver todas <i class="bi bi-arrow-right"></i></a>
         </div>
 

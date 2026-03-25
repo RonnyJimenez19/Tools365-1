@@ -31,7 +31,7 @@
             </div>
 
             <h2 class="auth-left-headline">
-                Tu mercado de<br><span>herramientas industriales</span>
+                Tu mercado de<br><span>herramientas</span>
             </h2>
             <p class="auth-left-sub">
                 Renta, compra, vende o subasta maquinaria a los mejores precios. Miles de usuarios confían en Tools365.

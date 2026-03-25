@@ -19,6 +19,7 @@
 
 </head>
 <body>
+    
 
 {{-- ── Overlay móvil ── --}}
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
@@ -27,9 +28,8 @@
 <aside class="sidebar" id="sidebar">
 
     {{-- Logo --}}
-    <a href="{{ route('dashboard') }}" class="sidebar-logo">
+    <a href="{{ route('inicio') }}" class="sidebar-logo">
         <span class="brand">Tools<span>365</span></span>
-        <span class="sidebar-logo-badge">PRO</span>
     </a>
 
     {{-- Usuario --}}
@@ -99,7 +99,7 @@
 
         <a href="#" class="nav-item">
             <i class="bi bi-trophy-fill"></i>
-            Mis pujas
+            Mis ofertas
         </a>
 
         <a href="#" class="nav-item">
