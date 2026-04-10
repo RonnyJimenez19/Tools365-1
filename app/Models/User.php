@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'rol',
     ];
 
     /**
@@ -32,6 +33,14 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    // Helper para usar en Blade y controladores
+    public function esAdmin(): bool    { return $this->rol === 'admin'; }
+    public function esGerente(): bool  { return $this->rol === 'gerente'; }
+    public function esInvitado(): bool { return $this->rol === 'invitado'; }
+
+    // Puede ver contenido pero no modificar
+    public function puedeEditar(): bool { return in_array($this->rol, ['admin', 'gerente']); }
 
     /**
      * Get the attributes that should be cast.

@@ -62,7 +62,7 @@
     <div class="auth-right">
 
         <div class="auth-right-header">
-            <h1>Crea tu cuenta ✨</h1>
+            <h1>Crea tu cuenta</h1>
             <p>Completa los datos y únete a la comunidad Tools365</p>
         </div>
 

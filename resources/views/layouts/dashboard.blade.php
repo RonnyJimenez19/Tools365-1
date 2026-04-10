@@ -47,125 +47,84 @@
     {{-- Navegación --}}
     <nav class="sidebar-nav">
 
-        {{-- Principal --}}
-        <div class="nav-section-label">Principal</div>
+    <div class="nav-section-label">Principal</div>
+    <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+        <i class="bi bi-grid-1x2-fill"></i> Mi Panel
+    </a>
 
-        <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-            <i class="bi bi-grid-1x2-fill"></i>
-            Mi Panel
-        </a>
-
-        {{-- Mis actividades --}}
-        <div class="nav-section-label">Mis Actividades</div>
+    {{-- ── Solo admin y gerente pueden publicar ── --}}
+    @if(auth()->user()->puedeEditar())
+        <div class="nav-section-label">Gestión</div>
 
         <a href="#" class="nav-item">
-            <i class="bi bi-plus-circle-fill"></i>
-            Publicar herramienta
+            <i class="bi bi-plus-circle-fill"></i> Publicar herramienta
         </a>
-
         <a href="#" class="nav-item">
-            <i class="bi bi-box-seam-fill"></i>
-            Mis publicaciones
-            <span class="nav-badge">3</span>
+            <i class="bi bi-box-seam-fill"></i> Herramientas
         </a>
 
-        {{-- Comprar / Rentar --}}
-        <div class="nav-section-label">Comprar y Rentar</div>
+        @if(auth()->user()->esAdmin())
+            <a href="#" class="nav-item">
+                <i class="bi bi-people-fill"></i> Usuarios
+            </a>
+            <a href="#" class="nav-item">
+                <i class="bi bi-file-earmark-text-fill"></i> Contenido de la página
+            </a>
+        @endif
+    @endif
 
-        <a href="#" class="nav-item">
-            <i class="bi bi-bag-heart-fill"></i>
-            Mis compras
-        </a>
+    {{-- ── Visible para todos ── --}}
+    <div class="nav-section-label">Mi actividad</div>
 
-        <a href="#" class="nav-item">
-            <i class="bi bi-clock-history"></i>
-            Mis rentas activas
-            <span class="nav-badge info">2</span>
-        </a>
+    <a href="#" class="nav-item">
+        <i class="bi bi-bag-heart-fill"></i> Mis compras
+    </a>
+    <a href="#" class="nav-item">
+        <i class="bi bi-clock-history"></i> Mis rentas activas
+        <span class="nav-badge info">2</span>
+    </a>
+    <a href="#" class="nav-item">
+        <i class="bi bi-heart-fill"></i> Favoritos
+    </a>
 
-        <a href="#" class="nav-item">
-            <i class="bi bi-heart-fill"></i>
-            Guardados / Favoritos
-        </a>
+    <div class="nav-section-label">Subastas</div>
+    <a href="#" class="nav-item">
+        <i class="bi bi-hammer"></i> Subastas activas
+        <span class="nav-badge new">5</span>
+    </a>
 
-        {{-- Subastas --}}
-        <div class="nav-section-label">Subastas</div>
+    <div class="nav-section-label">Cuenta</div>
+    <a href="#" class="nav-item">
+        <i class="bi bi-person-circle"></i> Mi perfil
+    </a>
+    <a href="#" class="nav-item">
+        <i class="bi bi-star-fill"></i> Mi plan
+    </a>
 
-        <a href="#" class="nav-item">
-            <i class="bi bi-hammer"></i>
-            Subastas activas
-            <span class="nav-badge new">5</span>
-        </a>
+    <div class="nav-section-label">Soporte</div>
+    <a href="{{ route('inicio') }}" class="nav-item">
+        <i class="bi bi-shop"></i> Ir a la tienda
+    </a>
+    <a href="#" class="nav-item">
+        <i class="bi bi-question-circle-fill"></i> Ayuda & FAQ
+    </a>
 
-        <a href="#" class="nav-item">
-            <i class="bi bi-trophy-fill"></i>
-            Mis ofertas
-        </a>
+    {{-- ── Badge de rol visible para el admin ── --}}
+    @if(auth()->user()->puedeEditar())
+        <div style="margin-top: 16px; padding: 0 8px;">
+            <span style="
+                display: inline-flex; align-items: center; gap: 6px;
+                background: rgba(83,74,183,0.12); border: 0.5px solid #534AB7;
+                border-radius: 20px; padding: 4px 10px;
+                font-size: 11px; font-weight: 700; color: #7F77DD;
+            ">
+                <i class="bi bi-shield-fill" style="font-size: 10px;"></i>
+                {{ ucfirst(auth()->user()->rol) }}
+            </span>
+        </div>
+    @endif
 
-        <a href="#" class="nav-item">
-            <i class="bi bi-award-fill"></i>
-            Subastas ganadas
-        </a>
-
-        {{-- Finanzas --}}
-        <div class="nav-section-label">Finanzas</div>
-
-        <a href="#" class="nav-item">
-            <i class="bi bi-wallet2"></i>
-            Mi billetera
-        </a>
-
-        <a href="#" class="nav-item">
-            <i class="bi bi-receipt"></i>
-            Historial de pagos
-        </a>
-
-        {{-- Comunicación --}}
-        <div class="nav-section-label">Comunicación</div>
-
-        <a href="#" class="nav-item">
-            <i class="bi bi-chat-dots-fill"></i>
-            Mensajes
-            <span class="nav-badge new">2</span>
-        </a>
-
-        <a href="#" class="nav-item">
-            <i class="bi bi-bell-fill"></i>
-            Notificaciones
-        </a>
-
-        {{-- Configuración --}}
-        <div class="nav-section-label">Cuenta</div>
-
-        <a href="#" class="nav-item">
-            <i class="bi bi-person-circle"></i>
-            Mi perfil
-        </a>
-
-        <a href="#" class="nav-item">
-            <i class="bi bi-star-fill"></i>
-            Mi plan
-        </a>
-
-        <a href="#" class="nav-item">
-            <i class="bi bi-gear-fill"></i>
-            Configuración
-        </a>
-
-        {{-- Soporte --}}
-        <div class="nav-section-label">Soporte</div>
-
-        <a href="{{ route('inicio') }}" class="nav-item">
-            <i class="bi bi-shop"></i>
-            Ir a la tienda
-        </a>
-
-        <a href="#" class="nav-item">
-            <i class="bi bi-question-circle-fill"></i>
-            Ayuda & FAQ
-        </a>
-
-    </nav>
+</nav>
 
     {{-- Logout --}}
     <div class="sidebar-footer">

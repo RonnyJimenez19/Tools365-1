@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
 
+
 // Rutas públicas existentes
 Route::get('/', [HomeController::class, 'inicio'])->name('inicio');
 Route::get('/buscar', [HomeController::class, 'buscar'])->name('buscar');
@@ -22,11 +23,20 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
 });
 
+// ── Login admin (accesible sin sesión para poder loguearse) ────────────────
+Route::get('/login-admin',  [AuthController::class, 'showAdminLogin'])->name('admin.login');
+Route::post('/login-admin', [AuthController::class, 'adminLogin']);
+
+
 // ── Rutas protegidas (requieren sesión) ──────────────────────────────────────
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
-    Route::post('/logout',   [AuthController::class, 'logout'])->name('logout');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+    // Solo admin y gerente
+    Route::middleware('rol:admin,gerente')->group(function () {
+        Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
+        // Aquí irán las rutas de CRUD de herramientas, usuarios, contenido
+    });
     // TODO: rutas futuras del sistema
     // Route::get('/mis-publicaciones',  [...]);
     // Route::get('/publicar',           [...]);
