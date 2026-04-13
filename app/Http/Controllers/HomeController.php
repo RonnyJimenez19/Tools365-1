@@ -1,106 +1,93 @@
 <?php
 
-// Landing page controller
-
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Comentario;
 use App\Models\Producto;
-use App\Models\Categoria;
+use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
     public function inicio()
     {
-        // Helper: 4 productos activos del tipo dado, con imagen y categoría
-        $porTipo = fn(string $tipo) => Producto::with(['categoria', 'imagenes'])
-            ->where('estado', 'activo')
-            ->where('tipo', $tipo)
-            ->orderBy('created_at', 'desc')
-            ->take(4)
-            ->get();
-
-        // Subastas: las más urgentes primero (timer_fin más cercano)
-        $subastas = Producto::with(['categoria', 'imagenes'])
-            ->where('estado', 'activo')
+        $subastas = Producto::with(['imagenes', 'categoria'])
             ->where('tipo', 'subasta')
-            ->whereNotNull('timer_fin')
-            ->where('timer_fin', '>', now())
-            ->orderBy('timer_fin', 'asc')
+            ->where('estado', 'activo')
+            ->latest()
             ->take(4)
             ->get();
 
-        $rentas = $porTipo('renta');
-        $ventas = $porTipo('venta');
+        $rentas = Producto::with(['imagenes', 'categoria'])
+            ->where('tipo', 'renta')
+            ->where('estado', 'activo')
+            ->latest()
+            ->take(4)
+            ->get();
 
-        return view('inicio', compact('subastas', 'rentas', 'ventas'));
+        $ventas = Producto::with(['imagenes', 'categoria'])
+            ->where('tipo', 'venta')
+            ->where('estado', 'activo')
+            ->latest()
+            ->take(4)
+            ->get();
+
+        // Comentarios aprobados y marcados como "en inicio" (máx. 3)
+        $comentarios_inicio = Comentario::aprobados()
+            ->enInicio()
+            ->latest()
+            ->take(3)
+            ->get();
+
+        // Si no hay suficientes destacados, completar con los más recientes aprobados
+        if ($comentarios_inicio->count() < 3) {
+            $ids   = $comentarios_inicio->pluck('id');
+            $extra = Comentario::aprobados()
+                ->whereNotIn('id', $ids)
+                ->latest()
+                ->take(3 - $comentarios_inicio->count())
+                ->get();
+
+            $comentarios_inicio = $comentarios_inicio->concat($extra);
+        }
+
+        return view('inicio', compact(
+            'subastas', 'rentas', 'ventas', 'comentarios_inicio'
+        ));
     }
 
     public function buscar(Request $request)
     {
-        $termino = trim($request->get('q', ''));
-        $tipo    = $request->get('tipo', '');
+        $query = $request->get('q', '');
 
-        // Si no hay término ni filtro de tipo, no ejecutar consulta
-        $buscando = $termino !== '' || $tipo !== '';
+        $productos = Producto::with(['imagenes', 'categoria'])
+            ->where('estado', 'activo')
+            ->where(function ($q) use ($query) {
+                $q->where('nombre', 'like', "%{$query}%")
+                  ->orWhere('descripcion', 'like', "%{$query}%");
+            })
+            ->paginate(12)
+            ->withQueryString();
 
-        $productos = null;
-
-        if ($buscando) {
-            $productos = Producto::with(['categoria', 'imagenes'])
-                ->where('estado', 'activo')
-                ->buscar($termino)
-                ->when($tipo, fn($q) => $q->where('tipo', $tipo))
-                ->orderBy('created_at', 'desc')
-                ->paginate(12)
-                ->withQueryString();
-        }
-
-        return view('busqueda', compact('productos', 'termino', 'tipo', 'buscando'));
+        return view('busqueda', compact('productos', 'query'));
     }
 
     public function busquedaAvanzada(Request $request)
     {
-        $termino       = $request->get('q', '');
-        $categoriaSlug = $request->get('categoria', '');
-        $tipo          = $request->get('tipo', '');
-        $precioMin     = $request->get('precio_min', '');
-        $precioMax     = $request->get('precio_max', '');
+        $productos = Producto::with(['imagenes', 'categoria'])
+            ->where('estado', 'activo')
+            ->when($request->filled('q'), fn($q) =>
+                $q->where('nombre', 'like', '%' . $request->q . '%'))
+            ->when($request->filled('tipo'), fn($q) =>
+                $q->where('tipo', $request->tipo))
+            ->when($request->filled('categoria_id'), fn($q) =>
+                $q->where('categoria_id', $request->categoria_id))
+            ->when($request->filled('precio_min'), fn($q) =>
+                $q->where('precio', '>=', $request->precio_min))
+            ->when($request->filled('precio_max'), fn($q) =>
+                $q->where('precio', '<=', $request->precio_max))
+            ->paginate(12)
+            ->withQueryString();
 
-        // Catálogo de categorías desde la BD
-        $categorias = Categoria::where('estado', 'activo')
-            ->orderBy('nombre')
-            ->get();
-
-        // ¿Se envió el formulario con algún parámetro?
-        $buscando = $request->hasAny(['q', 'categoria', 'tipo', 'precio_min', 'precio_max']);
-
-        if ($buscando) {
-            $productos = Producto::with(['categoria', 'imagenes'])
-                ->where('estado', 'activo')
-                ->buscar($termino)
-                ->when($categoriaSlug, fn($q) =>
-                    $q->whereHas('categoria', fn($c) => $c->where('slug', $categoriaSlug))
-                )
-                ->when($tipo,      fn($q) => $q->where('tipo', $tipo))
-                ->when($precioMin, fn($q) => $q->where('precio', '>=', $precioMin))
-                ->when($precioMax, fn($q) => $q->where('precio', '<=', $precioMax))
-                ->orderBy('created_at', 'desc')
-                ->paginate(12)
-                ->withQueryString();
-        } else {
-            // Sin filtros: mostrar los últimos 20 productos registrados
-            $productos = Producto::with(['categoria', 'imagenes'])
-                ->where('estado', 'activo')
-                ->orderBy('created_at', 'desc')
-                ->take(20)
-                ->get();
-        }
-
-        return view('busqueda-avanzada', compact(
-            'productos', 'termino', 'categoriaSlug',
-            'tipo', 'precioMin', 'precioMax',
-            'categorias', 'buscando'
-        ));
+        return view('busqueda-avanzada', compact('productos'));
     }
 }

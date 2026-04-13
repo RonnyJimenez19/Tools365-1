@@ -228,6 +228,42 @@
     </div>
 </section>
 
+{{-- ===== COMENTARIOS / OPINIONES ===== --}}
+<section id="opiniones" class="py-5 bg-light">
+    <div class="container">
+ 
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">Lo que dice nuestra comunidad</h2>
+            <p class="lead text-muted">Opiniones reales de usuarios de Tools365</p>
+        </div>
+ 
+        {{-- Grid de comentarios aprobados --}}
+        @if(isset($comentarios_inicio) && $comentarios_inicio->count())
+            <div class="row g-4 mb-5">
+                @foreach($comentarios_inicio as $c)
+                    <div class="col-md-4">
+                        <x-comentario-card :comentario="$c" />
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <div class="text-center text-muted py-4 mb-4">
+                <i class="bi bi-chat-dots fs-2 d-block mb-2"></i>
+                Aún no hay opiniones. ¡Sé el primero en comentar!
+            </div>
+        @endif
+ 
+        {{-- Botón para ver todos / dejar opinión --}}
+        <div class="text-center">
+            <a href="{{ route('comentarios.index') }}" class="btn btn-outline-primary rounded-pill px-5">
+                <i class="bi bi-chat-square-quote me-2"></i>
+                Ver todas las opiniones y dejar la tuya
+            </a>
+        </div>
+ 
+    </div>
+</section>
+
 {{-- ===== CTA FINAL ===== --}}
 <section class="py-5 bg-accent text-white">
     <div class="container text-center py-5">

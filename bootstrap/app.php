@@ -11,9 +11,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // ── Alias de middlewares ─────────────────────────────────────────────
         $middleware->alias([
-            'rol' => \App\Http\Middleware\RoleMiddleware::class,
+            'rol'             => \App\Http\Middleware\RoleMiddleware::class,
+            'session.timeout' => \App\Http\Middleware\SessionTimeout::class,
         ]);
+
+        // ── Aplicar timeout de sesión a todas las rutas web ──────────────────
+        // Solo afecta a usuarios autenticados (el middleware hace la verificación)
+        $middleware->appendToGroup('web', \App\Http\Middleware\SessionTimeout::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

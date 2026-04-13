@@ -73,6 +73,22 @@
             </div>
         @endif
 
+        @if(session('session_expired'))
+    <div class="alert-expired" style="
+        display: flex; align-items: flex-start; gap: 12px;
+        background: #fffbeb; border: 1.5px solid #f6ad55;
+        border-radius: 12px; padding: 14px 18px;
+        font-size: 14px; color: #744210;
+        margin-bottom: 20px;
+    ">
+        <i class="bi bi-hourglass-split" style="font-size:20px; flex-shrink:0; margin-top:1px;"></i>
+        <div>
+            <strong style="display:block; margin-bottom:2px;">Sesión expirada</strong>
+            {{ session('session_expired') }}
+        </div>
+    </div>
+@endif
+
         <form action="{{ route('login') }}" method="POST" novalidate>
             @csrf
 

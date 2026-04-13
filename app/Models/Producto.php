@@ -10,41 +10,50 @@ class Producto extends Model
 {
     protected $fillable = [
         'titulo', 'descripcion', 'precio', 'unidad',
-        'ubicacion', 'tipo', 'categoria_id',   // <-- categoria_id en lugar de categoria + imagen
+        'ubicacion', 'tipo', 'categoria_id',
         'estado', 'timer_fin',
+        // ── Ofertas ──────────────────────────────────────
+        'precio_original', 'descuento_porcentaje',
+        'oferta_activa', 'oferta_fin', 'oferta_etiqueta',
     ];
 
     protected $casts = [
-        'timer_fin' => 'datetime',
-        'precio'    => 'decimal:2',
+        'timer_fin'             => 'datetime',
+        'precio'                => 'decimal:2',
+        'precio_original'       => 'decimal:2',
+        'oferta_activa'         => 'boolean',
+        'oferta_fin'            => 'datetime',
+        'descuento_porcentaje'  => 'integer',
     ];
 
-    // ── Relaciones ─────────────────────────────────────────────
+    // ── Relaciones ──────────────────────────────────────────────────────────────
 
-    // Pertenece a una categoría (FK)
     public function categoria()
     {
         return $this->belongsTo(Categoria::class);
     }
 
-    // Tiene muchas imágenes (carrusel de ángulos)
     public function imagenes()
     {
         return $this->hasMany(ProductoImagen::class)->orderBy('orden');
     }
 
-    // Imagen principal (orden = 0, la primera disponible)
     public function imagenPrincipal()
     {
         return $this->hasOne(ProductoImagen::class)->orderBy('orden');
     }
 
-    // ── Scope búsqueda ─────────────────────────────────────────
+    public function detalles(): HasMany
+    {
+        return $this->hasMany(ProductoDetalle::class)->orderBy('orden');
+    }
+
+    // ── Scopes ──────────────────────────────────────────────────────────────────
 
     public function scopeBuscar($query, $termino)
     {
         return $query->where(function ($q) use ($termino) {
-            $q->where('titulo',      'like', "%{$termino}%")
+            $q->where('titulo',       'like', "%{$termino}%")
               ->orWhere('descripcion', 'like', "%{$termino}%")
               ->orWhere('ubicacion',   'like', "%{$termino}%")
               ->orWhereHas('categoria', fn($c) =>
@@ -53,9 +62,51 @@ class Producto extends Model
         });
     }
 
-    public function detalles(): HasMany
-{
-    return $this->hasMany(ProductoDetalle::class)->orderBy('orden');
-}
- 
+    /**
+     * Devuelve productos con oferta activa.
+     * Si tiene oferta_fin, solo los que no han expirado.
+     */
+    public function scopeConOferta($query)
+    {
+        return $query->where('oferta_activa', true)
+                     ->where(function ($q) {
+                         $q->whereNull('oferta_fin')
+                           ->orWhere('oferta_fin', '>', now());
+                     });
+    }
+
+    // ── Helpers ─────────────────────────────────────────────────────────────────
+
+    /**
+     * Calcula y guarda el porcentaje de descuento a partir de precio_original y precio.
+     * Llamar antes de save() cuando se actualicen los precios.
+     */
+    public function calcularDescuento(): void
+    {
+        if ($this->precio_original && $this->precio_original > 0) {
+            $this->descuento_porcentaje = (int) round(
+                (($this->precio_original - $this->precio) / $this->precio_original) * 100
+            );
+        } else {
+            $this->descuento_porcentaje = null;
+        }
+    }
+
+    /** ¿La oferta sigue vigente en este momento? */
+    public function ofertaVigente(): bool
+    {
+        if (! $this->oferta_activa) {
+            return false;
+        }
+        return is_null($this->oferta_fin) || $this->oferta_fin->isFuture();
+    }
+
+    /** Ahorro absoluto (precio_original - precio). */
+    public function ahorroAbsoluto(): float
+    {
+        if ($this->precio_original && $this->ofertaVigente()) {
+            return (float) ($this->precio_original - $this->precio);
+        }
+        return 0.0;
+    }
 }

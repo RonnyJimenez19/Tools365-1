@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\RegistroConfirmacion;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
 {
-    // ── Login público (usuarios de la plataforma) ──────────────────────────
+    // ── Login público (usuarios de la plataforma) ────────────────────────────
 
     public function showLogin()
     {
@@ -32,6 +34,9 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
+            // Inicializar marca de actividad para el middleware de timeout
+            session(['last_activity_at' => now()]);
+
             return redirect()->intended(route('inicio'))
                 ->with('success', 'Sesión iniciada correctamente.');
         }
@@ -41,15 +46,13 @@ class AuthController extends Controller
             ->withErrors(['email' => 'Las credenciales no son correctas.']);
     }
 
-    // ── Login admin (solo personal interno → dashboard) ────────────────────
+    // ── Login admin (solo personal interno → dashboard) ──────────────────────
 
     public function showAdminLogin()
     {
-        // Si ya está logueado como admin, directo al dashboard
         if (Auth::check() && Auth::user()->puedeEditar()) {
             return redirect()->route('dashboard');
         }
-
         return view('auth.login-admin');
     }
 
@@ -67,7 +70,6 @@ class AuthController extends Controller
         $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials)) {
-            // Verificar que el usuario tenga rol administrativo
             if (!Auth::user()->puedeEditar()) {
                 Auth::logout();
                 $request->session()->invalidate();
@@ -77,6 +79,8 @@ class AuthController extends Controller
             }
 
             $request->session()->regenerate();
+            session(['last_activity_at' => now()]);
+
             return redirect()->route('dashboard')
                 ->with('success', 'Bienvenido al panel, ' . auth()->user()->name . '.');
         }
@@ -86,7 +90,7 @@ class AuthController extends Controller
             ->withErrors(['email' => 'Las credenciales no son correctas.']);
     }
 
-    // ── Registro público ───────────────────────────────────────────────────
+    // ── Registro público ─────────────────────────────────────────────────────
 
     public function showRegister()
     {
@@ -113,16 +117,25 @@ class AuthController extends Controller
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
-            'rol'      => 'invitado',   // todo registro público es invitado
+            'rol'      => 'invitado',
         ]);
 
+        // ── Enviar correo de confirmación ────────────────────────────────────
+        // Usamos try/catch para que un fallo de SMTP no interrumpa el registro
+        try {
+            Mail::to($user->email)->send(new RegistroConfirmacion($user));
+        } catch (\Throwable $e) {
+            // En producción loguear: \Log::error('Mail error: ' . $e->getMessage());
+        }
+
         Auth::login($user);
+        session(['last_activity_at' => now()]);
 
         return redirect()->route('inicio')
-            ->with('success', '¡Bienvenido a Tools365, ' . $user->name . '!');
+            ->with('success', '¡Bienvenido a Tools365, ' . $user->name . '! Revisa tu correo para confirmar tu registro.');
     }
 
-    // ── Logout (sirve para ambos tipos de usuario) ─────────────────────────
+    // ── Logout ───────────────────────────────────────────────────────────────
 
     public function logout(Request $request)
     {
@@ -132,13 +145,12 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        // Redirigir según de dónde vino
         return $wasAdmin
             ? redirect()->route('admin.login')->with('success', 'Sesión cerrada correctamente.')
             : redirect()->route('inicio')->with('success', 'Sesión cerrada correctamente.');
     }
 
-    // ── Dashboard ──────────────────────────────────────────────────────────
+    // ── Dashboard ────────────────────────────────────────────────────────────
 
     public function dashboard()
     {

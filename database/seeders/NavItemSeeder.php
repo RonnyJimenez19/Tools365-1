@@ -26,7 +26,7 @@ class NavItemSeeder extends Seeder
                 'target'    => null,
             ],
             [
-                'label'     => 'Ofertas',
+                'label'     => '    s',
                 'url'       => '#',
                 'icono'     => 'bi-tags-fill',
                 'orden'     => 20,
