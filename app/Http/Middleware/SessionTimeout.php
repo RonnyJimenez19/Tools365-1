@@ -12,16 +12,24 @@ class SessionTimeout
     /**
      * Minutos de inactividad antes de cerrar la sesión.
      */
-    protected int $timeoutMinutes = 10;
+    protected int $timeoutMinutes = 1;
 
-    public function handle(Request $request, Closure $next): Response
-    {
-        // Solo aplica a usuarios autenticados
-        if (Auth::check()) {
-            $lastActivity = session('last_activity_at');
+public function handle(Request $request, Closure $next): Response
+{
+    if (Auth::check()) {
+        $lastActivity = session('last_activity_at');
 
-            if ($lastActivity !== null) {
-                $inactiveSeconds = now()->diffInSeconds($lastActivity);
+        // DEBUG TEMPORAL — quítalo después
+        \Log::info('Session timeout check', [
+            'user'          => Auth::user()->email,
+            'last_activity' => $lastActivity,
+            'now'           => now(),
+            'diff_seconds'  => $lastActivity ? now()->diffInSeconds($lastActivity) : 'NULL',
+            'timeout'       => $this->timeoutMinutes * 60,
+        ]);
+
+        if ($lastActivity !== null) {
+$inactiveSeconds = now()->diffInSeconds($lastActivity, false) * -1;
 
                 if ($inactiveSeconds > ($this->timeoutMinutes * 60)) {
                     // Determinar a dónde redirigir según el rol antes de cerrar sesión

@@ -55,39 +55,61 @@ class HomeController extends Controller
         ));
     }
 
-    public function buscar(Request $request)
-    {
-        $query = $request->get('q', '');
+public function buscar(Request $request)
+{
+    $query = $request->get('q', '');
+    $tipo  = $request->get('tipo', '');
 
-        $productos = Producto::with(['imagenes', 'categoria'])
-            ->where('estado', 'activo')
-            ->where(function ($q) use ($query) {
-                $q->where('nombre', 'like', "%{$query}%")
-                  ->orWhere('descripcion', 'like', "%{$query}%");
-            })
-            ->paginate(12)
-            ->withQueryString();
+    $productos = Producto::with(['imagenes', 'categoria'])
+        ->where('estado', 'activo')
+        ->where(function ($q) use ($query) {
+            $q->where('titulo', 'like', "%{$query}%")
+              ->orWhere('descripcion', 'like', "%{$query}%");
+        })
+        ->when($tipo, fn($q) => $q->where('tipo', $tipo))
+        ->paginate(12)
+        ->withQueryString();
 
-        return view('busqueda', compact('productos', 'query'));
-    }
+    return view('busqueda.busqueda', [
+        'productos' => $productos,
+        'termino'   => $query,
+        'buscando'  => true,
+        'tipo'      => $tipo,
+    ]);
+}
 
-    public function busquedaAvanzada(Request $request)
-    {
-        $productos = Producto::with(['imagenes', 'categoria'])
-            ->where('estado', 'activo')
-            ->when($request->filled('q'), fn($q) =>
-                $q->where('nombre', 'like', '%' . $request->q . '%'))
-            ->when($request->filled('tipo'), fn($q) =>
-                $q->where('tipo', $request->tipo))
-            ->when($request->filled('categoria_id'), fn($q) =>
-                $q->where('categoria_id', $request->categoria_id))
-            ->when($request->filled('precio_min'), fn($q) =>
-                $q->where('precio', '>=', $request->precio_min))
-            ->when($request->filled('precio_max'), fn($q) =>
-                $q->where('precio', '<=', $request->precio_max))
-            ->paginate(12)
-            ->withQueryString();
+public function busquedaAvanzada(Request $request)
+{
+    $termino      = $request->get('q', '');
+    $tipo         = $request->get('tipo', '');
+    $categoriaSlug = $request->get('categoria', '');
 
-        return view('busqueda-avanzada', compact('productos'));
-    }
+    $categorias = \App\Models\Categoria::where('estado', 'activo')->get();
+
+    $productos = Producto::with(['imagenes', 'categoria'])
+        ->where('estado', 'activo')
+        ->when($termino, fn($q) =>
+            $q->where('titulo', 'like', "%{$termino}%")
+              ->orWhere('descripcion', 'like', "%{$termino}%"))
+        ->when($tipo, fn($q) => $q->where('tipo', $tipo))
+        ->when($categoriaSlug, fn($q) =>
+            $q->whereHas('categoria', fn($q) => $q->where('slug', $categoriaSlug)))
+        ->when($request->filled('precio_min'), fn($q) =>
+            $q->where('precio', '>=', $request->precio_min))
+        ->when($request->filled('precio_max'), fn($q) =>
+            $q->where('precio', '<=', $request->precio_max))
+        ->paginate(12)
+        ->withQueryString();
+
+return view('busqueda.busqueda-avanzada', [
+    'productos'     => $productos,
+    'termino'       => $termino,
+    'tipo'          => $tipo,
+    'categoriaSlug' => $categoriaSlug,
+    'categorias'    => $categorias,
+    'precioMin'     => $request->get('precio_min', ''),
+    'precioMax'     => $request->get('precio_max', ''),
+    'buscando'      => $request->hasAny(['q','tipo','categoria','precio_min','precio_max']),
+]);
+}
 }
