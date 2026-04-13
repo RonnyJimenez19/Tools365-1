@@ -142,9 +142,11 @@
             compra y subasta en todo México.
         </p>
 
-        <div class="highlight-box">
-            🎉 Tu registro fue completado. Haz clic en el botón de abajo para iniciar sesión y comenzar.
-        </div>
+<div class="highlight-box">
+    🎉 Tu registro fue completado. Haz clic abajo para <strong>verificar tu correo</strong> y activar tu cuenta.
+</div>
+
+
 
         <div class="features">
             <div class="feature">
@@ -171,9 +173,9 @@
         </div>
 
         <div class="btn-container">
-            <a href="{{ $loginUrl }}" class="btn">
-                Iniciar Sesión →
-            </a>
+<a href="{{ $verifyUrl }}" class="btn">
+    Verificar mi correo →
+</a>
         </div>
 
         <hr class="divider">

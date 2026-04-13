@@ -27,14 +27,15 @@ class RegistroConfirmacion extends Mailable
         );
     }
 
-    public function content(): Content
-    {
-        return new Content(
-            view: 'emails.registro-confirmacion',
-            with: [
-                'nombre'    => $this->user->name,
-                'loginUrl'  => route('login'),
-            ],
-        );
-    }
+public function content(): Content
+{
+    return new Content(
+        view: 'emails.registro-confirmacion',
+        with: [
+            'nombre'      => $this->user->name,
+            'loginUrl'    => route('login'),
+            'verifyUrl'   => route('email.verify', $this->user->verification_token),
+        ],
+    );
+}
 }

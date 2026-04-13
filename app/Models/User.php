@@ -22,8 +22,11 @@ class User extends Authenticatable
         'email',
         'password',
         'rol',
+        'verification_token',
+        'email_verified_at',
     ];
 
+    protected $guarded = [];
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -54,4 +57,10 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+
+public function estaVerificado(): bool
+{
+    return !is_null($this->email_verified_at);
+}
 }

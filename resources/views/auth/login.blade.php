@@ -73,6 +73,15 @@
             </div>
         @endif
 
+        @if($errors->has('email') && str_contains($errors->first('email'), 'verificar'))
+    <div style="background:#fffbeb;border:1.5px solid #f6ad55;border-radius:12px;padding:14px 18px;font-size:14px;color:#744210;margin-bottom:20px;">
+        <strong style="display:block;margin-bottom:6px;">¿No recibiste el correo?</strong>
+        <a href="{{ route('verificacion.pendiente') }}" style="color:#1F3A93;font-weight:700;">
+            Reenviar correo de verificación →
+        </a>
+    </div>
+@endif
+
         @if(session('session_expired'))
     <div class="alert-expired" style="
         display: flex; align-items: flex-start; gap: 12px;
