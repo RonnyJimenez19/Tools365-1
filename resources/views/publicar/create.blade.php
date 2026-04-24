@@ -11,7 +11,7 @@
     --pub-dark:     #0f172a;
     --pub-surface:  #ffffff;
     --pub-border:   #e2e8f0;
-    --pub-muted:    #94a3b8;
+    --pub-muted: #64748b;
     --pub-radius:   14px;
     --pub-shadow:   0 4px 24px rgba(15,23,42,.08);
 }
@@ -76,7 +76,7 @@
     color: #fff; font-weight: 700; font-size: .85rem;
     display: grid; place-items: center; flex-shrink: 0;
 }
-.pub-card-header h5 { margin: 0; font-weight: 700; font-size: 1rem; }
+.pub-card-header h5 { margin: 0; font-weight: 700; font-size: 1rem; color: #0f172a;}
 .pub-card-body { padding: 28px; }
 
 /* ── Form controls ─────────────────────────────── */
@@ -103,7 +103,7 @@
     border-color: #ef4444;
 }
 .invalid-feedback { font-size: .78rem; color: #ef4444; }
-.form-hint { font-size: .78rem; color: var(--pub-muted); margin-top: 4px; }
+.form-hint { font-size: .78rem; color: #64748b; margin-top: 4px; }
 
 /* ── Tipo selector ─────────────────────────────── */
 .tipo-grid {
@@ -339,7 +339,8 @@
     <label for="descripcion" class="form-label">
         Descripción <span style="color:#ef4444">*</span>
     </label>
-    <span style="display:block;font-size:.78rem;color:#94a3b8;margin-bottom:6px;">
+    <span style="display:block;font-size:.78rem;color:#475569;margin-bottom:6px;">
+
         <i class="bi bi-info-circle me-1"></i>Mínimo 20 caracteres. Describe estado, características y condiciones de uso.
     </span>
                                 <textarea name="descripcion" id="descripcion" rows="5"
@@ -434,8 +435,9 @@
                             <h5>Fotos del producto</h5>
                         </div>
 <div class="pub-card-body">
-    <span style="display:block;font-size:.82rem;color:#94a3b8;margin-bottom:12px;">
-        <i class="bi bi-info-circle me-1"></i>Sube <strong>mínimo 3 fotos</strong> del producto desde distintos ángulos. Formatos: JPG, PNG, WEBP · máx. 4 MB c/u · hasta 10 fotos.
+    <span style="display:block;font-size:.82rem;color:#475569;margin-bottom:12px;">
+
+    <i class="bi bi-info-circle me-1"></i>Sube <strong>mínimo 3 fotos</strong> del producto desde distintos ángulos. Formatos: JPG, PNG, WEBP · máx. 4 MB c/u · hasta 10 fotos.
     </span>
     <div class="upload-zone" id="upload-zone">
         <input type="file" name="imagenes[]" id="imagenes" accept="image/*" multiple>
