@@ -8,7 +8,6 @@ use App\Models\Categoria;
 use App\Models\ProductoImagen;
 use App\Models\ProductoDetalle;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class PublicarController extends BaseController
@@ -28,37 +27,38 @@ class PublicarController extends BaseController
     /** Guardar nueva publicación */
     public function store(Request $request)
     {
-$data = $request->validate([
-    'titulo'           => 'required|string|max:200',
-    'descripcion'      => 'required|string|min:20|max:2000',
-    'precio'           => 'required|numeric|min:0',
-    'unidad'           => 'required|string|max:50',
-    'ubicacion'        => 'required|string|max:150',
-    'tipo'             => 'required|in:renta,venta,subasta',
-    'categoria_id'     => 'required|exists:categorias,id',
-    'timer_fin'        => 'nullable|date|after:now',
-    'imagenes'         => 'required|array|min:3',
-    'imagenes.*'       => 'image|mimes:jpeg,jpg,png,webp|max:4096',
-    'detalles'         => 'required|array|min:2',
-    'detalles.*.clave' => 'required|string|max:80',
-    'detalles.*.valor' => 'required|string|max:150',
-], [
-    'titulo.required'       => 'El título del anuncio es obligatorio.',
-    'descripcion.required'  => 'La descripción es obligatoria.',
-    'descripcion.min'       => 'La descripción debe tener al menos 20 caracteres.',
-    'precio.required'       => 'El precio es obligatorio.',
-    'unidad.required'       => 'Selecciona una unidad o periodo.',
-    'ubicacion.required'    => 'La ubicación es obligatoria.',
-    'tipo.required'         => 'Selecciona el tipo de publicación.',
-    'categoria_id.required' => 'Selecciona una categoría.',
-    'imagenes.required'     => 'Debes subir al menos 3 fotos del producto.',
-    'imagenes.min'          => 'Debes subir al menos 3 fotos del producto.',
-    'detalles.required'     => 'Debes agregar al menos 2 especificaciones técnicas.',
-    'detalles.min'          => 'Debes agregar al menos 2 especificaciones técnicas.',
-    'detalles.*.clave.required' => 'Completa el nombre de todas las especificaciones.',
-    'detalles.*.valor.required' => 'Completa el valor de todas las especificaciones.',
-]);
+        $data = $request->validate([
+            'titulo'           => 'required|string|max:200',
+            'descripcion'      => 'required|string|min:20|max:2000',
+            'precio'           => 'required|numeric|min:0',
+            'unidad'           => 'required|string|max:50',
+            'ubicacion'        => 'required|string|max:150',
+            'tipo'             => 'required|in:renta,venta,subasta',
+            'categoria_id'     => 'required|exists:categorias,id',
+            'timer_fin'        => 'nullable|date|after:now',
+            'imagenes'         => 'required|array|min:3',
+            'imagenes.*'       => 'image|mimes:jpeg,jpg,png,webp|max:4096',
+            'detalles'         => 'required|array|min:2',
+            'detalles.*.clave' => 'required|string|max:80',
+            'detalles.*.valor' => 'required|string|max:150',
+        ], [
+            'titulo.required'           => 'El título del anuncio es obligatorio.',
+            'descripcion.required'      => 'La descripción es obligatoria.',
+            'descripcion.min'           => 'La descripción debe tener al menos 20 caracteres.',
+            'precio.required'           => 'El precio es obligatorio.',
+            'unidad.required'           => 'Selecciona una unidad o periodo.',
+            'ubicacion.required'        => 'La ubicación es obligatoria.',
+            'tipo.required'             => 'Selecciona el tipo de publicación.',
+            'categoria_id.required'     => 'Selecciona una categoría.',
+            'imagenes.required'         => 'Debes subir al menos 3 fotos del producto.',
+            'imagenes.min'              => 'Debes subir al menos 3 fotos del producto.',
+            'detalles.required'         => 'Debes agregar al menos 2 especificaciones técnicas.',
+            'detalles.min'              => 'Debes agregar al menos 2 especificaciones técnicas.',
+            'detalles.*.clave.required' => 'Completa el nombre de todas las especificaciones.',
+            'detalles.*.valor.required' => 'Completa el valor de todas las especificaciones.',
+        ]);
 
+        // ── Crear producto ────────────────────────────────────────────────────
         $producto = Producto::create([
             'titulo'       => $data['titulo'],
             'descripcion'  => $data['descripcion'] ?? null,
@@ -71,67 +71,60 @@ $data = $request->validate([
             'estado'       => 'activo',
         ]);
 
-foreach ($request->file('imagenes', []) as $i => $archivo) {
+        // ── Guardar imágenes directo en public/uploads/productos/{id}/ ────────
+        // Se evita el symlink de storage (problemático en Laragon/Windows).
+        $destDir = public_path("uploads/productos/{$producto->id}");
 
-    
-    if (!($archivo instanceof \Illuminate\Http\UploadedFile)) {
-        continue;
-    }
-
-    if (!$archivo->isValid()) {
-        continue;
-    }
-
-  
-    if (empty($archivo->getPathname())) {
-        continue;
-    }
-
-    $extension = $archivo->getClientOriginalExtension();
-
-    if (!$extension) {
-        $extension = match ($archivo->getMimeType()) {
-            'image/jpeg', 'image/jpg' => 'jpg',
-            'image/png' => 'png',
-            'image/webp' => 'webp',
-            default => null
-        };
-    }
-
-    if (!$extension) {
-        continue;
-    }
-
-    $nombreArchivo = Str::uuid() . '.' . $extension;
-
-    try {
-        $ruta = $archivo->storeAs(
-            'Imagenes/productos/' . $producto->id,
-            $nombreArchivo,
-            'public'
-        );
-
-        if (!$ruta) {
-            continue;
+        if (!is_dir($destDir)) {
+            mkdir($destDir, 0775, true);
         }
 
-    } catch (\Throwable $e) {
-        continue; 
-    }
+        foreach ($request->file('imagenes', []) as $i => $archivo) {
 
-    ProductoImagen::create([
-        'producto_id'    => $producto->id,
-        'ruta'           => 'storage/' . $ruta,
-        'nombre_archivo' => $nombreArchivo,
-        'orden'          => $i,
-        'estado'         => 'activo',
-    ]);
-}
+            if (!($archivo instanceof \Illuminate\Http\UploadedFile) || !$archivo->isValid()) {
+                continue;
+            }
 
-        // ── Guardar detalles clave-valor ──────────────────────────────────
-        if (! empty($data['detalles'])) {
+            $extension = strtolower($archivo->getClientOriginalExtension());
+
+            // Fallback por MIME si la extensión viene vacía
+            if (!$extension) {
+                $extension = match ($archivo->getMimeType()) {
+                    'image/jpeg', 'image/jpg' => 'jpg',
+                    'image/png'               => 'png',
+                    'image/webp'              => 'webp',
+                    default                   => null,
+                };
+            }
+
+            if (!$extension) {
+                continue;
+            }
+
+            $nombreArchivo = Str::uuid() . '.' . $extension;
+            $rutaAbsoluta  = $destDir . DIRECTORY_SEPARATOR . $nombreArchivo;
+
+            try {
+                $archivo->move($destDir, $nombreArchivo);
+            } catch (\Throwable $e) {
+                // Si no se pudo mover, saltar esta imagen
+                continue;
+            }
+
+            // La ruta guardada en BD es relativa a public/, usable con asset()
+            ProductoImagen::create([
+                'producto_id'    => $producto->id,
+                'ruta'           => "uploads/productos/{$producto->id}/{$nombreArchivo}",
+                'nombre_archivo' => $nombreArchivo,
+                'orden'          => $i,
+                'estado'         => 'activo',
+            ]);
+        }
+
+        // ── Guardar detalles clave-valor ──────────────────────────────────────
+        if (!empty($data['detalles'])) {
             foreach ($data['detalles'] as $orden => $detalle) {
-                if (! empty($detalle['clave']) && ! empty($detalle['valor'])) {
+                if (!empty($detalle['clave']) && !empty($detalle['valor'])) {
                     ProductoDetalle::create([
                         'producto_id' => $producto->id,
                         'clave'       => $detalle['clave'],
