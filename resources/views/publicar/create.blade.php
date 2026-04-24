@@ -284,7 +284,7 @@
 
                     {{-- PASO 1: Información básica --}}
                     <div class="pub-card mb-4">
-                        <div class="pub-card-header">
+<div class="pub-card-header" style="color: black;">
                             <div class="step-badge">1</div>
                             <h5>Información básica</h5>
                         </div>
@@ -335,8 +335,13 @@
                             </div>
 
                             {{-- Descripción --}}
-                            <div class="mb-3">
-                                <label for="descripcion" class="form-label">Descripción</label>
+<div class="mb-3">
+    <label for="descripcion" class="form-label">
+        Descripción <span style="color:#ef4444">*</span>
+    </label>
+    <span style="display:block;font-size:.78rem;color:#94a3b8;margin-bottom:6px;">
+        <i class="bi bi-info-circle me-1"></i>Mínimo 20 caracteres. Describe estado, características y condiciones de uso.
+    </span>
                                 <textarea name="descripcion" id="descripcion" rows="5"
                                           class="form-control @error('descripcion') is-invalid @enderror"
                                           placeholder="Describe el estado, características principales, condiciones de uso...">{{ old('descripcion') }}</textarea>
@@ -346,7 +351,9 @@
                             {{-- Categoría + Ubicación --}}
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label for="categoria_id" class="form-label">Categoría *</label>
+                                    <label for="categoria_id" class="form-label">
+    Categoría <span style="color:#ef4444">*</span>
+</label>
                                     <select name="categoria_id" id="categoria_id"
                                             class="form-select @error('categoria_id') is-invalid @enderror">
                                         <option value="">Selecciona una categoría</option>
@@ -359,7 +366,9 @@
                                     @error('categoria_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="ubicacion" class="form-label">Ubicación</label>
+                                    <label for="ubicacion" class="form-label">
+    Ubicación <span style="color:#ef4444">*</span>
+</label>
                                     <input type="text" name="ubicacion" id="ubicacion"
                                            class="form-control @error('ubicacion') is-invalid @enderror"
                                            value="{{ old('ubicacion') }}"
@@ -379,7 +388,9 @@
                         <div class="pub-card-body">
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label for="precio" class="form-label">Precio (MXN) *</label>
+                                    <label for="precio" class="form-label">
+    Precio (MXN) <span style="color:#ef4444">*</span>
+</label>
                                     <div class="input-group">
                                         <span class="input-group-text" style="border-radius:10px 0 0 10px; border:1.5px solid var(--pub-border); background:transparent;">$</span>
                                         <input type="number" name="precio" id="precio"
@@ -391,7 +402,9 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="unidad" class="form-label">Unidad / Periodo</label>
+                                    <label for="unidad" class="form-label">
+    Unidad / Periodo <span style="color:#ef4444">*</span>
+</label>
                                     <select name="unidad" id="unidad" class="form-select" id="select-unidad">
                                         <option value="">Sin especificar</option>
                                         <option value="/día"   {{ old('unidad') == '/día'   ? 'selected':'' }}>/día</option>
@@ -420,17 +433,33 @@
                             <div class="step-badge">3</div>
                             <h5>Fotos del producto</h5>
                         </div>
-                        <div class="pub-card-body">
-                            <div class="upload-zone" id="upload-zone">
-                                <input type="file" name="imagenes[]" id="imagenes" accept="image/*" multiple>
-                                <div class="upload-icon"><i class="bi bi-cloud-arrow-up"></i></div>
-                                <div style="font-weight:600; margin-bottom:4px;">Arrastra tus fotos aquí</div>
-                                <div class="form-hint">o haz clic para seleccionar • JPG, PNG, WEBP • máx. 4 MB c/u • hasta 10 fotos</div>
-                                <div class="upload-preview" id="upload-preview"></div>
-                            </div>
-                            @error('imagenes') <div class="invalid-feedback d-block mt-2">{{ $message }}</div> @enderror
-                            @error('imagenes.*') <div class="invalid-feedback d-block mt-2">{{ $message }}</div> @enderror
-                        </div>
+<div class="pub-card-body">
+    <span style="display:block;font-size:.82rem;color:#94a3b8;margin-bottom:12px;">
+        <i class="bi bi-info-circle me-1"></i>Sube <strong>mínimo 3 fotos</strong> del producto desde distintos ángulos. Formatos: JPG, PNG, WEBP · máx. 4 MB c/u · hasta 10 fotos.
+    </span>
+    <div class="upload-zone" id="upload-zone">
+        <input type="file" name="imagenes[]" id="imagenes" accept="image/*" multiple>
+        <div class="upload-icon"><i class="bi bi-cloud-arrow-up"></i></div>
+        <div style="font-weight:600; margin-bottom:4px;">Arrastra tus fotos aquí</div>
+        <div class="form-hint">o haz clic para seleccionar</div>
+        <div class="upload-preview" id="upload-preview"></div>
+    </div>
+
+    {{-- Contador fotos --}}
+    <div id="fotos-counter" style="
+        margin-top: 10px; padding: 10px 14px; border-radius: 8px;
+        font-size: .82rem; font-weight: 600;
+        display: flex; align-items: center; gap: 8px;
+        background: #fef2f2; border: 1.5px solid #fca5a5; color: #991b1b;
+        transition: all .3s;
+    ">
+        <i class="bi bi-exclamation-circle-fill" id="fotos-icon"></i>
+        <span id="fotos-text">Aún no hay fotos: sube al menos 3 para poder publicar.</span>
+    </div>
+
+    @error('imagenes') <div class="invalid-feedback d-block mt-2">{{ $message }}</div> @enderror
+    @error('imagenes.*') <div class="invalid-feedback d-block mt-2">{{ $message }}</div> @enderror
+</div>
                     </div>
 
                     {{-- PASO 4: Detalles técnicos --}}
@@ -471,8 +500,24 @@
                             <button type="button" id="btn-add-detalle">
                                 <i class="bi bi-plus-lg me-1"></i> Agregar especificación
                             </button>
-                            <div class="form-hint mt-2">Ejemplos: Año de fabricación, Capacidad de carga, Combustible, Peso…</div>
-                        </div>
+<div class="form-hint mt-2">Ejemplos: Año de fabricación, Capacidad de carga, Combustible, Peso…</div>
+<div id="detalles-counter" style="
+    margin-top: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: .82rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fef2f2;
+    border: 1.5px solid #fca5a5;
+    color: #991b1b;
+    transition: all .3s;
+">
+    <i class="bi bi-exclamation-circle-fill" id="counter-icon"></i>
+    <span id="counter-text">Faltan especificaciones: agrega al menos 2 para poder publicar.</span>
+</div>                        </div>
                     </div>
 
                     {{-- Botón submit --}}
@@ -533,7 +578,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-    // ── Mostrar/ocultar campos de subasta ──────────────────────────────
+    // ── Tipo publicación / subasta ────────────────────────────────────────
     const tipoRadios = document.querySelectorAll('input[name="tipo"]');
     const subastaBox = document.getElementById('subasta-fields');
     const unidadSel  = document.getElementById('unidad');
@@ -541,23 +586,40 @@ document.addEventListener('DOMContentLoaded', () => {
     function actualizarTipo() {
         const val = document.querySelector('input[name="tipo"]:checked')?.value;
         subastaBox.style.display = (val === 'subasta') ? 'block' : 'none';
-        if (val === 'subasta' && unidadSel.value === '') {
-            unidadSel.value = 'puja actual';
-        }
+        if (val === 'subasta' && unidadSel.value === '') unidadSel.value = 'puja actual';
     }
     tipoRadios.forEach(r => r.addEventListener('change', actualizarTipo));
     actualizarTipo();
 
-    // ── Preview de imágenes ────────────────────────────────────────────
+    // ── Imágenes ──────────────────────────────────────────────────────────
     const inputImg    = document.getElementById('imagenes');
     const preview     = document.getElementById('upload-preview');
     const zone        = document.getElementById('upload-zone');
-    let selectedFiles = [];
+    const fotosCounter = document.getElementById('fotos-counter');
+    const fotosIcon    = document.getElementById('fotos-icon');
+    const fotosText    = document.getElementById('fotos-text');
+    let selectedFiles  = [];
 
-inputImg.addEventListener('change', () => {
-    selectedFiles = Array.from(inputImg.files).filter(f => f.size > 0);
-    renderPreviews();
-});
+    function actualizarFotos() {
+        const n = selectedFiles.length;
+        if (n >= 3) {
+            fotosCounter.style.background = '#f0fdf4';
+            fotosCounter.style.border     = '1.5px solid #86efac';
+            fotosCounter.style.color      = '#166534';
+            fotosIcon.className           = 'bi bi-check-circle-fill';
+            fotosText.textContent         = `✓ ${n} foto${n > 1 ? 's' : ''} seleccionada${n > 1 ? 's' : ''}. ¡Listo!`;
+        } else {
+            const faltan = 3 - n;
+            fotosCounter.style.background = '#fef2f2';
+            fotosCounter.style.border     = '1.5px solid #fca5a5';
+            fotosCounter.style.color      = '#991b1b';
+            fotosIcon.className           = 'bi bi-exclamation-circle-fill';
+            fotosText.textContent         = n === 0
+                ? 'Aún no hay fotos: sube al menos 3 para poder publicar.'
+                : `${n} foto${n > 1 ? 's' : ''} seleccionada${n > 1 ? 's' : ''} — falta${faltan > 1 ? 'n' : ''} ${faltan} más.`;
+        }
+        validarFormulario();
+    }
 
     function renderPreviews() {
         preview.innerHTML = '';
@@ -572,22 +634,27 @@ inputImg.addEventListener('change', () => {
             `;
             preview.appendChild(item);
         });
-
         syncInput();
-
         preview.querySelectorAll('.remove-img').forEach(btn => {
             btn.addEventListener('click', () => {
                 selectedFiles.splice(+btn.dataset.idx, 1);
                 renderPreviews();
+                actualizarFotos();
             });
         });
+        actualizarFotos();
+    }
+
+    function syncInput() {
+        const dt = new DataTransfer();
+        selectedFiles.forEach(f => dt.items.add(f));
+        inputImg.files = dt.files;
     }
 
     inputImg.addEventListener('change', () => {
         Array.from(inputImg.files).forEach(f => {
-            if (f instanceof File && f.size > 0 && selectedFiles.length < 10) {
+            if (f instanceof File && f.size > 0 && selectedFiles.length < 10)
                 selectedFiles.push(f);
-            }
         });
         renderPreviews();
     });
@@ -597,39 +664,95 @@ inputImg.addEventListener('change', () => {
     zone.addEventListener('drop', e => {
         e.preventDefault(); zone.classList.remove('drag-over');
         Array.from(e.dataTransfer.files).forEach(f => {
-            if (f instanceof File && f.size > 0 && selectedFiles.length < 10) {
+            if (f instanceof File && f.size > 0 && selectedFiles.length < 10)
                 selectedFiles.push(f);
-            }
         });
         renderPreviews();
     });
 
-    // ── Detalles dinámicos ─────────────────────────────────────────────
+    // ── Especificaciones ──────────────────────────────────────────────────
     const detallesContainer = document.getElementById('detalles-container');
-    const btnAdd = document.getElementById('btn-add-detalle');
+    const btnAdd            = document.getElementById('btn-add-detalle');
+    const detallesCounter   = document.getElementById('detalles-counter');
+    const counterIcon       = document.getElementById('counter-icon');
+    const counterText       = document.getElementById('counter-text');
     let detalleIdx = detallesContainer.querySelectorAll('.detalle-row').length;
+
+    function actualizarContador() {
+        const rows = detallesContainer.querySelectorAll('.detalle-row');
+        let llenas = 0;
+        rows.forEach(row => {
+            const inputs = row.querySelectorAll('input[type="text"]');
+            if (inputs[0]?.value.trim() && inputs[1]?.value.trim()) llenas++;
+        });
+        const faltan = Math.max(0, 2 - llenas);
+        if (faltan === 0) {
+            detallesCounter.style.background = '#f0fdf4';
+            detallesCounter.style.border     = '1.5px solid #86efac';
+            detallesCounter.style.color      = '#166534';
+            counterIcon.className            = 'bi bi-check-circle-fill';
+            counterText.textContent          = `✓ ${llenas} especificación${llenas > 1 ? 'es' : ''} registrada${llenas > 1 ? 's' : ''}. ¡Listo!`;
+        } else {
+            detallesCounter.style.background = '#fef2f2';
+            detallesCounter.style.border     = '1.5px solid #fca5a5';
+            detallesCounter.style.color      = '#991b1b';
+            counterIcon.className            = 'bi bi-exclamation-circle-fill';
+            counterText.textContent          = `Faltan ${faltan} especificación${faltan > 1 ? 'es' : ''}: agrega al menos 2 para poder publicar.`;
+        }
+        validarFormulario();
+    }
+
+    function bindDetalleInputs() {
+        detallesContainer.querySelectorAll('input[type="text"]').forEach(input => {
+            input.removeEventListener('input', actualizarContador);
+            input.addEventListener('input', actualizarContador);
+        });
+    }
 
     btnAdd.addEventListener('click', () => {
         const row = document.createElement('div');
         row.className = 'detalle-row';
         row.innerHTML = `
-            <input type="text" name="detalles[${detalleIdx}][clave]"
-                   class="form-control" placeholder="Ej: Capacidad">
-            <input type="text" name="detalles[${detalleIdx}][valor]"
-                   class="form-control" placeholder="Ej: 500 kg">
-            <button type="button" class="btn-remove-detalle" title="Eliminar">
-                <i class="bi bi-trash3"></i>
-            </button>
+            <input type="text" name="detalles[${detalleIdx}][clave]" class="form-control" placeholder="Ej: Capacidad">
+            <input type="text" name="detalles[${detalleIdx}][valor]" class="form-control" placeholder="Ej: 500 kg">
+            <button type="button" class="btn-remove-detalle" title="Eliminar"><i class="bi bi-trash3"></i></button>
         `;
         detallesContainer.appendChild(row);
         detalleIdx++;
-        row.querySelector('.btn-remove-detalle').addEventListener('click', () => row.remove());
+        row.querySelector('.btn-remove-detalle').addEventListener('click', () => {
+            row.remove();
+            actualizarContador();
+        });
+        setTimeout(() => { bindDetalleInputs(); actualizarContador(); }, 50);
     });
 
     detallesContainer.querySelectorAll('.btn-remove-detalle').forEach(btn => {
-        btn.addEventListener('click', () => btn.closest('.detalle-row').remove());
+        btn.addEventListener('click', () => { btn.closest('.detalle-row').remove(); actualizarContador(); });
     });
 
+    // ── Validación global del botón submit ────────────────────────────────
+    const btnPublicar = document.querySelector('.btn-publicar');
+
+    function validarFormulario() {
+        const fotosOk     = selectedFiles.length >= 3;
+        const rows        = detallesContainer.querySelectorAll('.detalle-row');
+        let llenas = 0;
+        rows.forEach(row => {
+            const inputs = row.querySelectorAll('input[type="text"]');
+            if (inputs[0]?.value.trim() && inputs[1]?.value.trim()) llenas++;
+        });
+        const detallesOk  = llenas >= 2;
+        const ok          = fotosOk && detallesOk;
+
+        btnPublicar.disabled      = !ok;
+        btnPublicar.style.opacity = ok ? '1' : '.5';
+        btnPublicar.style.cursor  = ok ? 'pointer' : 'not-allowed';
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────
+    bindDetalleInputs();
+    actualizarContador();
+    actualizarFotos();
 });
 </script>
 @endpush

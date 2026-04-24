@@ -13,6 +13,8 @@
     @stack('css')
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
     
+    {{-- reCAPTCHA v3 --}}
+    <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
 </head>
 <body>
 
@@ -80,7 +82,7 @@
             Reenviar correo de verificación →
         </a>
     </div>
-@endif
+    @endif
 
         @if(session('session_expired'))
     <div class="alert-expired" style="
@@ -96,7 +98,7 @@
             {{ session('session_expired') }}
         </div>
     </div>
-@endif
+    @endif
 
         <form action="{{ route('login') }}" method="POST" novalidate>
             @csrf
@@ -143,10 +145,10 @@
                 <label for="remember">Mantener sesión iniciada</label>
             </div>
 
-            <button type="submit" class="btn-submit">
-                <i class="bi bi-box-arrow-in-right"></i>
-                Iniciar Sesión
-            </button>
+    <button type="submit" class="btn-submit" id="btn-login">
+    <i class="bi bi-box-arrow-in-right"></i>
+    Iniciar Sesión
+    </button>
         </form>
 
         <div class="divider">o</div>
@@ -169,6 +171,25 @@
             icon.className = 'bi bi-eye';
         }
     }
+
+    // reCAPTCHA v3 — se ejecuta al hacer submit
+    document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = this;
+
+        grecaptcha.ready(function() {
+            grecaptcha.execute('{{ config("services.recaptcha.site_key") }}', { action: 'login' })
+                .then(function(token) {
+                    // Inyectar token en el form
+                    let input = document.createElement('input');
+                    input.type  = 'hidden';
+                    input.name  = 'recaptcha_token';
+                    input.value = token;
+                    form.appendChild(input);
+                    form.submit();
+                });
+        });
+    });
 </script>
 </body>
 </html>

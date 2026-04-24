@@ -28,23 +28,36 @@ class PublicarController extends BaseController
     /** Guardar nueva publicación */
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'titulo'       => 'required|string|max:200',
-            'descripcion'  => 'nullable|string|max:2000',
-            'precio'       => 'required|numeric|min:0',
-            'unidad'       => 'nullable|string|max:50',
-            'ubicacion'    => 'nullable|string|max:150',
-            'tipo'         => 'required|in:renta,venta,subasta',
-            'categoria_id' => 'required|exists:categorias,id',
-            'timer_fin'    => 'nullable|date|after:now',
-            // Imágenes
-            'imagenes'     => 'nullable|array|max:10',
-            'imagenes.*'   => 'image|mimes:jpeg,jpg,png,webp|max:4096',
-            // Detalles clave-valor
-            'detalles'     => 'nullable|array',
-            'detalles.*.clave' => 'required_with:detalles|string|max:80',
-            'detalles.*.valor' => 'required_with:detalles|string|max:150',
-        ]);
+$data = $request->validate([
+    'titulo'           => 'required|string|max:200',
+    'descripcion'      => 'required|string|min:20|max:2000',
+    'precio'           => 'required|numeric|min:0',
+    'unidad'           => 'required|string|max:50',
+    'ubicacion'        => 'required|string|max:150',
+    'tipo'             => 'required|in:renta,venta,subasta',
+    'categoria_id'     => 'required|exists:categorias,id',
+    'timer_fin'        => 'nullable|date|after:now',
+    'imagenes'         => 'required|array|min:3',
+    'imagenes.*'       => 'image|mimes:jpeg,jpg,png,webp|max:4096',
+    'detalles'         => 'required|array|min:2',
+    'detalles.*.clave' => 'required|string|max:80',
+    'detalles.*.valor' => 'required|string|max:150',
+], [
+    'titulo.required'       => 'El título del anuncio es obligatorio.',
+    'descripcion.required'  => 'La descripción es obligatoria.',
+    'descripcion.min'       => 'La descripción debe tener al menos 20 caracteres.',
+    'precio.required'       => 'El precio es obligatorio.',
+    'unidad.required'       => 'Selecciona una unidad o periodo.',
+    'ubicacion.required'    => 'La ubicación es obligatoria.',
+    'tipo.required'         => 'Selecciona el tipo de publicación.',
+    'categoria_id.required' => 'Selecciona una categoría.',
+    'imagenes.required'     => 'Debes subir al menos 3 fotos del producto.',
+    'imagenes.min'          => 'Debes subir al menos 3 fotos del producto.',
+    'detalles.required'     => 'Debes agregar al menos 2 especificaciones técnicas.',
+    'detalles.min'          => 'Debes agregar al menos 2 especificaciones técnicas.',
+    'detalles.*.clave.required' => 'Completa el nombre de todas las especificaciones.',
+    'detalles.*.valor.required' => 'Completa el valor de todas las especificaciones.',
+]);
 
         $producto = Producto::create([
             'titulo'       => $data['titulo'],

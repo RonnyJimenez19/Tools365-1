@@ -237,11 +237,14 @@
                 @endguest
 
                 {{-- Calificación --}}
-                <div class="mb-4">
-                    <label class="form-label-custom">
-                        Calificación <span style="color:#dc2626">*</span>
-                    </label>
-                    <div class="star-rating">
+<div class="mb-4">
+    <label class="form-label-custom">
+        Calificación <span style="color:#dc2626">*</span>
+    </label>
+    <span style="display:block; font-size:13px; color:#888; margin-bottom:8px;">
+        <i class="bi bi-info-circle me-1"></i>Haz clic en las estrellas para seleccionar tu calificación.
+    </span>
+    <div class="star-rating">
                         @for($i = 5; $i >= 1; $i--)
                             <input type="radio" id="star{{ $i }}" name="calificacion"
                                    value="{{ $i }}"

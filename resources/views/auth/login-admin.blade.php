@@ -11,6 +11,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/login-admin.css') }}">
+
+    <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
 </head>
 <body>
 
@@ -162,6 +164,23 @@
             icon.className = 'bi bi-eye';
         }
     }
+
+    document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = this;
+
+        grecaptcha.ready(function() {
+            grecaptcha.execute('{{ config("services.recaptcha.site_key") }}', { action: 'admin_login' })
+                .then(function(token) {
+                    let input = document.createElement('input');
+                    input.type  = 'hidden';
+                    input.name  = 'recaptcha_token';
+                    input.value = token;
+                    form.appendChild(input);
+                    form.submit();
+                });
+        });
+    });
 </script>
 </body>
 </html>

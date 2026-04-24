@@ -9,9 +9,27 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
+
 
 class AuthController extends Controller
 {
+
+// ── Validar reCAPTCHA v3 ──────────────────────────────────────────────────
+private function verifyRecaptcha(string $token, string $action, float $minScore = 0.5): bool
+{
+    $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+        'secret'   => config('services.recaptcha.secret_key'),
+        'response' => $token,
+    ]);
+
+    $data = $response->json();
+
+    return $data['success'] === true
+        && ($data['score'] ?? 0) >= $minScore
+        && ($data['action'] ?? '') === $action;
+}
+
     // ── Login público (usuarios de la plataforma) ────────────────────────────
 
     public function showLogin()
@@ -30,11 +48,19 @@ class AuthController extends Controller
             'password.required' => 'La contraseña es obligatoria.',
         ]);
 
+        // Verificar reCAPTCHA v3
+$token = $request->input('recaptcha_token', '');
+if (!$this->verifyRecaptcha($token, 'login', 0.5)) {
+    return back()
+        ->withInput($request->only('email'))
+        ->withErrors(['email' => 'Verificación de seguridad fallida. Intenta de nuevo.']);
+}
+
         $credentials = $request->only('email', 'password');
         $remember    = $request->boolean('remember');
 
 if (Auth::attempt($credentials, $remember)) {
-    if (!Auth::user()->estaVerificado()) {
+    if (!Auth::user()->email_verified_at) {
         Auth::logout();
         return back()
             ->withInput($request->only('email'))
@@ -57,7 +83,7 @@ if (Auth::attempt($credentials, $remember)) {
 
     public function showAdminLogin()
     {
-        if (Auth::check() && Auth::user()->puedeEditar()) {
+        if (Auth::check() && Auth::user()->rol === 'admin') {
             return redirect()->route('dashboard');
         }
         return view('auth.login-admin');
@@ -74,10 +100,17 @@ if (Auth::attempt($credentials, $remember)) {
             'password.required' => 'La contraseña es obligatoria.',
         ]);
 
+        $token = $request->input('recaptcha_token', '');
+if (!$this->verifyRecaptcha($token, 'admin_login', 0.7)) {
+    return back()
+        ->withInput($request->only('email'))
+        ->withErrors(['email' => 'Verificación de seguridad fallida.']);
+}
+
         $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials)) {
-            if (!Auth::user()->puedeEditar()) {
+            if (Auth::user()->rol !== 'admin') {
                 Auth::logout();
                 $request->session()->invalidate();
                 return back()
@@ -89,7 +122,7 @@ if (Auth::attempt($credentials, $remember)) {
             session(['last_activity_at' => now()]);
 
             return redirect()->route('dashboard')
-                ->with('success', 'Bienvenido al panel, ' . auth()->user()->name . '.');
+                ->with('success', 'Bienvenido al panel, ' . Auth::user()->name . '.');
         }
 
         return back()
@@ -147,7 +180,7 @@ public function register(Request $request)
 
     public function logout(Request $request)
     {
-        $wasAdmin = Auth::check() && Auth::user()->puedeEditar();
+        $wasAdmin = Auth::check() && Auth::user()->rol === 'admin';
 
         Auth::logout();
         $request->session()->invalidate();
@@ -182,7 +215,7 @@ public function reenviarVerificacion(Request $request)
 
     $user = User::where('email', $request->email)->first();
 
-    if ($user->estaVerificado()) {
+    if ($user->email_verified_at) {
         return back()->with('info', 'Este correo ya fue verificado. Puedes iniciar sesión.');
     }
 
@@ -205,4 +238,7 @@ public function reenviarVerificacion(Request $request)
     {
         return view('dashboard.index');
     }
+
+
+    
 }
