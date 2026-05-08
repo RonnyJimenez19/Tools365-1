@@ -68,7 +68,8 @@
 @endphp
 
 <div class="col-lg-3 col-md-4 col-6">
-    <div class="product-card">
+    <a href="{{ $producto ? route('productos.show', $producto) : '#' }}"
+        class="product-card text-decoration-none d-block">
 
         {{-- ── IMAGEN / CARRUSEL ── --}}
         @if($imagenes->isEmpty())
@@ -169,7 +170,7 @@
             @endif
 
         </div>
-    </div>
+    </a>
 </div>
 
 {{-- Estilos del carrusel (se inyectan una sola vez gracias al stack) --}}
@@ -180,10 +181,7 @@
     .product-carousel { position: relative; }
     .product-card-img { height: 160px; object-fit: cover; width: 100%; display: block; }
 
-    /* Puntitos pequeños */
-    .product-carousel-indicators {
-        bottom: 4px; margin: 0;
-    }
+    .product-carousel-indicators { bottom: 4px; margin: 0; }
     .product-carousel-indicators button {
         width: 6px !important; height: 6px !important;
         border-radius: 50% !important;
@@ -196,17 +194,11 @@
         background-color: var(--color-accent) !important;
     }
 
-    /* Botones prev/next compactos */
-    .product-carousel-btn {
-        width: 24px;
-        opacity: 0;
-        transition: opacity 0.2s;
-    }
+    .product-carousel-btn { width: 24px; opacity: 0; transition: opacity 0.2s; }
     .product-card:hover .product-carousel-btn { opacity: 1; }
     .product-carousel-btn.carousel-control-prev { left: 2px; }
     .product-carousel-btn.carousel-control-next { right: 2px; }
 
-    /* Caption de ángulo */
     .product-carousel-caption {
         bottom: 18px; padding: 2px 8px;
         font-size: 0.68rem; font-weight: 700;
@@ -215,5 +207,13 @@
         white-space: nowrap; width: auto;
     }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+    document.querySelectorAll('.product-carousel-btn').forEach(btn => {
+        btn.addEventListener('click', e => e.stopPropagation());
+    });
+</script>
 @endpush
 @endonce

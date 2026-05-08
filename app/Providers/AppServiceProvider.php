@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use App\Models\Categoria;
 use App\Http\View\Composers\NavComposer;
+use Illuminate\Pagination\Paginator; 
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,6 +14,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Paginator::useBootstrapFive();
         // Inyecta $categoriasNav en el partial del navbar
         View::composer('partials.navbar', function ($view) {
             $view->with('categoriasNav', Categoria::where('estado', 'activo')

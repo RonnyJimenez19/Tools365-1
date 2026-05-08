@@ -6,11 +6,16 @@ use App\Http\Controllers\ComentarioController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OfertaController;
 use App\Http\Controllers\PublicarController;
+use App\Http\Controllers\ProductoController;
+
 
 // ── Rutas públicas ────────────────────────────────────────────────────────────
 Route::get('/',                  [HomeController::class, 'inicio'])->name('inicio');
 Route::get('/buscar',            [HomeController::class, 'buscar'])->name('buscar');
 Route::get('/busqueda-avanzada', [HomeController::class, 'busquedaAvanzada'])->name('busqueda.avanzada');
+
+Route::get('/productos/{producto}', [ProductoController::class, 'show'])->name('productos.show');
+
 
 Route::get('/ofertas', [OfertaController::class, 'index'])->name('ofertas.index');
 Route::view('/planes',   'planes.index')->name('planes.index');

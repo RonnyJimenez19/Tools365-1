@@ -90,31 +90,37 @@
         ============================== --}}
         <section class="resultados-col">
 
-            @if(!$buscando)
-                {{-- ── DEFAULT: últimos productos registrados ── --}}
-                <div class="default-header">
-                    <h3 style="color: black;">
-                        <i class="bi bi-search me-1" style="color: black;"></i>
-                        Últimos registros
-                    </h3>
-                    <span class="text-muted" style="font-size:0.82rem; font-weight:600;">
-                        {{ $productos->count() }} productos recientes
-                    </span>
-                </div>
+@if(!$buscando)
+    {{-- ── DEFAULT: últimos productos registrados ── --}}
+    <div class="default-header">
+        <h3 style="color: black;">
+            <i class="bi bi-search me-1" style="color: black;"></i>
+            Últimos registros
+        </h3>
+        <span class="text-muted" style="font-size:0.82rem; font-weight:600;">
+            {{ $productos->total() }} productos recientes
+        </span>
+    </div>
 
-                @if($productos->count() > 0)
-                    <div class="row g-3">
-                        @foreach($productos as $producto)
-                            <x-product-card :producto="$producto" />
-                        @endforeach
-                    </div>
-                @else
-                    <div class="empty-state">
-                        <div class="empty-icon"><i class="bi bi-box-seam"></i></div>
-                        <h3>Sin productos registrados</h3>
-                        <p>Aún no hay productos en la plataforma.</p>
-                    </div>
-                @endif
+    @if($productos->count() > 0)
+        <div class="row g-3">
+            @foreach($productos as $producto)
+                <x-product-card :producto="$producto" />
+            @endforeach
+        </div>
+
+        @if($productos->hasPages())
+            <div class="d-flex justify-content-center mt-4">
+                {{ $productos->links() }}
+            </div>
+        @endif
+    @else
+        <div class="empty-state">
+            <div class="empty-icon"><i class="bi bi-box-seam"></i></div>
+            <h3>Sin productos registrados</h3>
+            <p>Aún no hay productos en la plataforma.</p>
+        </div>
+    @endif
 
             @elseif($productos && $productos->count() > 0)
                 {{-- ── RESULTADOS CON FILTROS ── --}}
