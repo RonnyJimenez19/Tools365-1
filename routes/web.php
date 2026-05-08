@@ -19,7 +19,7 @@ Route::view('/contacto', 'contacto.index')->name('contacto.index');
 Route::get( '/opiniones', [ComentarioController::class, 'index'])->name('comentarios.index');
 Route::post('/opiniones', [ComentarioController::class, 'store'])->name('comentarios.store');
 
-// ── Verificación de correo (públicas — el usuario NO tiene sesión) ─────────────
+// ── Verificación de correo ────────────────────────────────────────────────────
 Route::get('/verificar/{token}',      [AuthController::class, 'verify'])->name('email.verify');
 Route::view('/verificacion-pendiente', 'auth.verificacion-pendiente')->name('verificacion.pendiente');
 Route::post('/reenviar-verificacion', [AuthController::class, 'reenviarVerificacion'])->name('verificacion.reenviar');
@@ -41,9 +41,33 @@ Route::post('/login-admin', [AuthController::class, 'adminLogin']);
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+    // ── Publicar nueva herramienta ────────────────────────────────────────────
     Route::get( '/publicar', [PublicarController::class, 'create'])->name('publicar.create');
     Route::post('/publicar', [PublicarController::class, 'store'])->name('publicar.store');
 
+    // ── Mis publicaciones ─────────────────────────────────────────────────────
+    Route::prefix('mis-publicaciones')->name('mis-publicaciones.')->group(function () {
+
+        // Listado con filtros
+        Route::get('/', [PublicarController::class, 'index'])->name('index');
+
+        // Ver detalle / estado de una publicación
+        Route::get('/{producto}', [PublicarController::class, 'show'])->name('show');
+
+        // Formulario de edición
+        Route::get('/{producto}/editar', [PublicarController::class, 'edit'])->name('edit');
+
+        // Guardar cambios de edición
+        Route::put('/{producto}', [PublicarController::class, 'update'])->name('update');
+
+        // Cambiar estado (pausar / reactivar / vendido) via PATCH
+        Route::patch('/{producto}/estado', [PublicarController::class, 'cambiarEstado'])->name('estado');
+
+        // Eliminar (soft delete → estado = eliminado)
+        Route::delete('/{producto}', [PublicarController::class, 'destroy'])->name('destroy');
+    });
+
+    // ── Dashboard (admin / gerente) ───────────────────────────────────────────
     Route::middleware('rol:admin,gerente')->group(function () {
         Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
     });

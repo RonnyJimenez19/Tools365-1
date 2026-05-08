@@ -93,12 +93,12 @@
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item" href="{{ route('mis-publicaciones.index') }}">
                                     <i class="bi bi-megaphone me-2"></i>Mis publicaciones
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item" href="{{ route('planes.index') }}">
                                     <i class="bi bi-stars me-2"></i>Planes
                                 </a>
                             </li>

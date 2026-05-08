@@ -63,4 +63,5 @@ public function estaVerificado(): bool
 {
     return !is_null($this->email_verified_at);
 }
+
 }
