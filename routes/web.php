@@ -7,6 +7,8 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OfertaController;
 use App\Http\Controllers\PublicarController;
 use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\DashboardController;
+
 
 
 // ── Rutas públicas ────────────────────────────────────────────────────────────
@@ -43,37 +45,30 @@ Route::get( '/login-admin', [AuthController::class, 'showAdminLogin'])->name('ad
 Route::post('/login-admin', [AuthController::class, 'adminLogin']);
 
 // ── Rutas protegidas (requieren sesión) ───────────────────────────────────────
+
+// ✅ Así debe quedar — todo en el mismo grupo auth
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // ── Publicar nueva herramienta ────────────────────────────────────────────
-    Route::get( '/publicar', [PublicarController::class, 'create'])->name('publicar.create');
+    Route::get('/publicar', [PublicarController::class, 'create'])->name('publicar.create');
     Route::post('/publicar', [PublicarController::class, 'store'])->name('publicar.store');
 
-    // ── Mis publicaciones ─────────────────────────────────────────────────────
     Route::prefix('mis-publicaciones')->name('mis-publicaciones.')->group(function () {
-
-        // Listado con filtros
-        Route::get('/', [PublicarController::class, 'index'])->name('index');
-
-        // Ver detalle / estado de una publicación
-        Route::get('/{producto}', [PublicarController::class, 'show'])->name('show');
-
-        // Formulario de edición
-        Route::get('/{producto}/editar', [PublicarController::class, 'edit'])->name('edit');
-
-        // Guardar cambios de edición
-        Route::put('/{producto}', [PublicarController::class, 'update'])->name('update');
-
-        // Cambiar estado (pausar / reactivar / vendido) via PATCH
+        Route::get('/',                    [PublicarController::class, 'index'])->name('index');
+        Route::get('/{producto}',          [PublicarController::class, 'show'])->name('show');
+        Route::get('/{producto}/editar',   [PublicarController::class, 'edit'])->name('edit');
+        Route::put('/{producto}',          [PublicarController::class, 'update'])->name('update');
         Route::patch('/{producto}/estado', [PublicarController::class, 'cambiarEstado'])->name('estado');
-
-        // Eliminar (soft delete → estado = eliminado)
-        Route::delete('/{producto}', [PublicarController::class, 'destroy'])->name('destroy');
+        Route::delete('/{producto}',       [PublicarController::class, 'destroy'])->name('destroy');
     });
 
-    // ── Dashboard (admin / gerente) ───────────────────────────────────────────
+    // Dashboard — abierto a todos los auth, el controlador decide la vista
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Rutas exclusivas admin/gerente
     Route::middleware('rol:admin,gerente')->group(function () {
-        Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
+        Route::get('/dashboard/usuarios',  [DashboardController::class, 'usuarios']);
+        Route::get('/dashboard/contenido', [DashboardController::class, 'contenido']);
     });
-});
+}
+);

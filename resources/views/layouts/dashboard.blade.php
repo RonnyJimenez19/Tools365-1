@@ -8,26 +8,19 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/tools365.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/dashboard_blade.css') }}">
     @stack('css')
-
- <link rel="stylesheet" href="{{ asset('css/dashboard_blade.css') }}">
-
 </head>
 <body>
-    
 
-{{-- ── Overlay móvil ── --}}
+{{-- Overlay móvil --}}
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 {{-- ══════════════════════ SIDEBAR ══════════════════════ --}}
 <aside class="sidebar" id="sidebar">
 
-    {{-- Logo --}}
     <a href="{{ route('inicio') }}" class="sidebar-logo">
         <span class="brand">Tools<span>365</span></span>
     </a>
@@ -39,94 +32,118 @@
         </div>
         <div class="sidebar-user-info">
             <div class="sidebar-user-name">{{ auth()->user()->name }}</div>
-            <div class="sidebar-user-role">Plan Básico</div>
+            <div class="sidebar-user-role">
+                @if(auth()->user()->esAdmin())
+                    Administrador
+                @elseif(auth()->user()->rol === 'gerente')
+                    Gerente
+                @else
+                    Plan Básico
+                @endif
+            </div>
         </div>
-        <div class="sidebar-user-badge"></div>
     </div>
 
     {{-- Navegación --}}
     <nav class="sidebar-nav">
 
-    <div class="nav-section-label">Principal</div>
-    <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-        <i class="bi bi-grid-1x2-fill"></i> Mi Panel
-    </a>
-
-    {{-- ── Solo admin y gerente pueden publicar ── --}}
-    @if(auth()->user()->puedeEditar())
-        <div class="nav-section-label">Gestión</div>
-
-        <a href="#" class="nav-item">
-            <i class="bi bi-plus-circle-fill"></i> Publicar herramienta
-        </a>
-        <a href="#" class="nav-item">
-            <i class="bi bi-box-seam-fill"></i> Herramientas
+        {{-- ── PANEL PRINCIPAL ── --}}
+        <div class="nav-section-label">Principal</div>
+        <a href="{{ route('dashboard') }}"
+           class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+            <i class="bi bi-grid-1x2-fill"></i> Mi Panel
         </a>
 
-        @if(auth()->user()->esAdmin())
+        {{-- ── ADMIN / GERENTE: Gestión del sistema ── --}}
+        @if(auth()->user()->puedeEditar())
+            <div class="nav-section-label">Gestión del sistema</div>
+
             <a href="#" class="nav-item">
-                <i class="bi bi-people-fill"></i> Usuarios
+                <i class="bi bi-plus-circle-fill"></i> Publicar herramienta
             </a>
             <a href="#" class="nav-item">
-                <i class="bi bi-file-earmark-text-fill"></i> Contenido de la página
+                <i class="bi bi-box-seam-fill"></i> Todas las herramientas
+            </a>
+            <a href="#" class="nav-item">
+                <i class="bi bi-hammer"></i> Subastas
+                <span class="nav-badge new">5</span>
+            </a>
+
+            @if(auth()->user()->esAdmin())
+                <div class="nav-section-label">Administración</div>
+                <a href="{{ route('dashboard') }}" class="nav-item">
+                    <i class="bi bi-people-fill"></i> Usuarios
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="bi bi-file-earmark-text-fill"></i> Contenido de la página
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="bi bi-bar-chart-fill"></i> Reportes
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="bi bi-gear-fill"></i> Configuración
+                </a>
+            @endif
+        @endif
+
+        {{-- ── USUARIO INVITADO: Mis publicaciones ── --}}
+        @if(!auth()->user()->puedeEditar())
+            <div class="nav-section-label">Mis publicaciones</div>
+
+            <a href="{{ route('publicar.create') }}" class="nav-item">
+                <i class="bi bi-plus-circle-fill"></i> Publicar herramienta
+            </a>
+            <a href="{{ route('mis-publicaciones.index') }}"
+               class="nav-item {{ request()->routeIs('mis-publicaciones.*') ? 'active' : '' }}">
+                <i class="bi bi-box-seam-fill"></i> Mis publicaciones
+                <span class="nav-badge info">3</span>
+            </a>
+
+            <div class="nav-section-label">Ventas</div>
+            <a href="#" class="nav-item">
+                <i class="bi bi-chat-left-text-fill"></i> Comentarios
+                <span class="nav-badge">3</span>
+            </a>
+
+            <div class="nav-section-label">Actividad</div>
+            <a href="#" class="nav-item">
+                <i class="bi bi-clock-history"></i> Mis rentas
+                <span class="nav-badge info">2</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="bi bi-hammer"></i> Subastas
+                <span class="nav-badge new">5</span>
+            </a>
+
+            <div class="nav-section-label">Cuenta</div>
+            <a href="#" class="nav-item {{ request()->routeIs('perfil.*') ? 'active' : '' }}">
+                <i class="bi bi-person-circle"></i> Mi perfil
+            </a>
+            <a href="{{ route('planes.index') }}"
+               class="nav-item {{ request()->routeIs('planes.*') ? 'active' : '' }}">
+                <i class="bi bi-star-fill"></i> Mi plan
             </a>
         @endif
-    @endif
 
-    {{-- ── Visible para todos ── --}}
-    <div class="nav-section-label">Mi actividad</div>
+        {{-- ── COMÚN: Soporte ── --}}
+        <div class="nav-section-label">Soporte</div>
+        <a href="{{ route('inicio') }}" class="nav-item">
+            <i class="bi bi-shop"></i> Ir a la tienda
+        </a>
+        <a href="#" class="nav-item">
+            <i class="bi bi-question-circle-fill"></i> Ayuda & FAQ
+        </a>
 
-    <a href="#" class="nav-item">
-        <i class="bi bi-bag-heart-fill"></i> Mis compras
-    </a>
-    <a href="#" class="nav-item">
-        <i class="bi bi-clock-history"></i> Mis rentas activas
-        <span class="nav-badge info">2</span>
-    </a>
-    <a href="#" class="nav-item">
-        <i class="bi bi-heart-fill"></i> Favoritos
-    </a>
-
-    <div class="nav-section-label">Subastas</div>
-    <a href="#" class="nav-item">
-        <i class="bi bi-hammer"></i> Subastas activas
-        <span class="nav-badge new">5</span>
-    </a>
-
-    <div class="nav-section-label">Cuenta</div>
-    <a href="#" class="nav-item">
-        <i class="bi bi-person-circle"></i> Mi perfil
-    </a>
-    <a href="#" class="nav-item">
-        <i class="bi bi-star-fill"></i> Mi plan
-    </a>
-
-    <div class="nav-section-label">Soporte</div>
-    <a href="{{ route('inicio') }}" class="nav-item">
-        <i class="bi bi-shop"></i> Ir a la tienda
-    </a>
-    <a href="#" class="nav-item">
-        <i class="bi bi-question-circle-fill"></i> Ayuda & FAQ
-    </a>
-
-    {{-- ── Badge de rol visible para el admin ── --}}
-    @if(auth()->user()->puedeEditar())
-        <div style="margin-top: 16px; padding: 0 8px;">
-            <span style="
-                display: inline-flex; align-items: center; gap: 6px;
-                background: rgba(83,74,183,0.12); border: 0.5px solid #534AB7;
-                border-radius: 20px; padding: 4px 10px;
-                font-size: 11px; font-weight: 700; color: #7F77DD;
-            ">
-                <i class="bi bi-shield-fill" style="font-size: 10px;"></i>
+        {{-- Badge de rol para admin/gerente --}}
+        @if(auth()->user()->puedeEditar())
+            <div class="sidebar-role-badge">
+                <i class="bi bi-shield-fill"></i>
                 {{ ucfirst(auth()->user()->rol) }}
-            </span>
-        </div>
-    @endif
+            </div>
+        @endif
 
-</nav>
+    </nav>
 
-    {{-- Logout --}}
     <div class="sidebar-footer">
         <form action="{{ route('logout') }}" method="POST">
             @csrf
@@ -146,39 +163,34 @@
         <i class="bi bi-list" style="font-size:1.4rem;"></i>
     </button>
 
-    <div>
+    <div class="topbar-title-wrap">
         <span class="topbar-title">@yield('topbar_title', 'Mi Panel')</span>
         @hasSection('topbar_breadcrumb')
             <span class="topbar-breadcrumb">/ @yield('topbar_breadcrumb')</span>
         @endif
     </div>
 
-    {{-- Búsqueda --}}
     <div class="topbar-search">
         <i class="bi bi-search"></i>
         <input type="text" placeholder="Buscar herramientas, publicaciones...">
     </div>
 
     <div class="topbar-actions">
-        {{-- Notificaciones --}}
         <a href="#" class="topbar-icon-btn" title="Notificaciones">
             <i class="bi bi-bell"></i>
             <span class="topbar-notif-dot"></span>
         </a>
-
-        {{-- Mensajes --}}
         <a href="#" class="topbar-icon-btn" title="Mensajes">
             <i class="bi bi-chat-dots"></i>
         </a>
-
-        {{-- Publicar rápido --}}
-        <a href="#" class="topbar-icon-btn" title="Publicar herramienta"
-           style="background: var(--accent); border-color: var(--accent); color: #fff;">
-            <i class="bi bi-plus-lg"></i>
-        </a>
+        {{-- Botón publicar rápido solo para invitados --}}
+        @if(!auth()->user()->puedeEditar())
+            <a href="{{ route('publicar.create') }}" class="topbar-icon-btn topbar-btn-accent" title="Publicar herramienta">
+                <i class="bi bi-plus-lg"></i>
+            </a>
+        @endif
     </div>
 
-    {{-- Avatar usuario --}}
     <a href="#" class="topbar-user">
         <div class="topbar-user-avatar">
             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
@@ -192,7 +204,6 @@
 <main class="main-content">
     <div class="page-body">
 
-        {{-- Toast de sesión --}}
         @if(session('success'))
             <div class="toast-session" id="sessionToast">
                 <i class="bi bi-check-circle-fill"></i>
@@ -218,8 +229,6 @@
         document.getElementById('sidebar').classList.remove('open');
         document.getElementById('sidebarOverlay').classList.remove('open');
     }
-
-    // Auto-ocultar toast después de 4s
     setTimeout(() => {
         const t = document.getElementById('sessionToast');
         if (t) t.remove();
