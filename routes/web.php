@@ -8,6 +8,8 @@ use App\Http\Controllers\OfertaController;
 use App\Http\Controllers\PublicarController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AdminController;
+
 
 
 
@@ -68,6 +70,14 @@ Route::middleware('auth')->group(function () {
     Route::middleware('rol:admin,gerente')->group(function () {
         Route::get('/dashboard/usuarios',  [DashboardController::class, 'usuarios']);
         Route::get('/dashboard/contenido', [DashboardController::class, 'contenido']);
+        
     });
+
+    // Rutas exclusivas admin
+Route::middleware('rol:admin')->prefix('dashboard/admin')->name('admin.')->group(function () {
+    Route::get('/usuarios',                         [AdminController::class, 'usuarios'])->name('usuarios');
+    Route::patch('/usuarios/{user}',                [AdminController::class, 'updateUsuario'])->name('usuarios.update');
+    Route::patch('/usuarios/{user}/toggle-bloqueo', [AdminController::class, 'toggleBloqueo'])->name('usuarios.toggle');
+});
 }
 );

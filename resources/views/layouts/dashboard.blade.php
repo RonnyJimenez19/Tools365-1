@@ -356,18 +356,19 @@
 
             @if(auth()->user()->esAdmin())
                 <div class="nav-section-label">Administración</div>
-                <a href="{{ route('dashboard') }}" class="nav-item">
-                    <i class="bi bi-people-fill"></i> Usuarios
-                </a>
-                <a href="#" class="nav-item">
+<a href="{{ route('admin.usuarios') }}" class="nav-item {{ request()->routeIs('admin.usuarios') ? 'active' : '' }}">
+    <i class="bi bi-people-fill"></i> Usuarios
+</a>
+
+                {{--<a href="#" class="nav-item">
                     <i class="bi bi-file-earmark-text-fill"></i> Contenido de la página
-                </a>
+                </a>--}}
                 <a href="#" class="nav-item">
                     <i class="bi bi-bar-chart-fill"></i> Reportes
                 </a>
-                <a href="#" class="nav-item">
+                {{--<a href="#" class="nav-item">
                     <i class="bi bi-gear-fill"></i> Configuración
-                </a>
+                </a>--}}
             @endif
         @endif
 
