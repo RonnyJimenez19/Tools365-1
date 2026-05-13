@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
+
 
 
 class AuthController extends Controller
@@ -32,10 +34,22 @@ private function verifyRecaptcha(string $token, string $action, float $minScore 
 
     // ── Login público (usuarios de la plataforma) ────────────────────────────
 
-    public function showLogin()
-    {
-        return view('auth.login');
-    }
+public function showLogin()
+{
+    $satisfaccion = \App\Models\Comentario::aprobados()->avg('calificacion');
+
+    $stats = [
+        'usuarios'     => \App\Models\User::whereNotNull('email_verified_at')->count(),
+        'herramientas' => \App\Models\Producto::where('estado', 'activo')->count(),
+        'satisfaccion' => $satisfaccion ? round(($satisfaccion / 5) * 100) : 98,
+        'ciudades'     => \App\Models\Producto::where('estado', 'activo')
+                            ->whereNotNull('ubicacion')
+                            ->distinct()
+                            ->count(\Illuminate\Support\Facades\DB::raw('TRIM(ubicacion)')),
+    ];
+
+    return view('auth.login', compact('stats'));
+}
 
     public function login(Request $request)
     {

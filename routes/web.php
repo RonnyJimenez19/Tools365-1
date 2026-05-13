@@ -46,7 +46,6 @@ Route::post('/login-admin', [AuthController::class, 'adminLogin']);
 
 // ── Rutas protegidas (requieren sesión) ───────────────────────────────────────
 
-// ✅ Así debe quedar — todo en el mismo grupo auth
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 

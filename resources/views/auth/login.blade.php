@@ -39,11 +39,11 @@
                 Renta, compra, vende o subasta maquinaria a los mejores precios. Miles de usuarios confían en Tools365.
             </p>
 
-            <div class="stat-pills">
-                <div class="stat-pill"><strong>10K+</strong><span>Usuarios</span></div>
-                <div class="stat-pill"><strong>5K+</strong><span>Productos</span></div>
-                <div class="stat-pill"><strong>32</strong><span>Ciudades</span></div>
-            </div>
+<div class="stat-pills">
+    <div class="stat-pill"><strong>{{ number_format($stats['usuarios']) }}+</strong><span>Usuarios</span></div>
+    <div class="stat-pill"><strong>{{ number_format($stats['herramientas']) }}+</strong><span>Productos</span></div>
+    <div class="stat-pill"><strong>{{ $stats['ciudades'] }}</strong><span>Ciudades</span></div>
+</div>
 
         </div>
     </div>

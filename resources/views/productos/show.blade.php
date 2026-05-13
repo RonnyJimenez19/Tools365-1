@@ -264,22 +264,7 @@
 
 @section('contenido')
 
-{{-- ── Breadcrumb ── --}}
-<div class="detalle-breadcrumb">
-    <div class="container">
-        <a href="{{ route('inicio') }}"><i class="bi bi-house me-1"></i>Inicio</a>
-        <span class="separator">/</span>
-        <a href="{{ route('busqueda.avanzada') }}">Explorar</a>
-        @if($producto->categoria)
-            <span class="separator">/</span>
-            <a href="{{ route('busqueda.avanzada', ['categoria' => $producto->categoria->slug]) }}">
-                {{ $producto->categoria->nombre }}
-            </a>
-        @endif
-        <span class="separator">/</span>
-        <span class="text-muted">{{ Str::limit($producto->titulo, 40) }}</span>
-    </div>
-</div>
+
 
 {{-- ── Layout principal ── --}}
 <div class="container">

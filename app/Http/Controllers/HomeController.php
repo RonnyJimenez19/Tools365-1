@@ -6,6 +6,8 @@ use App\Models\Comentario;
 use App\Models\Producto;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+
 
 class HomeController extends Controller
 {
@@ -39,6 +41,18 @@ class HomeController extends Controller
             ->take(3)
             ->get();
 
+$satisfaccion = \App\Models\Comentario::aprobados()->avg('calificacion');
+
+$stats = [
+    'usuarios'     => \App\Models\User::whereNotNull('email_verified_at')->count(),
+    'herramientas' => \App\Models\Producto::where('estado', 'activo')->count(),
+    'satisfaccion' => $satisfaccion ? round(($satisfaccion / 5) * 100) : 98,
+    'ciudades'     => \App\Models\Producto::where('estado', 'activo')
+                        ->whereNotNull('ubicacion')
+                        ->distinct()
+                        ->count(\Illuminate\Support\Facades\DB::raw('TRIM(ubicacion)')),
+];
+
         // Si no hay suficientes destacados, completar con los más recientes aprobados
         if ($comentarios_inicio->count() < 3) {
             $ids   = $comentarios_inicio->pluck('id');
@@ -51,9 +65,9 @@ class HomeController extends Controller
             $comentarios_inicio = $comentarios_inicio->concat($extra);
         }
 
-        return view('inicio', compact(
-            'subastas', 'rentas', 'ventas', 'comentarios_inicio'
-        ));
+return view('inicio', compact(
+    'subastas', 'rentas', 'ventas', 'comentarios_inicio', 'stats'
+));
     }
 
     public function buscar(Request $request)
