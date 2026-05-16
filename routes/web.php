@@ -9,6 +9,7 @@ use App\Http\Controllers\PublicarController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CarritoController;
 
 
 
@@ -63,6 +64,17 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{producto}',       [PublicarController::class, 'destroy'])->name('destroy');
     });
 
+        // ── Carrito (cualquier usuario autenticado) ─────────────────
+    Route::prefix('carrito')->name('carrito.')->group(function () {
+        Route::get('/',                [CarritoController::class, 'index'])   ->name('index');
+        Route::post('/',               [CarritoController::class, 'store'])   ->name('store');
+        Route::patch('/{carritoItem}', [CarritoController::class, 'update'])  ->name('update');
+        Route::delete('/{carritoItem}',[CarritoController::class, 'destroy']) ->name('destroy');
+        Route::delete('/',             [CarritoController::class, 'vaciar'])  ->name('vaciar');
+        Route::get('/checkout',        [CarritoController::class, 'checkout'])->name('checkout');
+        Route::get('/conteo',          [CarritoController::class, 'conteo'])  ->name('conteo');
+    });
+
     // Dashboard — abierto a todos los auth, el controlador decide la vista
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -79,5 +91,7 @@ Route::middleware('rol:admin')->prefix('dashboard/admin')->name('admin.')->group
     Route::patch('/usuarios/{user}',                [AdminController::class, 'updateUsuario'])->name('usuarios.update');
     Route::patch('/usuarios/{user}/toggle-bloqueo', [AdminController::class, 'toggleBloqueo'])->name('usuarios.toggle');
 });
+
+
 }
 );

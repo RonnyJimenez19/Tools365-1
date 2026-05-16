@@ -357,6 +357,84 @@
                 @endif
             </div>
 
+            @auth
+{{-- ─── Agregar al carrito ─────────────────────────────── --}}
+<div class="mt-3">
+    @if($producto->estado !== 'activo')
+        <div class="alert alert-warning py-2">
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            Este producto no está disponible actualmente.
+        </div>
+
+    @elseif($producto->tipo === 'renta')
+        {{-- Formulario para RENTA --}}
+        <form method="POST" action="{{ route('carrito.store') }}" id="form-agregar-carrito">
+            @csrf
+            <input type="hidden" name="producto_id" value="{{ $producto->id }}">
+            <div class="row g-2 mb-3">
+                <div class="col-sm-5">
+                    <label class="form-label fw-semibold" style="font-size:.85rem;">Fecha inicio</label>
+                    <input type="date" name="fecha_inicio" class="form-control form-control-sm"
+                           min="{{ date('Y-m-d') }}" required>
+                </div>
+                <div class="col-sm-5">
+                    <label class="form-label fw-semibold" style="font-size:.85rem;">Fecha fin</label>
+                    <input type="date" name="fecha_fin" class="form-control form-control-sm" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-cart-plus me-2"></i>Agregar al carrito
+            </button>
+        </form>
+
+    @elseif($producto->tipo === 'venta')
+        {{-- Formulario para COMPRA --}}
+        <form method="POST" action="{{ route('carrito.store') }}" id="form-agregar-carrito">
+            @csrf
+            <input type="hidden" name="producto_id" value="{{ $producto->id }}">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <label class="fw-semibold" style="font-size:.85rem;">Cantidad</label>
+                <div class="input-group" style="width:130px;">
+                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                            onclick="let i=document.getElementById('qty-show');i.value=Math.max(1,+i.value-1)">−</button>
+                    <input type="number" id="qty-show" name="cantidad"
+                           value="1" min="1" max="99"
+                           class="form-control form-control-sm text-center">
+                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                            onclick="let i=document.getElementById('qty-show');i.value=Math.min(99,+i.value+1)">+</button>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-cart-plus me-2"></i>Agregar al carrito
+            </button>
+        </form>
+
+    @elseif($producto->tipo === 'subasta')
+        {{-- Subasta: botón va a la lógica de oferta, no al carrito --}}
+        <a href="#" class="btn btn-warning w-100">
+            <i class="bi bi-hammer me-2"></i>Hacer una oferta
+        </a>
+    @endif
+
+    {{-- Feedback de sesión --}}
+    @if(session('success'))
+        <div class="alert alert-success mt-2 py-2">
+            <i class="bi bi-check-circle me-1"></i>{{ session('success') }}
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger mt-2 py-2">
+            <i class="bi bi-exclamation-circle me-1"></i>{{ session('error') }}
+        </div>
+    @endif
+</div>
+@else
+{{-- Usuario no autenticado --}}
+<a href="{{ route('login') }}" class="btn btn-outline-primary w-100 mt-3">
+    <i class="bi bi-person me-2"></i>Inicia sesión para agregar al carrito
+</a>
+@endauth
+
             {{-- Etiqueta oferta --}}
             @if($producto->ofertaVigente() && $producto->oferta_etiqueta)
                 <div class="alert alert-danger py-2 px-3 mb-0" style="border-radius:8px; font-size:.88rem;">
