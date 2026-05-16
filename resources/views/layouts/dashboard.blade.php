@@ -384,21 +384,35 @@
                 <span class="nav-badge info">3</span>
             </a>
 
-            <div class="nav-section-label">Ventas</div>
-            <a href="#" class="nav-item">
-                <i class="bi bi-chat-left-text-fill"></i> Comentarios
-                <span class="nav-badge">3</span>
-            </a>
+<div class="nav-section-label">Ventas</div>
 
-            <div class="nav-section-label">Actividad</div>
-            <a href="#" class="nav-item">
-                <i class="bi bi-clock-history"></i> Mis rentas
-                <span class="nav-badge info">2</span>
-            </a>
-            <a href="#" class="nav-item">
-                <i class="bi bi-hammer"></i> Subastas
-                <span class="nav-badge new">5</span>
-            </a>
+<a href="{{ route('dashboard.ventas') }}"
+   class="nav-item {{ request()->routeIs('dashboard.ventas') ? 'active' : '' }}">
+    <i class="bi bi-bag-check-fill"></i> Mis ventas
+</a>
+
+<a href="{{ route('dashboard.compras') }}"
+   class="nav-item {{ request()->routeIs('dashboard.compras') ? 'active' : '' }}">
+    <i class="bi bi-bag-heart-fill"></i> Mis compras
+</a>
+
+<a href="{{ route('notificaciones.index') }}"
+   class="nav-item {{ request()->routeIs('notificaciones.*') ? 'active' : '' }}">
+    <i class="bi bi-bell-fill"></i> Notificaciones
+    <span class="nav-badge new" id="notif-badge" style="display:none;"></span>
+</a>
+
+<div class="nav-section-label">Actividad</div>
+
+<a href="#" class="nav-item">
+    <i class="bi bi-clock-history"></i> Mis rentas
+    <span class="nav-badge info">2</span>
+</a>
+
+<a href="#" class="nav-item">
+    <i class="bi bi-hammer"></i> Subastas
+    <span class="nav-badge new">5</span>
+</a>
 
             <div class="nav-section-label">Cuenta</div>
             <a href="#" class="nav-item {{ request()->routeIs('perfil.*') ? 'active' : '' }}">
@@ -459,10 +473,10 @@
     </div>
 
     <div class="topbar-actions">
-        <a href="#" class="topbar-icon-btn" title="Notificaciones">
-            <i class="bi bi-bell"></i>
-            <span class="topbar-notif-dot"></span>
-        </a>
+<a href="{{ route('notificaciones.index') }}" class="topbar-icon-btn" title="Notificaciones">
+    <i class="bi bi-bell"></i>
+    <span class="topbar-notif-dot" id="notif-dot" style="display:none;"></span>
+</a>
         <a href="#" class="topbar-icon-btn" title="Mensajes">
             <i class="bi bi-chat-dots"></i>
         </a>
@@ -507,14 +521,40 @@
         document.getElementById('sidebar').classList.toggle('open');
         document.getElementById('sidebarOverlay').classList.toggle('open');
     }
+
     function closeSidebar() {
         document.getElementById('sidebar').classList.remove('open');
         document.getElementById('sidebarOverlay').classList.remove('open');
     }
+
     setTimeout(() => {
         const t = document.getElementById('sessionToast');
         if (t) t.remove();
     }, 4000);
+
+    async function actualizarBadgeNotif() {
+        try {
+            const r = await fetch('{{ route('notificaciones.conteo') }}');
+            const d = await r.json();
+
+            const badge = document.getElementById('notif-badge');
+            const dot   = document.getElementById('notif-dot');
+
+            if (badge) {
+                badge.textContent = d.conteo;
+                badge.style.display = d.conteo > 0 ? '' : 'none';
+            }
+
+            if (dot) {
+                dot.style.display = d.conteo > 0 ? '' : 'none';
+            }
+        } catch (e) {
+            console.log('Error cargando notificaciones');
+        }
+    }
+
+    actualizarBadgeNotif();
+    setInterval(actualizarBadgeNotif, 30000);
 </script>
 
 @stack('scripts')

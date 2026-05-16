@@ -142,10 +142,9 @@
                 </div>
 
                 {{-- En un proyecto real aquí iría la integración con pasarela de pago --}}
-                <button class="btn btn-success btn-confirmar mt-3"
-                        onclick="alert('Pedido registrado. El vendedor se pondrá en contacto contigo pronto. 🎉\n\n(Integra aquí tu pasarela de pago o sistema de pedidos.)')">
-                    <i class="bi bi-check-circle me-2"></i>Confirmar pedido
-                </button>
+<a href="{{ route('pago.iniciar') }}" class="btn btn-success btn-confirmar mt-3">
+    <i class="bi bi-credit-card me-2"></i>Confirmar y pagar
+</a>
 
                 <p class="note-checkout">
                     <i class="bi bi-shield-check me-1 text-success"></i>

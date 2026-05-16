@@ -417,13 +417,13 @@
         </a>
     </div>
     <div class="col-6 col-md-3 col-lg-3">
-        <a href="#" class="action-card h-100">
-            <div class="action-icon rent"><i class="bi bi-clock-history"></i></div>
-            <div>
-                <div class="action-label">Mis rentas</div>
-                <div class="action-sub">2 activas ahora</div>
-            </div>
-        </a>
+<a href="{{ route('dashboard.compras') }}" class="action-card h-100">
+    <div class="action-icon rent"><i class="bi bi-clock-history"></i></div>
+    <div>
+        <div class="action-label">Mis compras</div>
+        <div class="action-sub">Ver historial</div>
+    </div>
+</a>
     </div>
     <div class="col-6 col-md-3 col-lg-3">
         <a href="#" class="action-card h-100">
@@ -435,14 +435,27 @@
         </a>
     </div>
     <div class="col-6 col-md-3 col-lg-3">
-        <a href="#" class="action-card h-100">
-            <div class="action-icon msg"><i class="bi bi-chat-left-text-fill"></i></div>
-            <div>
-                <div class="action-label">Comentarios</div>
-                <div class="action-sub">3 sin responder</div>
-            </div>
-        </a>
+<a href="{{ route('comentarios.index') }}" class="action-card h-100">
+    <div class="action-icon msg"><i class="bi bi-chat-left-text-fill"></i></div>
+    <div>
+        <div class="action-label">Comentarios</div>
+        <div class="action-sub">3 sin responder</div>
     </div>
+</a>
+    </div>
+
+    <div class="col-6 col-md-3 col-lg-3">
+    <a href="{{ route('notificaciones.index') }}" class="action-card h-100">
+        <div class="action-icon msg">
+            <i class="bi bi-bell-fill"></i>
+        </div>
+        <div>
+            <div class="action-label">Notificaciones</div>
+            <div class="action-sub">Ver alertas</div>
+        </div>
+    </a>
+</div>
+
     <div class="col-6 col-md-3 col-lg-3">
         <a href="#" class="action-card h-100">
             <div class="action-icon wallet"><i class="bi bi-wallet2"></i></div>
@@ -465,6 +478,5 @@
 </div>
 
 
-</div>
 
 @endsection
