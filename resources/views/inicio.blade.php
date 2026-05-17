@@ -25,7 +25,6 @@
                 titulo="Todas tus" acento="herramientas en un solo lugar"
                 descripcion="Renta, compra, vende o subasta maquinaria y herramientas industriales de forma segura."
                 btnTexto="Comienza Gratis" btnIcono="bi-rocket-takeoff"
-                btnTexto2="Ver Demo"       btnIcono2="bi-play-circle"
             />
             <x-hero-slide :activo="false"
                 imagen="Imagenes/sistemariego.jpg"
@@ -65,10 +64,22 @@
 <div class="stats-bar shadow-sm">
     <div class="container">
         <div class="row">
-            <div class="col-3 stat-item"><div class="stat-number">10K+</div><div class="stat-label">Usuarios activos</div></div>
-            <div class="col-3 stat-item"><div class="stat-number">5K+</div><div class="stat-label">Herramientas</div></div>
-            <div class="col-3 stat-item"><div class="stat-number">98%</div><div class="stat-label">Satisfacción</div></div>
-            <div class="col-3 stat-item"><div class="stat-number">32</div><div class="stat-label">Ciudades</div></div>
+            <div class="col-3 stat-item">
+                <div class="stat-number">{{ number_format($stats['usuarios']) }}+</div>
+                <div class="stat-label">Usuarios activos</div>
+            </div>
+            <div class="col-3 stat-item">
+                <div class="stat-number">{{ number_format($stats['herramientas']) }}+</div>
+                <div class="stat-label">Herramientas</div>
+            </div>
+            <div class="col-3 stat-item">
+                <div class="stat-number">{{ $stats['satisfaccion'] }}%</div>
+                <div class="stat-label">Satisfacción</div>
+            </div>
+            <div class="col-3 stat-item">
+                <div class="stat-number">{{ $stats['ciudades'] }}</div>
+                <div class="stat-label">Ciudades</div>
+            </div>
         </div>
     </div>
 </div>

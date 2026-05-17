@@ -207,13 +207,24 @@ class PublicarController extends BaseController
     }
 
     // ── Vista de detalle de estado de UNA publicación ─────────────────────────
-    public function show(Producto $producto)
-    {
-        $this->autorizarPropietario($producto);
-        $producto->load(['imagenes' => fn($q) => $q->orderBy('orden'), 'detalles', 'categoria']);
+public function show(Producto $producto)
+{
+    $this->autorizarPropietario($producto);
+    $producto->load(['imagenes' => fn($q) => $q->orderBy('orden'), 'detalles', 'categoria', 'user']);
 
-        return view('publicar.show', compact('producto'));
-    }
+    $relacionados = Producto::with(['imagenes', 'categoria'])
+        ->where('estado', 'activo')
+        ->where('id', '!=', $producto->id)
+        ->where(function ($q) use ($producto) {
+            $q->where('categoria_id', $producto->categoria_id)
+              ->orWhere('tipo', $producto->tipo);
+        })
+        ->latest()
+        ->take(4)
+        ->get();
+
+    return view('productos.show', compact('producto', 'relacionados'));
+}
 
     // ── Helpers privados ──────────────────────────────────────────────────────
 

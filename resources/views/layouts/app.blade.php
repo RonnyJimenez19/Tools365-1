@@ -32,6 +32,7 @@
 {{-- Navbar como partial independiente --}}
 @include('partials.navbar')
 
+
 @yield('contenido')
 
 {{-- Footer como partial independiente --}}

@@ -8,7 +8,11 @@ use App\Http\Controllers\OfertaController;
 use App\Http\Controllers\PublicarController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\DashboardController;
-
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CarritoController;
+use App\Http\Controllers\PagoController;
+use App\Http\Controllers\NotificacionController;
+use App\Http\Controllers\VentasController;
 
 
 // ── Rutas públicas ────────────────────────────────────────────────────────────
@@ -17,7 +21,6 @@ Route::get('/buscar',            [HomeController::class, 'buscar'])->name('busca
 Route::get('/busqueda-avanzada', [HomeController::class, 'busquedaAvanzada'])->name('busqueda.avanzada');
 
 Route::get('/productos/{producto}', [ProductoController::class, 'show'])->name('productos.show');
-
 
 Route::get('/ofertas', [OfertaController::class, 'index'])->name('ofertas.index');
 Route::view('/planes',   'planes.index')->name('planes.index');
@@ -45,11 +48,11 @@ Route::get( '/login-admin', [AuthController::class, 'showAdminLogin'])->name('ad
 Route::post('/login-admin', [AuthController::class, 'adminLogin']);
 
 // ── Rutas protegidas (requieren sesión) ───────────────────────────────────────
-
-// ✅ Así debe quedar — todo en el mismo grupo auth
 Route::middleware('auth')->group(function () {
+
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+    // ── Publicar ─────────────────────────────────────────────────────────────
     Route::get('/publicar', [PublicarController::class, 'create'])->name('publicar.create');
     Route::post('/publicar', [PublicarController::class, 'store'])->name('publicar.store');
 
@@ -62,13 +65,52 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{producto}',       [PublicarController::class, 'destroy'])->name('destroy');
     });
 
-    // Dashboard — abierto a todos los auth, el controlador decide la vista
+    // ── Carrito ───────────────────────────────────────────────────────────────
+    Route::prefix('carrito')->name('carrito.')->group(function () {
+        Route::get('/',                [CarritoController::class, 'index'])   ->name('index');
+        Route::post('/',               [CarritoController::class, 'store'])   ->name('store');
+        Route::patch('/{carritoItem}', [CarritoController::class, 'update'])  ->name('update');
+        Route::delete('/{carritoItem}',[CarritoController::class, 'destroy']) ->name('destroy');
+        Route::delete('/',             [CarritoController::class, 'vaciar'])  ->name('vaciar');
+        Route::get('/checkout',        [CarritoController::class, 'checkout'])->name('checkout');
+        Route::get('/conteo',          [CarritoController::class, 'conteo'])  ->name('conteo');
+    });
+
+    // ── Pago ─────────────────────────────────────────────────────────────────
+    Route::prefix('pago')->name('pago.')->group(function () {
+        Route::get('/iniciar',                    [PagoController::class, 'iniciar'])       ->name('iniciar');
+        Route::post('/procesar',                  [PagoController::class, 'procesar'])      ->name('procesar');
+        Route::get('/timer-status',               [PagoController::class, 'timerStatus'])   ->name('timer.status');
+        Route::get('/{pedido}/confirmacion',      [PagoController::class, 'confirmacion'])  ->name('confirmacion');
+        Route::delete('/tarjetas/{tarjeta}',      [PagoController::class, 'eliminarTarjeta'])->name('tarjetas.destroy');
+    });
+
+    // ── Dashboard ─────────────────────────────────────────────────────────────
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Ventas (vendedor) y Compras (comprador) — ambas accesibles para todos
+    Route::get('/dashboard/ventas',  [VentasController::class, 'index'])  ->name('dashboard.ventas');
+    Route::get('/dashboard/compras', [VentasController::class, 'compras'])->name('dashboard.compras');
+
+    // Notificaciones
+    Route::prefix('dashboard/notificaciones')->name('notificaciones.')->group(function () {
+        Route::get('/',                              [NotificacionController::class, 'index'])           ->name('index');
+        Route::post('/leer-todas',                   [NotificacionController::class, 'marcarTodasLeidas'])->name('leer-todas');
+        Route::post('/{notificacion}/leer',          [NotificacionController::class, 'marcarLeida'])     ->name('leer');
+        Route::get('/conteo',                        [NotificacionController::class, 'conteo'])          ->name('conteo');
+    });
 
     // Rutas exclusivas admin/gerente
     Route::middleware('rol:admin,gerente')->group(function () {
         Route::get('/dashboard/usuarios',  [DashboardController::class, 'usuarios']);
         Route::get('/dashboard/contenido', [DashboardController::class, 'contenido']);
     });
-}
-);
+
+    // Rutas exclusivas admin
+    Route::middleware('rol:admin')->prefix('dashboard/admin')->name('admin.')->group(function () {
+        Route::get('/usuarios',                         [AdminController::class, 'usuarios'])->name('usuarios');
+        Route::patch('/usuarios/{user}',                [AdminController::class, 'updateUsuario'])->name('usuarios.update');
+        Route::patch('/usuarios/{user}/toggle-bloqueo', [AdminController::class, 'toggleBloqueo'])->name('usuarios.toggle');
+    });
+
+});

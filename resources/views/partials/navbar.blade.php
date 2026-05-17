@@ -67,6 +67,27 @@
                         </a>
                     @endguest
 
+                    {{-- Ícono carrito (solo usuarios autenticados) --}}
+@auth
+<a href="{{ route('carrito.index') }}" class="btn btn-sm btn-outline-secondary position-relative me-2">
+    <i class="bi bi-cart3"></i>
+    @php
+        $conteoCarrito = \App\Models\CarritoItem::where('user_id', Auth::id())->count();
+    @endphp
+    @if($conteoCarrito > 0)
+    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger carrito-badge"
+          style="font-size:.6rem;">
+        {{ $conteoCarrito }}
+    </span>
+    @else
+    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger carrito-badge"
+          style="font-size:.6rem; display:none;">
+        0
+    </span>
+    @endif
+</a>
+@endauth
+
                     @auth
                     <div class="dropdown">
                         <button class="btn-ghost-nav dropdown-toggle d-flex align-items-center gap-2"

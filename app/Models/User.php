@@ -17,14 +17,11 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'rol',
-        'verification_token',
-        'email_verified_at',
-    ];
+protected $fillable = [
+    'name', 'email', 'password',
+    'rol', 'plan', 'status',
+    'verification_token', 'email_verified_at',
+];
 
     protected $guarded = [];
     /**
@@ -63,5 +60,9 @@ public function estaVerificado(): bool
 {
     return !is_null($this->email_verified_at);
 }
+
+public function estaActivo(): bool    { return $this->status === 'activo'; }
+public function estaBloqueado(): bool { return $this->status === 'bloqueado'; }
+public function estaInactivo(): bool { return $this->status === 'inactivo'; }
 
 }

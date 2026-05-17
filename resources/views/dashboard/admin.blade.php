@@ -351,35 +351,35 @@
             <div class="aac-sub">Publicar herramienta</div>
         </a>
     </div>
-    <div class="col-6 col-md-4 col-lg-2">
+    {{--<div class="col-6 col-md-4 col-lg-2">
         <a href="#" class="admin-action-card h-100">
             <div class="aac-icon content"><i class="bi bi-file-earmark-text-fill"></i></div>
             <div class="aac-label">Contenido de la página</div>
             <div class="aac-sub">Banners, nav, texto</div>
         </a>
-    </div>
-    <div class="col-6 col-md-4 col-lg-2">
+    </div>--}}
+    {{--<div class="col-6 col-md-4 col-lg-2">
         <a href="#" class="admin-action-card h-100">
             <div class="aac-icon reports"><i class="bi bi-bar-chart-fill"></i></div>
             <div class="aac-label">Reportes</div>
             <div class="aac-sub">Ventas y actividad</div>
         </a>
-    </div>
-    <div class="col-6 col-md-4 col-lg-2">
+    </div>--}}
+    {{--<div class="col-6 col-md-4 col-lg-2">
         <a href="#" class="admin-action-card h-100">
             <div class="aac-icon config"><i class="bi bi-gear-fill"></i></div>
             <div class="aac-label">Configuración</div>
             <div class="aac-sub">Sistema y parámetros</div>
         </a>
-    </div>
-    <div class="col-6 col-md-4 col-lg-2">
+    </div>--}}
+    {{--<div class="col-6 col-md-4 col-lg-2">
         <a href="#" class="admin-action-card alert-card h-100">
             <div class="aac-icon flagged"><i class="bi bi-flag-fill"></i></div>
             <div class="aac-label">Reportes de usuarios</div>
             <div class="aac-sub">29 pendientes</div>
             <span class="aac-badge">29</span>
         </a>
-    </div>
+    </div>--}}
 </div>
 
 {{-- ── Dos columnas ── --}}
