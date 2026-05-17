@@ -96,7 +96,7 @@
         <x-section-header titulo="Disponible para Rentar" icono="bi-clock-history" color="primary" />
         <div class="row g-3">
             @forelse($rentas as $producto)
-                <x-product-card :producto="$producto" />
+            <x-product-card :producto="$producto" />
             @empty
                 <div class="col-12 text-center text-muted py-4">
                     <i class="bi bi-clock-history fs-2 mb-2 d-block"></i>
