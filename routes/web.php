@@ -48,7 +48,7 @@ Route::get( '/login-admin', [AuthController::class, 'showAdminLogin'])->name('ad
 Route::post('/login-admin', [AuthController::class, 'adminLogin']);
 
 // ── Rutas protegidas (requieren sesión) ───────────────────────────────────────
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth','cuenta.activa'])->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -107,10 +107,18 @@ Route::middleware('auth')->group(function () {
     });
 
     // Rutas exclusivas admin
+    // Rutas exclusivas admin
     Route::middleware('rol:admin')->prefix('dashboard/admin')->name('admin.')->group(function () {
-        Route::get('/usuarios',                         [AdminController::class, 'usuarios'])->name('usuarios');
-        Route::patch('/usuarios/{user}',                [AdminController::class, 'updateUsuario'])->name('usuarios.update');
-        Route::patch('/usuarios/{user}/toggle-bloqueo', [AdminController::class, 'toggleBloqueo'])->name('usuarios.toggle');
+ 
+        // Usuarios
+        Route::get('/usuarios',                          [AdminController::class, 'usuarios'])->name('usuarios');
+        Route::patch('/usuarios/{user}',                 [AdminController::class, 'updateUsuario'])->name('usuarios.update');
+        Route::patch('/usuarios/{user}/toggle-bloqueo',  [AdminController::class, 'toggleBloqueo'])->name('usuarios.toggle');
+ 
+        // Publicaciones
+        Route::get('/publicaciones',                     [AdminController::class, 'publicaciones'])->name('publicaciones');
+        Route::patch('/publicaciones/{producto}',        [AdminController::class, 'updatePublicacion'])->name('publicaciones.update');
+        Route::delete('/publicaciones/{producto}',       [AdminController::class, 'destroyPublicacion'])->name('publicaciones.destroy');
     });
 
 });

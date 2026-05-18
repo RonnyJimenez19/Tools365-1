@@ -92,4 +92,9 @@ class Tarjeta extends Model
         if ($this->exp_anio === $hoy->year && $this->exp_mes < $hoy->month) return true;
         return false;
     }
+
+    
+public function pedidos() {
+    return $this->hasMany(Pedido::class);
+}
 }

@@ -15,11 +15,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'rol'             => \App\Http\Middleware\RoleMiddleware::class,
             'session.timeout' => \App\Http\Middleware\SessionTimeout::class,
+            'cuenta.activa' => \App\Http\Middleware\CuentaActiva::class,
         ]);
 
         // ── Aplicar timeout de sesión a todas las rutas web ──────────────────
         // Solo afecta a usuarios autenticados (el middleware hace la verificación)
         $middleware->appendToGroup('web', \App\Http\Middleware\SessionTimeout::class);
+        $middleware->appendToGroup('web', \App\Http\Middleware\CuentaActiva::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

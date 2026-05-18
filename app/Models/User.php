@@ -65,4 +65,23 @@ public function estaActivo(): bool    { return $this->status === 'activo'; }
 public function estaBloqueado(): bool { return $this->status === 'bloqueado'; }
 public function estaInactivo(): bool { return $this->status === 'inactivo'; }
 
+
+public function productos() {
+    return $this->hasMany(Producto::class);
+}
+public function carritoItems() {
+    return $this->hasMany(CarritoItem::class);
+}
+public function pedidos() {
+    return $this->hasMany(Pedido::class);
+}
+public function tarjetas() {
+    return $this->hasMany(Tarjeta::class, 'user_id'); // tabla tarjetas_guardadas
+}
+public function notificaciones() {
+    return $this->hasMany(Notificacion::class);
+}
+public function ventasComoVendedor() {
+    return $this->hasMany(PedidoItem::class, 'vendedor_id');
+}
 }

@@ -115,4 +115,8 @@ class Producto extends Model
 {
     return $this->belongsTo(User::class);
 }
+
+public function pedidoItems() {
+    return $this->hasMany(PedidoItem::class);
+}
 }

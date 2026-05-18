@@ -180,9 +180,8 @@ class PagoController extends BaseController
         try {
             // Actualizar pedido con datos de pago
             $tarjetaId     = $tarjeta?->id;
-            $ultCuatro     = $tarjeta
-                ? $tarjeta->ultimos_cuatro
-                : ($usarTarjetaGuardada ? $tarjeta->ultimos_cuatro : substr(preg_replace('/\D/', '', $request->numero ?? ''), -4));
+            $ultCuatro = $tarjeta?->ultimos_cuatro 
+    ?? substr(preg_replace('/\D/', '', $request->numero ?? ''), -4);
             $tipoTarjeta   = $tarjeta?->tipo ?? ($usarTarjetaGuardada ? null : Tarjeta::detectarTipo(preg_replace('/\D/', '', $request->numero ?? '')));
 
             $pedido->update([
