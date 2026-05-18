@@ -50,6 +50,11 @@ class Producto extends Model
         return $this->hasMany(ProductoDetalle::class)->orderBy('orden');
     }
 
+    public function pujas()
+{
+    return $this->hasMany(\App\Models\SubastaPuja::class, 'producto_id');
+}
+
     // ── Scopes ──────────────────────────────────────────────────────────────────
 
     public function scopeBuscar($query, $termino)
@@ -119,4 +124,23 @@ class Producto extends Model
 public function pedidoItems() {
     return $this->hasMany(PedidoItem::class);
 }
+
+public function pujaActual(): float
+{
+    return (float) ($this->pujas()->max('monto') ?? $this->precio);
+}
+
+public function pujaMinima(): float
+{
+    return $this->pujaActual() + ($this->incremento_minimo ?? 50);
+}
+
+public function subastaActiva(): bool
+{
+    return $this->tipo === 'subasta'
+        && $this->estado === 'activo'
+        && $this->timer_fin !== null
+        && \Carbon\Carbon::parse($this->timer_fin)->isFuture();
+}
+
 }

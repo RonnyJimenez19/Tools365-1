@@ -4,11 +4,7 @@
 
 @push('css')
 <style>
-/* ══════════════════════════════════════════════
-   PÁGINA DE DETALLE DE PRODUCTO
-══════════════════════════════════════════════ */
 
-/* ── Hero breadcrumb ── */
 .detalle-breadcrumb {
     background: var(--color-surface, #f8f9fa);
     border-bottom: 1px solid var(--color-border, #dee2e6);
@@ -259,6 +255,88 @@
 [data-theme="dark"] .specs-tabla td:last-child { color: #e0e0e0; }
 [data-theme="dark"] .relacionados-titulo { color: #f1f1f1; }
 [data-theme="dark"] .relacionados-section { border-color: #333; }
+
+.subasta-info-box {
+    background: linear-gradient(135deg, #f0f4ff, #e8f0fe);
+    border: 1.5px solid #c7d2fe;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-top: .5rem;
+}
+[data-theme="dark"] .subasta-info-box {
+    background: linear-gradient(135deg, #1e2035, #1a1f3a);
+    border-color: #3a3f6e;
+}
+.si-label {
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #6c757d;
+    margin-bottom: .2rem;
+}
+.si-val {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--color-text, #212529);
+    line-height: 1;
+}
+
+/* Input de puja */
+.puja-input-group {
+    display: flex;
+    align-items: center;
+    border: 2px solid #ffc107;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: border-color .2s, box-shadow .2s;
+}
+.puja-input-group:focus-within {
+    border-color: #e6a800;
+    box-shadow: 0 0 0 3px rgba(255,193,7,.25);
+}
+.puja-prefix,
+.puja-suffix {
+    padding: .5rem .8rem;
+    background: #fff8e1;
+    font-weight: 700;
+    color: #856404;
+    font-size: .95rem;
+    white-space: nowrap;
+}
+.puja-input {
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-align: center;
+    flex: 1;
+    min-width: 0;
+}
+.puja-input:focus { outline: none; }
+.puja-hint {
+    font-size: .78rem;
+    color: #6c757d;
+    margin-top: .35rem;
+    padding: 0 .2rem;
+}
+
+/* Filas de puja en accordion */
+.puja-fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .55rem 1rem;
+    border-bottom: 1px solid var(--color-border, #dee2e6);
+    font-size: .86rem;
+    gap: .5rem;
+}
+.puja-fila:last-child { border-bottom: none; }
+.puja-fila .pf-nombre { font-weight: 600; }
+.puja-fila .pf-monto  { font-weight: 800; color: #0d6efd; white-space: nowrap; }
+.puja-fila .pf-fecha  { font-size: .74rem; color: #999; }
+
 </style>
 @endpush
 
@@ -409,12 +487,132 @@
             </button>
         </form>
 
-    @elseif($producto->tipo === 'subasta')
-        {{-- Subasta: botón va a la lógica de oferta, no al carrito --}}
-        <a href="#" class="btn btn-warning w-100">
-            <i class="bi bi-hammer me-2"></i>Hacer una oferta
-        </a>
-    @endif
+@elseif($producto->tipo === 'subasta')
+        @php
+            $pujaActual      = $producto->pujaActual();
+            $pujaMinima      = $producto->pujaMinima();
+            $subastaActiva   = $producto->subastaActiva();
+            $esDueno         = auth()->id() === $producto->user_id;
+            $totalPujas      = $producto->pujas()->count();
+            $miMejorPuja     = $producto->pujas()->where('user_id', auth()->id())->max('monto');
+            $voyGanando      = $totalPujas > 0
+                            && $producto->pujas()->orderByDesc('monto')->value('user_id') === auth()->id();
+        @endphp
+ 
+        {{-- ── Info de la subasta ── --}}
+        <div class="subasta-info-box">
+            <div class="row g-2 text-center">
+                <div class="col-4">
+                    <div class="si-label">Puja actual</div>
+                    <div class="si-val text-primary" id="puja-actual-val">
+                        ${{ number_format($pujaActual, 0, '.', ',') }}
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="si-label">Mín. para pujar</div>
+                    <div class="si-val text-success">${{ number_format($pujaMinima, 0, '.', ',') }}</div>
+                </div>
+                <div class="col-4">
+                    <div class="si-label">Pujas</div>
+                    <div class="si-val" id="total-pujas-val">{{ $totalPujas }}</div>
+                </div>
+            </div>
+ 
+            @if($miMejorPuja)
+                <div class="mt-2 text-center" style="font-size:.82rem; color:#6c757d;">
+                    Tu mejor puja:
+                    <strong>${{ number_format($miMejorPuja, 0, '.', ',') }}</strong>
+                    &nbsp;
+                    @if($voyGanando)
+                        <span class="badge bg-success-subtle text-success">🏆 Vas ganando</span>
+                    @else
+                        <span class="badge bg-danger-subtle text-danger">⚠️ Fuiste superado</span>
+                    @endif
+                </div>
+            @endif
+        </div>
+ 
+        @if($esDueno)
+            <div class="alert alert-info py-2 mt-2" style="font-size:.88rem;">
+                <i class="bi bi-info-circle me-1"></i>
+                Esta es tu subasta. Gestiona las pujas desde
+                <a href="{{ route('subastas.index') }}">Mis Subastas</a>.
+            </div>
+ 
+        @elseif(!$subastaActiva)
+            <div class="alert alert-warning py-2 mt-2" style="font-size:.88rem;">
+                <i class="bi bi-clock-history me-1"></i>
+                @if($producto->estado === 'vendido')
+                    Esta subasta ya fue adjudicada.
+                @else
+                    El tiempo de esta subasta ha expirado.
+                @endif
+            </div>
+ 
+        @else
+            {{-- ── Formulario de puja ── --}}
+            <form method="POST"
+                  action="{{ route('subastas.pujar', $producto) }}"
+                  id="form-puja"
+                  class="mt-2">
+                @csrf
+                <div class="puja-input-group">
+                    <div class="puja-prefix">$</div>
+                    <input type="number"
+                           name="monto"
+                           id="monto-puja"
+                           class="puja-input form-control @error('monto') is-invalid @enderror"
+                           placeholder="{{ number_format($pujaMinima, 0) }}"
+                           min="{{ $pujaMinima }}"
+                           step="1"
+                           required>
+                    <div class="puja-suffix">MXN</div>
+                </div>
+                <div class="puja-hint">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Mínimo: <strong>${{ number_format($pujaMinima, 0, '.', ',') }}</strong>
+                    (puja actual + ${{ number_format($producto->incremento_minimo ?? 50, 0) }} de incremento)
+                </div>
+ 
+                @error('monto')
+                    <div class="alert alert-danger py-2 mt-1" style="font-size:.85rem;">
+                        <i class="bi bi-exclamation-circle me-1"></i>{{ $message }}
+                    </div>
+                @enderror
+ 
+                <button type="submit" class="btn btn-warning w-100 mt-2 fw-bold"
+                        onclick="return validarPuja({{ $pujaMinima }})">
+                    <i class="bi bi-hammer me-2"></i>Hacer oferta
+                </button>
+            </form>
+        @endif
+ 
+        {{-- Historial de pujas (accordion) --}}
+        <div class="accordion mt-3" id="accordionPujas">
+            <div class="accordion-item border-0 rounded-3 overflow-hidden"
+                 style="border: 1px solid var(--color-border, #dee2e6) !important;">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed py-2 fw-semibold"
+                            style="font-size:.88rem;"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#collapsePujas"
+                            onclick="cargarPujasInline({{ $producto->id }})">
+                        <i class="bi bi-list-ol me-2"></i>
+                        Ver historial de pujas ({{ $totalPujas }})
+                    </button>
+                </h2>
+                <div id="collapsePujas" class="accordion-collapse collapse">
+                    <div class="accordion-body p-0" id="pujas-inline-body">
+                        <div class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm text-primary"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @endif
 
     {{-- Feedback de sesión --}}
     @if(session('success'))
@@ -487,37 +685,9 @@
                 </div>
             @endif
 
-            {{-- CTA --}}
-            <div class="cta-group">
-                @if($producto->tipo === 'subasta')
-                    <a href="#" class="btn-cta-primary text-white"
-                       style="background: linear-gradient(135deg, #dc3545, #b02a37);">
-                        <i class="bi bi-hammer"></i> Realizar oferta
-                    </a>
-                @elseif($producto->tipo === 'renta')
-                    <a href="#" class="btn-cta-primary text-white"
-                       style="background: linear-gradient(135deg, #0d6efd, #0a58ca);">
-                        <i class="bi bi-calendar-check"></i> Solicitar renta
-                    </a>
-                @else
-                    <a href="#" class="btn-cta-primary text-white"
-                       style="background: linear-gradient(135deg, #198754, #146c43);">
-                        <i class="bi bi-bag-check"></i> Comprar ahora
-                    </a>
-                @endif
 
-                <a href="#" class="btn-cta-primary"
-                   style="background: var(--color-surface, #f8f9fa); border: 1.5px solid var(--color-border, #dee2e6); color: var(--color-text, #212529);">
-                    <i class="bi bi-whatsapp" style="color:#25d366;"></i> Contactar por WhatsApp
-                </a>
-            </div>
 
-            {{-- Compartir --}}
-            <div style="font-size:.82rem; color:#999; text-align:center;">
-                <i class="bi bi-share me-1"></i>
-                <a href="#" onclick="navigator.clipboard.writeText(window.location.href); this.textContent='¡Enlace copiado!'; setTimeout(()=>this.textContent='Copiar enlace',2000); return false;"
-                   style="color:inherit;">Copiar enlace</a>
-            </div>
+
 
         </div>
     </div>
@@ -556,6 +726,105 @@ function cambiarImagen(btn, src, alt) {
     }
     document.querySelectorAll('.thumb-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+}
+
+// Validación client-side de puja
+function validarPuja(minimo) {
+    const campo = document.getElementById('monto-puja');
+    if (!campo) return true;
+
+    const val = parseFloat(campo.value);
+
+    if (isNaN(val) || val < minimo) {
+        campo.classList.add('is-invalid');
+
+        let msg = document.getElementById('puja-error-msg');
+        if (!msg) {
+            msg = document.createElement('div');
+            msg.id = 'puja-error-msg';
+            msg.className = 'alert alert-danger py-2 mt-1';
+            msg.style.fontSize = '.85rem';
+
+            campo.closest('form').appendChild(msg);
+        }
+
+        msg.innerHTML = `
+            <i class="bi bi-exclamation-circle me-1"></i>
+            La puja mínima es <strong>$${minimo.toLocaleString('es-MX')}</strong> MXN.
+        `;
+
+        campo.focus();
+        return false;
+    }
+
+    campo.classList.remove('is-invalid');
+    const msg = document.getElementById('puja-error-msg');
+    if (msg) msg.remove();
+
+    return true;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const campo = document.getElementById('monto-puja');
+
+    if (campo) {
+        campo.addEventListener('input', () => {
+            campo.classList.remove('is-invalid');
+            const msg = document.getElementById('puja-error-msg');
+            if (msg) msg.remove();
+        });
+    }
+});
+
+let historialCargado = false;
+
+async function cargarPujasInline(productoId) {
+    if (historialCargado) return;
+
+    const body = document.getElementById('pujas-inline-body');
+    if (!body) return;
+
+    try {
+        const res = await fetch(`/subastas/${productoId}/historial`);
+        const data = await res.json();
+
+        if (!data.pujas.length) {
+            body.innerHTML = `
+                <p class="text-center text-muted py-3 mb-0">
+                    Aún no hay pujas registradas.
+                </p>
+            `;
+            historialCargado = true;
+            return;
+        }
+
+        let html = '';
+
+        data.pujas.forEach((p, i) => {
+            html += `
+                <div class="puja-fila ${i === 0 ? 'fw-bold' : ''}">
+                    <div>
+                        ${i === 0 ? '🏆 ' : ''}
+                        <span class="pf-nombre">${p.nombre}</span>
+                        <div class="pf-fecha">${p.fecha}</div>
+                    </div>
+                    <div class="pf-monto">
+                        $${Number(p.monto).toLocaleString('es-MX')}
+                    </div>
+                </div>
+            `;
+        });
+
+        body.innerHTML = html;
+        historialCargado = true;
+
+    } catch (e) {
+        body.innerHTML = `
+            <p class="text-danger text-center py-3 mb-0">
+                Error al cargar historial.
+            </p>
+        `;
+    }
 }
 </script>
 @endpush

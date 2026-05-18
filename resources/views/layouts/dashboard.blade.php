@@ -58,16 +58,13 @@
         {{-- ── ADMIN / GERENTE ── --}}
         @if(auth()->user()->puedeEditar())
             <div class="nav-section-label">Gestión del sistema</div>
-            <a href="#" class="nav-item">
+            <a href="{{ route('publicar.create') }}" class="nav-item">
                 <i class="bi bi-plus-circle-fill"></i> Publicar herramienta
             </a>
             <a href="#" class="nav-item">
                 <i class="bi bi-box-seam-fill"></i> Todas las herramientas
             </a>
-            <a href="#" class="nav-item">
-                <i class="bi bi-hammer"></i> Subastas
-                <span class="nav-badge new">5</span>
-            </a>
+
 
             @if(auth()->user()->esAdmin())
                 <div class="nav-section-label">Administración</div>
@@ -124,9 +121,9 @@
     <span class="nav-badge info">2</span>
 </a>
 
-<a href="#" class="nav-item">
+<a href="{{ route('subastas.index') }}"
+   class="nav-item {{ request()->routeIs('subastas.*') ? 'active' : '' }}">
     <i class="bi bi-hammer"></i> Subastas
-    <span class="nav-badge new">5</span>
 </a>
 
             <div class="nav-section-label">Cuenta</div>

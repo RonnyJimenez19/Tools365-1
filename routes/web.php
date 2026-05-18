@@ -13,6 +13,7 @@ use App\Http\Controllers\CarritoController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\VentasController;
+use App\Http\Controllers\SubastaController;
 
 
 // ── Rutas públicas ────────────────────────────────────────────────────────────
@@ -64,6 +65,15 @@ Route::middleware(['auth','cuenta.activa'])->group(function () {
         Route::patch('/{producto}/estado', [PublicarController::class, 'cambiarEstado'])->name('estado');
         Route::delete('/{producto}',       [PublicarController::class, 'destroy'])->name('destroy');
     });
+
+    Route::prefix('subastas')->name('subastas.')->group(function () {
+    Route::get('/',                              [SubastaController::class, 'index'])   ->name('index');
+    Route::post('/{producto}/pujar',             [SubastaController::class, 'pujar'])   ->name('pujar');
+    Route::get('/{producto}/historial',          [SubastaController::class, 'historial'])->name('historial');
+    Route::delete('/{producto}/cancelar',        [SubastaController::class, 'cancelar'])->name('cancelar');
+    Route::patch('/{producto}/vender',           [SubastaController::class, 'vender'])  ->name('vender');
+});
+ 
 
     // ── Carrito ───────────────────────────────────────────────────────────────
     Route::prefix('carrito')->name('carrito.')->group(function () {
