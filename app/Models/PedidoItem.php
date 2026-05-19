@@ -51,4 +51,6 @@ class PedidoItem extends Model
         $dias = $this->fecha_inicio->diffInDays($this->fecha_fin) + 1;
         return "{$this->fecha_inicio->format('d/m/Y')} – {$this->fecha_fin->format('d/m/Y')} ({$dias} día(s))";
     }
+
+    
 }

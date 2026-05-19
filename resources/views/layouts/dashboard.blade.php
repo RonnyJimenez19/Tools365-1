@@ -57,31 +57,38 @@
 
         {{-- ── ADMIN / GERENTE ── --}}
         @if(auth()->user()->puedeEditar())
-            <div class="nav-section-label">Gestión del sistema</div>
-            <a href="{{ route('publicar.create') }}" class="nav-item">
-                <i class="bi bi-plus-circle-fill"></i> Publicar herramienta
-            </a>
-            <a href="#" class="nav-item">
-                <i class="bi bi-box-seam-fill"></i> Todas las herramientas
-            </a>
+           
 
 
-            @if(auth()->user()->esAdmin())
-                <div class="nav-section-label">Administración</div>
-<a href="{{ route('admin.usuarios') }}" class="nav-item {{ request()->routeIs('admin.usuarios') ? 'active' : '' }}">
-    <i class="bi bi-people-fill"></i> Usuarios
-</a>
+@if(auth()->user()->esAdmin())
+    <div class="nav-section-label">Administración</div>
+    <a href="{{ route('admin.usuarios') }}"
+       class="nav-item {{ request()->routeIs('admin.usuarios') ? 'active' : '' }}">
+        <i class="bi bi-people-fill"></i> Usuarios
+    </a>
+    <a href="{{ route('admin.herramientas') }}"
+       class="nav-item {{ request()->routeIs('admin.herramientas') ? 'active' : '' }}">
+        <i class="bi bi-wrench-adjustable-circle-fill"></i> Herramientas
+    </a>
+    <a href="{{ route('admin.subastas') }}"
+       class="nav-item {{ request()->routeIs('admin.subastas') ? 'active' : '' }}">
+        <i class="bi bi-hammer"></i> Subastas
+    </a>
+    <a href="{{ route('admin.rentas') }}"
+       class="nav-item {{ request()->routeIs('admin.rentas') ? 'active' : '' }}">
+        <i class="bi bi-clock-history"></i> Rentas
+    </a>
+    <a href="{{ route('admin.opiniones') }}"
+       class="nav-item {{ request()->routeIs('admin.opiniones') ? 'active' : '' }}">
+        <i class="bi bi-chat-quote-fill"></i> Opiniones
+    </a>
+    <a href="{{ route('admin.ingresos') }}"
+       class="nav-item {{ request()->routeIs('admin.ingresos') ? 'active' : '' }}">
+        <i class="bi bi-bar-chart-fill"></i> Ingresos
+    </a>
+@endif
+ 
 
-                {{--<a href="#" class="nav-item">
-                    <i class="bi bi-file-earmark-text-fill"></i> Contenido de la página
-                </a>--}}
-                <a href="#" class="nav-item">
-                    <i class="bi bi-bar-chart-fill"></i> Reportes
-                </a>
-                {{--<a href="#" class="nav-item">
-                    <i class="bi bi-gear-fill"></i> Configuración
-                </a>--}}
-            @endif
         @endif
 
         {{-- ── USUARIO INVITADO ── --}}
