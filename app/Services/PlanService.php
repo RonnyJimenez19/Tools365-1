@@ -132,6 +132,30 @@ class PlanService
 
     // ── Comisiones ─────────────────────────────────────────────────────────────
 
+    public static function comision(string $plan): float
+{
+    $config = self::de($plan);
+
+    return $config['comision_venta'] ?? 0.12;
+}
+
+public static function comisionLabel(string $plan): string
+{
+    return (int)(self::comision($plan) * 100) . '%';
+}
+
+public static function calcular(float $totalItem, string $plan): array
+{
+    $pct      = self::comision($plan);
+    $comision = round($totalItem * $pct, 2);
+    $neto     = round($totalItem - $comision, 2);
+
+    return [
+        'comision_pct'   => $pct,
+        'comision_monto' => $comision,
+        'neto_vendedor'  => $neto,
+    ];
+}
     /**
      * Calcula la comisión que retiene la plataforma sobre un monto.
      *

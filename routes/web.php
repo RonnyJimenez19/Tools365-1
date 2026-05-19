@@ -150,5 +150,7 @@ Route::patch('/dashboard/rentas/{pedidoItem}/reactivar', [\App\Http\Controllers\
         Route::get('/publicaciones',                     [AdminController::class, 'publicaciones'])->name('publicaciones');
         Route::patch('/publicaciones/{producto}',        [AdminController::class, 'updatePublicacion'])->name('publicaciones.update');
         Route::delete('/publicaciones/{producto}',       [AdminController::class, 'destroyPublicacion'])->name('publicaciones.destroy');
-    });
+    
+        Route::get('/ingresos', [AdminController::class, 'ingresos'])->name('ingresos');
+        });
 

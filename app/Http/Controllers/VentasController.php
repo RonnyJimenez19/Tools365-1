@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pedido;
 use App\Models\PedidoItem;
+use App\Services\PlanService;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +18,6 @@ class VentasController extends BaseController
 
     /**
      * GET /dashboard/ventas
-     * Vista del VENDEDOR: todas las ventas/rentas de sus productos.
      */
     public function index(Request $request)
     {
@@ -28,41 +28,44 @@ class VentasController extends BaseController
             ->whereHas('pedido', fn($q) => $q->where('estado', 'pagado'))
             ->latest();
 
-        // Filtro por tipo
         if ($request->filled('tipo') && in_array($request->tipo, ['comprar', 'rentar'])) {
             $query->where('tipo_accion', $request->tipo);
         }
 
-        // Búsqueda
         if ($request->filled('q')) {
             $query->where('titulo', 'like', '%' . $request->q . '%');
         }
 
         $ventas = $query->paginate(12)->withQueryString();
 
-        // Totales resumen
-        $totalIngresos = PedidoItem::where('vendedor_id', $user->id)
-            ->whereHas('pedido', fn($q) => $q->where('estado', 'pagado'))
-            ->sum('total_item');
+        // ── Resumen financiero global ────────────────────────────────────────
+        $base = PedidoItem::where('vendedor_id', $user->id)
+            ->whereHas('pedido', fn($q) => $q->where('estado', 'pagado'));
 
-        $totalVentas = PedidoItem::where('vendedor_id', $user->id)
-            ->where('tipo_accion', 'comprar')
-            ->whereHas('pedido', fn($q) => $q->where('estado', 'pagado'))
-            ->count();
+        $totalBruto    = (clone $base)->sum('total_item');
+        $totalComision = (clone $base)->sum('comision_plataforma');
+        $totalNeto     = (clone $base)->sum('neto_vendedor');
+        $totalVentas   = (clone $base)->where('tipo_accion', 'comprar')->count();
+        $totalRentas   = (clone $base)->where('tipo_accion', 'rentar')->count();
 
-        $totalRentas = PedidoItem::where('vendedor_id', $user->id)
-            ->where('tipo_accion', 'rentar')
-            ->whereHas('pedido', fn($q) => $q->where('estado', 'pagado'))
-            ->count();
+        // Plan y tasa actual del vendedor
+        $planActual   = $user->plan ?? 'free';
+        $tasaActual   = PlanService::comisionLabel($planActual);
 
         return view('dashboard.ventas', compact(
-            'ventas', 'totalIngresos', 'totalVentas', 'totalRentas'
+            'ventas',
+            'totalBruto',
+            'totalComision',
+            'totalNeto',
+            'totalVentas',
+            'totalRentas',
+            'planActual',
+            'tasaActual'
         ));
     }
 
     /**
      * GET /dashboard/compras
-     * Vista del COMPRADOR: todos sus pedidos pagados.
      */
     public function compras(Request $request)
     {
@@ -73,20 +76,13 @@ class VentasController extends BaseController
             ->where('estado', 'pagado')
             ->latest('pagado_at');
 
-        // Filtro por tipo de acción dentro del pedido
         if ($request->filled('tipo')) {
             $query->whereHas('items', fn($q) => $q->where('tipo_accion', $request->tipo));
         }
 
-        $pedidos = $query->paginate(10)->withQueryString();
-
-        $totalGastado = Pedido::where('user_id', $user->id)
-            ->where('estado', 'pagado')
-            ->sum('total');
-
-        $totalPedidos = Pedido::where('user_id', $user->id)
-            ->where('estado', 'pagado')
-            ->count();
+        $pedidos      = $query->paginate(10)->withQueryString();
+        $totalGastado = Pedido::where('user_id', $user->id)->where('estado', 'pagado')->sum('total');
+        $totalPedidos = Pedido::where('user_id', $user->id)->where('estado', 'pagado')->count();
 
         return view('dashboard.compras', compact('pedidos', 'totalGastado', 'totalPedidos'));
     }

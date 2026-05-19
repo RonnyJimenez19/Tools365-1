@@ -4,7 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Producto;
-use Illuminate\Http\Request;
+use Illuminate\Http\Request;;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
+use App\Models\PedidoItem;
+use App\Models\Pedido;
+
 
 class AdminController extends Controller
 {
@@ -159,4 +164,94 @@ class AdminController extends Controller
 
         return $actividad->sortByDesc('fecha')->take(8)->values();
     }
+
+    public function ingresos(Request $request)
+{
+    // ── Filtros ────────────────────────────────────────────────────────────
+    $periodo = $request->get('periodo', '30'); // días
+    $desde   = now()->subDays((int) $periodo)->startOfDay();
+ 
+    $baseItems = PedidoItem::whereHas('pedido', fn($q) =>
+        $q->where('estado', 'pagado')->where('pagado_at', '>=', $desde)
+    );
+ 
+    // ── Totales globales ───────────────────────────────────────────────────
+    $totalBruto    = (clone $baseItems)->sum('total_item');
+    $totalComision = (clone $baseItems)->sum('comision_plataforma');
+    $totalNeto     = (clone $baseItems)->sum('neto_vendedor');
+    $totalTx       = (clone $baseItems)->count();
+ 
+    // Por tipo
+    $porTipo = PedidoItem::selectRaw("
+            tipo_accion,
+            COUNT(*)                         AS cantidad,
+            SUM(total_item)                  AS bruto,
+            SUM(comision_plataforma)         AS comision,
+            SUM(neto_vendedor)               AS neto
+        ")
+        ->whereHas('pedido', fn($q) =>
+            $q->where('estado', 'pagado')->where('pagado_at', '>=', $desde)
+        )
+        ->groupBy('tipo_accion')
+        ->get();
+ 
+    // Por plan del vendedor
+    $porPlan = PedidoItem::selectRaw("
+            u.plan,
+            COUNT(pi.id)                     AS cantidad,
+            SUM(pi.total_item)               AS bruto,
+            SUM(pi.comision_plataforma)      AS comision,
+            SUM(pi.neto_vendedor)            AS neto
+        ")
+        ->from('pedido_items AS pi')
+        ->join('users AS u', 'u.id', '=', 'pi.vendedor_id')
+        ->whereHas('pedido', fn($q) =>
+            $q->where('estado', 'pagado')->where('pagado_at', '>=', $desde)
+        )
+        ->groupBy('u.plan')
+        ->get();
+ 
+    // Top vendedores por comisión generada
+    $topVendedores = PedidoItem::selectRaw("
+            vendedor_id,
+            SUM(total_item)              AS bruto,
+            SUM(comision_plataforma)     AS comision,
+            SUM(neto_vendedor)           AS neto,
+            COUNT(*)                     AS ventas
+        ")
+        ->with('vendedor:id,name,email,plan')
+        ->whereHas('pedido', fn($q) =>
+            $q->where('estado', 'pagado')->where('pagado_at', '>=', $desde)
+        )
+        ->groupBy('vendedor_id')
+        ->orderByDesc('comision')
+        ->limit(10)
+        ->get();
+ 
+    // Últimas transacciones
+    $ultimasTx = PedidoItem::with(['pedido', 'vendedor:id,name,plan'])
+        ->whereHas('pedido', fn($q) =>
+            $q->where('estado', 'pagado')->where('pagado_at', '>=', $desde)
+        )
+        ->orderByDesc('created_at')
+        ->limit(20)
+        ->get();
+ 
+    // Ingresos por suscripciones de plan (pedidos con folio PLAN-)
+    $ingresosSubs = Pedido::where('folio', 'like', 'PLAN-%')
+        ->where('estado', 'pagado')
+        ->where('pagado_at', '>=', $desde)
+        ->sum('total');
+ 
+    $cantidadSubs = Pedido::where('folio', 'like', 'PLAN-%')
+        ->where('estado', 'pagado')
+        ->where('pagado_at', '>=', $desde)
+        ->count();
+ 
+    return view('dashboard.admin.ingresos', compact(
+        'totalBruto', 'totalComision', 'totalNeto', 'totalTx',
+        'porTipo', 'porPlan', 'topVendedores', 'ultimasTx',
+        'ingresosSubs', 'cantidadSubs', 'periodo'
+    ));
+}
 }

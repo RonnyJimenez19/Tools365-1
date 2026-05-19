@@ -11,6 +11,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Services\PlanService;
 
 class SubastaController extends BaseController
 {
@@ -340,22 +341,22 @@ class SubastaController extends BaseController
     // ──────────────────────────────────────────────────────
     // POST /subastas/pagar/{pedido}/procesar
     // ──────────────────────────────────────────────────────
-    public function procesarPago(Request $request, Pedido $pedido)
+public function procesarPago(Request $request, Pedido $pedido)
     {
         $user = Auth::user();
-
+ 
         if ($pedido->user_id !== $user->id) abort(403);
         if (!$pedido->es_subasta) abort(404);
-
+ 
         if ($pedido->timerExpirado()) {
             $this->cancelarPedidoSubasta($pedido);
             return redirect()->route('subastas.index')
                 ->with('error', 'El tiempo para pagar expiró.');
         }
-
-        // Determinar tarjeta
+ 
+        // ── Determinar tarjeta ───────────────────────────────────────────────
         $usarGuardada = $request->filled('tarjeta_guardada_id');
-
+ 
         if ($usarGuardada) {
             $tarjeta = \App\Models\Tarjeta::where('id', $request->tarjeta_guardada_id)
                 ->where('user_id', $user->id)->firstOrFail();
@@ -367,10 +368,10 @@ class SubastaController extends BaseController
                 'exp_anio' => ['required', 'integer', 'min:' . date('Y')],
                 'cvv'      => ['required', 'digits_between:3,4'],
             ]);
-
+ 
             $numeroLimpio = preg_replace('/\D/', '', $request->numero);
             $tarjeta = null;
-
+ 
             if ($request->boolean('guardar_tarjeta')) {
                 if ($request->boolean('predeterminada')) {
                     \App\Models\Tarjeta::where('user_id', $user->id)->update(['predeterminada' => false]);
@@ -387,62 +388,70 @@ class SubastaController extends BaseController
                 ]);
             }
         }
-
+ 
         $producto = $pedido->subastaProducto;
-
+ 
         DB::transaction(function () use ($pedido, $producto, $tarjeta, $request, $usarGuardada, $user) {
             $numeroLimpio = $usarGuardada ? null : preg_replace('/\D/', '', $request->numero ?? '');
-
+ 
+            // ── Calcular comisión según plan del VENDEDOR ────────────────────
+            $planVendedor = $producto->user->plan ?? 'free';
+            $calc = \App\Services\PlanService::calcular($pedido->total, $planVendedor);
+ 
             $pedido->update([
                 'tarjeta_id'             => $tarjeta?->id,
                 'tarjeta_ultimos_cuatro' => $tarjeta?->ultimos_cuatro ?? substr($numeroLimpio, -4),
                 'tarjeta_tipo'           => $tarjeta?->tipo ?? \App\Models\Tarjeta::detectarTipo($numeroLimpio ?? ''),
                 'estado'                 => 'pagado',
                 'pagado_at'              => now(),
+                'comision_total'         => $calc['comision_monto'],
             ]);
-
-            // Crear pedido_item
+ 
+            // Crear pedido_item con comisión
             \App\Models\PedidoItem::create([
-                'pedido_id'       => $pedido->id,
-                'producto_id'     => $producto->id,
-                'titulo'          => $producto->titulo,
-                'tipo_accion'     => 'comprar',
-                'precio_unitario' => $pedido->total,
-                'cantidad'        => 1,
-                'total_item'      => $pedido->total,
-                'vendedor_id'     => $producto->user_id,
+                'pedido_id'           => $pedido->id,
+                'producto_id'         => $producto->id,
+                'titulo'              => $producto->titulo,
+                'tipo_accion'         => 'comprar',
+                'precio_unitario'     => $pedido->total,
+                'cantidad'            => 1,
+                'total_item'          => $pedido->total,
+                'comision_pct'        => $calc['comision_pct'],
+                'comision_plataforma' => $calc['comision_monto'],
+                'neto_vendedor'       => $calc['neto_vendedor'],
+                'vendedor_id'         => $producto->user_id,
             ]);
-
-            // Marcar producto como vendido
+ 
             $producto->update(['estado' => 'vendido']);
-
-            // Notificar al ganador (comprador)
+ 
+            // Notificar al comprador
             Notificacion::create([
                 'user_id'  => $user->id,
                 'tipo'     => 'compra_confirmada',
                 'titulo'   => '¡Pago confirmado! ' . $pedido->folio,
-                'cuerpo'   => "Tu pago de $" . number_format($pedido->total, 2)
-                              . " MXN por \"{$producto->titulo}\" fue procesado. ¡El vendedor se pondrá en contacto!",
+                'cuerpo'   => 'Tu pago de $' . number_format($pedido->total, 2)
+                              . ' MXN por "' . $producto->titulo . '" fue procesado. ¡El vendedor se pondrá en contacto!',
                 'url'      => '/dashboard/compras',
                 'ref_tipo' => 'pedido',
                 'ref_id'   => $pedido->id,
                 'leida'    => false,
             ]);
-
-            // Notificar al vendedor
+ 
+            // Notificar al vendedor con su neto
             Notificacion::create([
                 'user_id'  => $producto->user_id,
                 'tipo'     => 'venta_realizada',
                 'titulo'   => '¡Pago recibido por tu subasta!',
-                'cuerpo'   => "{$user->name} pagó $" . number_format($pedido->total, 2)
-                              . " MXN por \"{$producto->titulo}\".",
+                'cuerpo'   => $user->name . ' pagó $' . number_format($pedido->total, 2)
+                              . ' MXN por "' . $producto->titulo . '". '
+                              . 'Tu ingreso neto: $' . number_format($calc['neto_vendedor'], 2) . ' MXN.',
                 'url'      => '/dashboard/ventas',
                 'ref_tipo' => 'pedido',
                 'ref_id'   => $pedido->id,
                 'leida'    => false,
             ]);
         });
-
+ 
         return redirect()->route('pago.confirmacion', $pedido)
             ->with('success', "¡Pago exitoso! Pedido #{$pedido->folio} confirmado.");
     }
