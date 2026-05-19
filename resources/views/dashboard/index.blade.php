@@ -458,15 +458,7 @@
     </a>
 </div>
 
-    <div class="col-6 col-md-3 col-lg-3">
-        <a href="#" class="action-card h-100">
-            <div class="action-icon wallet"><i class="bi bi-wallet2"></i></div>
-            <div>
-                <div class="action-label">Mi billetera</div>
-                <div class="action-sub">$4,280 disponible</div>
-            </div>
-        </a>
-    </div>
+
 
     <div class="col-6 col-md-3 col-lg-3">
         <a href="{{ route('planes.index') }}" class="action-card h-100">

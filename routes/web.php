@@ -14,6 +14,8 @@ use App\Http\Controllers\PagoController;
 use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\VentasController;
 use App\Http\Controllers\SubastaController;
+use App\Http\Controllers\PlanController;
+
 
 
 // ── Rutas públicas ────────────────────────────────────────────────────────────
@@ -79,8 +81,13 @@ Route::middleware(['auth','cuenta.activa'])->group(function () {
     Route::get('/pagar/{pedido}/timer',          [SubastaController::class, 'timerSubasta']) ->name('pagar.timer');
 });
 
-Route::get('/dashboard/plan', [\App\Http\Controllers\DashboardController::class, 'plan'])->name('dashboard.plan');
-
+// ── Plan / Suscripción ────────────────────────────────────────────────────
+Route::prefix('dashboard/plan')->name('dashboard.plan')->group(function () {
+    Route::get('/',                    [PlanController::class, 'index'])   ->name('');         // GET  /dashboard/plan
+    Route::get('/checkout/{plan}',     [PlanController::class, 'checkout'])->name('.checkout'); // GET  /dashboard/plan/checkout/pro
+    Route::post('/pagar',              [PlanController::class, 'pagar'])   ->name('.pagar');    // POST /dashboard/plan/pagar
+    Route::delete('/cancelar',         [PlanController::class, 'cancelar'])->name('.cancelar'); // DEL  /dashboard/plan/cancelar
+});
 
 // Rentas
 Route::get('/dashboard/rentas', [\App\Http\Controllers\RentasController::class, 'index'])->name('dashboard.rentas');

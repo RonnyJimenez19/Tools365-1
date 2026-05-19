@@ -93,7 +93,6 @@
             <a href="{{ route('mis-publicaciones.index') }}"
                class="nav-item {{ request()->routeIs('mis-publicaciones.*') ? 'active' : '' }}">
                 <i class="bi bi-box-seam-fill"></i> Mis publicaciones
-                <span class="nav-badge info">3</span>
             </a>
 
 <div class="nav-section-label">Ventas</div>
@@ -118,7 +117,6 @@
 
 <a href="{{ route('dashboard.rentas') }}" class="nav-item">
     <i class="bi bi-clock-history"></i> Mis rentas
-    <span class="nav-badge info">2</span>
 </a>
 
 <a href="{{ route('subastas.index') }}"
@@ -127,9 +125,7 @@
 </a>
 
             <div class="nav-section-label">Cuenta</div>
-            <a href="#" class="nav-item {{ request()->routeIs('perfil.*') ? 'active' : '' }}">
-                <i class="bi bi-person-circle"></i> Mi perfil
-            </a>
+ 
             <a href="{{ route('dashboard.plan') }}"
                class="nav-item {{ request()->routeIs('planes.*') ? 'active' : '' }}">
                 <i class="bi bi-star-fill"></i> Mi plan
@@ -141,9 +137,7 @@
         <a href="{{ route('inicio') }}" class="nav-item">
             <i class="bi bi-shop"></i> Ir a la tienda
         </a>
-        <a href="#" class="nav-item">
-            <i class="bi bi-question-circle-fill"></i> Ayuda & FAQ
-        </a>
+   
 
         @if(auth()->user()->puedeEditar())
             <div class="sidebar-role-badge">
