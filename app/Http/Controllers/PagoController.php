@@ -180,9 +180,8 @@ class PagoController extends BaseController
         try {
             // Actualizar pedido con datos de pago
             $tarjetaId     = $tarjeta?->id;
-            $ultCuatro     = $tarjeta
-                ? $tarjeta->ultimos_cuatro
-                : ($usarTarjetaGuardada ? $tarjeta->ultimos_cuatro : substr(preg_replace('/\D/', '', $request->numero ?? ''), -4));
+            $ultCuatro = $tarjeta?->ultimos_cuatro 
+    ?? substr(preg_replace('/\D/', '', $request->numero ?? ''), -4);
             $tipoTarjeta   = $tarjeta?->tipo ?? ($usarTarjetaGuardada ? null : Tarjeta::detectarTipo(preg_replace('/\D/', '', $request->numero ?? '')));
 
             $pedido->update([
@@ -212,10 +211,16 @@ class PagoController extends BaseController
                     'vendedor_id'     => $producto->user_id,
                 ]);
 
-                // Marcar producto como vendido si es venta (rentas siguen activas)
-                if ($item->tipo_accion === 'comprar') {
-                    $producto->update(['estado' => 'vendido']);
-                }
+                // Marcar producto como vendido si es venta o como pausado si es renta
+   if ($item->tipo_accion === 'comprar') {
+       // Venta: producto pasa a vendido definitivamente
+       $producto->update(['estado' => 'vendido']);
+ 
+   } elseif ($item->tipo_accion === 'rentar') {
+       // Renta: producto se pausa para que no aparezca en búsquedas
+       // El arrendador podrá reactivarlo desde "Mis rentas" cuando termine el período
+       $producto->update(['estado' => 'pausado']);
+   }
 
                 // Notificar al vendedor (una vez por vendedor por pedido)
                 $vendedorId = $producto->user_id;

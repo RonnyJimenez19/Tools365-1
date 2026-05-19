@@ -106,4 +106,8 @@ class Notificacion extends Model
             'ref_id'   => $pedido->id,
         ]);
     }
+
+    public function pedido() {
+    return $this->belongsTo(Pedido::class, 'ref_id');
+}
 }

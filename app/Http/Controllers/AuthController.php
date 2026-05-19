@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
+use App\Models\Producto;
 
 
 
@@ -51,47 +52,82 @@ public function showLogin()
     return view('auth.login', compact('stats'));
 }
 
-    public function login(Request $request)
-    {
-        $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required|string',
-        ], [
-            'email.required'    => 'El correo es obligatorio.',
-            'email.email'       => 'Ingresa un correo válido.',
-            'password.required' => 'La contraseña es obligatoria.',
-        ]);
 
-        // Verificar reCAPTCHA v3
-$token = $request->input('recaptcha_token', '');
-if (!$this->verifyRecaptcha($token, 'login', 0.5)) {
+public function login(Request $request)
+{
+    $request->validate([
+        'email'    => 'required|email',
+        'password' => 'required|string',
+    ], [
+        'email.required'    => 'El correo es obligatorio.',
+        'email.email'       => 'Ingresa un correo válido.',
+        'password.required' => 'La contraseña es obligatoria.',
+    ]);
+
+    // Verificar reCAPTCHA v3
+    $token = $request->input('recaptcha_token', '');
+
+    if (!$this->verifyRecaptcha($token, 'login', 0.5)) {
+        return back()
+            ->withInput($request->only('email'))
+            ->withErrors([
+                'email' => 'Verificación de seguridad fallida. Intenta de nuevo.'
+            ]);
+    }
+
+    $credentials = $request->only('email', 'password');
+    $remember = $request->boolean('remember');
+
+    if (Auth::attempt($credentials, $remember)) {
+
+        $user = Auth::user();
+
+        // Verificar correo
+        if (!$user->email_verified_at) {
+            Auth::logout();
+
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors([
+                    'email' => 'Debes verificar tu correo antes de iniciar sesión.'
+                ]);
+        }
+
+        // Verificar status
+        if ($user->status === 'bloqueado') {
+            Auth::logout();
+
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors([
+                    'email' => 'Tu cuenta ha sido bloqueada por uso indebido. Contacta al soporte.'
+                ]);
+        }
+
+        if ($user->status === 'inactivo') {
+            Auth::logout();
+
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors([
+                    'email' => 'Esta cuenta está inactiva. Contacta al administrador para reactivarla.'
+                ]);
+        }
+
+        // Solo si todo está correcto
+        $request->session()->regenerate();
+        session(['last_activity_at' => now()]);
+
+        return redirect()->intended(route('inicio'))
+            ->with('success', 'Sesión iniciada correctamente.');
+    }
+
     return back()
         ->withInput($request->only('email'))
-        ->withErrors(['email' => 'Verificación de seguridad fallida. Intenta de nuevo.']);
+        ->withErrors([
+            'email' => 'Las credenciales no son correctas.'
+        ]);
 }
-
-        $credentials = $request->only('email', 'password');
-        $remember    = $request->boolean('remember');
-
-if (Auth::attempt($credentials, $remember)) {
-    if (!Auth::user()->email_verified_at) {
-        Auth::logout();
-        return back()
-            ->withInput($request->only('email'))
-            ->withErrors(['email' => 'Debes verificar tu correo antes de iniciar sesión.']);
-    }
-
-    $request->session()->regenerate();   // ← fuera del if, al mismo nivel
-    session(['last_activity_at' => now()]);
-
-    return redirect()->intended(route('inicio'))
-        ->with('success', 'Sesión iniciada correctamente.');
-}
-
-        return back()
-            ->withInput($request->only('email'))
-            ->withErrors(['email' => 'Las credenciales no son correctas.']);
-    }
 
     // ── Login admin (solo personal interno → dashboard) ──────────────────────
 

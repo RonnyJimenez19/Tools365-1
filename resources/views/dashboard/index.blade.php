@@ -434,7 +434,8 @@
             </div>
         </a>
     </div>
-    <div class="col-6 col-md-3 col-lg-3">
+
+    {{--<div class="col-6 col-md-3 col-lg-3">
 <a href="{{ route('comentarios.index') }}" class="action-card h-100">
     <div class="action-icon msg"><i class="bi bi-chat-left-text-fill"></i></div>
     <div>
@@ -442,7 +443,8 @@
         <div class="action-sub">3 sin responder</div>
     </div>
 </a>
-    </div>
+    </div> --}}
+
 
     <div class="col-6 col-md-3 col-lg-3">
     <a href="{{ route('notificaciones.index') }}" class="action-card h-100">
