@@ -224,16 +224,16 @@
         <div class="plans-row">
             <x-plan-card
                 nombre="FREE" precio="$0" periodo="/mes" descripcion="Ideal para usuarios nuevos"
-                :caracteristicas="['Hasta 5 publicaciones','3 fotos por publicación','Visibilidad estándar','Soporte email (48h)','Comisión venta: 12%','Comisión renta: 15%']"
+                :caracteristicas="['Hasta 5 publicaciones','3 fotos por publicación','Soporte email (48h)','Comisión venta: 12%','Comisión renta: 15%']"
             />
             <x-plan-card
                 nombre="BÁSICO" precio="$199" periodo="/mes" descripcion="Para vendedores activos"
                 destacado="true" badge="MÁS POPULAR"
-                :caracteristicas="['Hasta 20 publicaciones','6 fotos + 1 video','2 destacados al mes','Insignia Verificado','Soporte email (24h)','Comisión venta: 10%','Comisión renta: 12%']"
+                :caracteristicas="['Hasta 20 publicaciones','6 fotos','2 destacados al mes','Soporte email (24h)','Comisión venta: 10%','Comisión renta: 12%']"
             />
             <x-plan-card
                 nombre="PROFESIONAL" precio="$599" periodo="/mes" descripcion="Para empresas y alto volumen"
-                :caracteristicas="['Publicaciones ilimitadas','10 fotos + 3 videos','10 destacados al mes','Insignia PRO','Soporte prioritario 24/7','Estadísticas avanzadas','Comisiones desde 8%']"
+                :caracteristicas="['Publicaciones ilimitadas','10 fotos','10 destacados al mes','Insignia PRO','Soporte prioritario 24/7','Comisiones desde 8%']"
             />
         </div>
     </div>

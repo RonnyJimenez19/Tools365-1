@@ -12,7 +12,8 @@ return new class extends Migration
 public function up(): void
 {
     Schema::table('users', function (Blueprint $table) {
-        $table->string('plan')->default('basico')->after('rol');
+        $table->string('plan')->default('free')->after('rol');
+
         // basico | pro | enterprise
 
         $table->enum('status', ['activo', 'bloqueado', 'inactivo'])

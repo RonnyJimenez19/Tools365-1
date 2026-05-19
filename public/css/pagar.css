@@ -1,0 +1,198 @@
+
+/* ══════════════════════════════════════════════════
+   PAGO DE SUBASTA
+══════════════════════════════════════════════════ */
+.pago-sub-layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 2rem;
+    align-items: start;
+    padding: 2rem 0;
+}
+@media (max-width: 900px) {
+    .pago-sub-layout { grid-template-columns: 1fr; }
+}
+
+/* Timer urgente */
+.timer-24h {
+    background: linear-gradient(135deg, #fff3cd, #ffeeba);
+    border: 2px solid #ffc107;
+    border-radius: 14px;
+    padding: 1.2rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.timer-24h.critico {
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    border-color: #dc3545;
+}
+.timer-24h-icon { font-size: 2rem; flex-shrink: 0; }
+.timer-24h-label {
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #856404;
+    margin-bottom: .1rem;
+}
+.timer-24h.critico .timer-24h-label { color: #991b1b; }
+.timer-24h-val {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #856404;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+.timer-24h.critico .timer-24h-val { color: #dc3545; }
+.timer-24h-desc { font-size: .82rem; color: #6c757d; margin-top: .2rem; }
+
+/* Resumen del producto ganado */
+.prod-ganado-card {
+    border-radius: 14px;
+    border: 1.5px solid #c7d2fe;
+    background: linear-gradient(135deg, #f0f4ff, #e8f0fe);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+[data-theme="dark"] .prod-ganado-card {
+    background: linear-gradient(135deg, #1e2035, #1a1f3a);
+    border-color: #3a3f6e;
+}
+.prod-ganado-inner {
+    display: flex;
+    gap: 1rem;
+    padding: 1.1rem;
+    align-items: center;
+}
+.prod-ganado-img {
+    width: 80px;
+    height: 64px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: #9fa8da;
+}
+.prod-ganado-img img {
+    width: 80px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+.prod-ganado-titulo {
+    font-weight: 700;
+    font-size: .97rem;
+    line-height: 1.3;
+    color: var(--color-text, #212529);
+}
+.prod-ganado-precio {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #0d6efd;
+    margin-top: .2rem;
+}
+.prod-ganado-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    background: #d1fae5;
+    color: #065f46;
+    font-size: .74rem;
+    font-weight: 700;
+    padding: .2rem .6rem;
+    border-radius: 20px;
+    margin-bottom: .4rem;
+}
+
+/* Panel de pago */
+.pago-panel {
+    background: var(--color-surface, #fff);
+    border: 1.5px solid var(--color-border, #dee2e6);
+    border-radius: 16px;
+    padding: 1.8rem;
+}
+[data-theme="dark"] .pago-panel { background: #1e1e2e; border-color: #333; }
+
+.pago-section-label {
+    font-size: .73rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: #999;
+    margin-bottom: 1rem;
+    padding-bottom: .4rem;
+    border-bottom: 1px solid var(--color-border, #dee2e6);
+}
+
+/* Tarjetas guardadas */
+.tarjeta-saved {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    padding: .75rem 1rem;
+    border: 2px solid var(--color-border, #dee2e6);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+    margin-bottom: .5rem;
+}
+.tarjeta-saved:has(input:checked) {
+    border-color: #0d6efd;
+    background: rgba(13,110,253,.04);
+}
+.tarjeta-saved input[type=radio] { flex-shrink: 0; }
+.tarjeta-icon { font-size: 1.4rem; }
+.tarjeta-info { flex: 1; }
+.tarjeta-numero { font-weight: 700; font-size: .92rem; }
+.tarjeta-det    { font-size: .78rem; color: #6c757d; }
+
+/* Inputs tarjeta nueva */
+.input-card {
+    border-radius: 8px;
+    border: 1.5px solid var(--color-border, #dee2e6);
+    padding: .55rem .9rem;
+    font-size: .93rem;
+    width: 100%;
+    transition: border-color .2s, box-shadow .2s;
+    background: var(--color-surface, #fff);
+    color: var(--color-text, #212529);
+}
+.input-card:focus {
+    outline: none;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 3px rgba(13,110,253,.18);
+}
+
+/* Resumen lateral */
+.resumen-lateral {
+    background: var(--color-surface, #fff);
+    border: 1.5px solid var(--color-border, #dee2e6);
+    border-radius: 16px;
+    padding: 1.5rem;
+    position: sticky;
+    top: 1.5rem;
+}
+[data-theme="dark"] .resumen-lateral { background: #1e1e2e; border-color: #333; }
+.resumen-fila {
+    display: flex;
+    justify-content: space-between;
+    font-size: .88rem;
+    padding: .4rem 0;
+    border-bottom: 1px solid var(--color-border, #dee2e6);
+}
+.resumen-fila:last-child { border: none; }
+.resumen-total-fila {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.15rem;
+    font-weight: 800;
+    padding: .7rem 0 0;
+    margin-top: .3rem;
+}
+.resumen-total-fila .val { color: #0d6efd; }

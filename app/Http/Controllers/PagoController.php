@@ -8,10 +8,12 @@ use App\Models\Pedido;
 use App\Models\PedidoItem;
 use App\Models\Producto;
 use App\Models\Tarjeta;
+use App\Services\PlanService;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PagoController extends BaseController
 {
@@ -22,10 +24,6 @@ class PagoController extends BaseController
 
     // ── 1. MOSTRAR formulario de pago ────────────────────────────────────────
 
-    /**
-     * GET /pago/iniciar
-     * Crea el pedido en estado "pendiente" con timer de 3 min y muestra la UI.
-     */
     public function iniciar()
     {
         $user  = Auth::user();
@@ -38,14 +36,12 @@ class PagoController extends BaseController
                 ->with('error', 'Tu carrito está vacío.');
         }
 
-        // Verificar que todos los productos estén activos
         $inactivos = $items->filter(fn($i) => $i->producto->estado !== 'activo');
         if ($inactivos->isNotEmpty()) {
             return redirect()->route('carrito.index')
                 ->with('error', 'Algunos productos de tu carrito ya no están disponibles.');
         }
 
-        // Cancelar pedido pendiente anterior si lo hay (ya expiró el timer)
         $pedidoAnterior = Pedido::where('user_id', $user->id)
             ->where('estado', 'pendiente')
             ->first();
@@ -55,20 +51,15 @@ class PagoController extends BaseController
                 $pedidoAnterior->update(['estado' => 'cancelado']);
                 Notificacion::crearCancelacion($user, $pedidoAnterior);
             } else {
-                // Aún tiene tiempo — redirigir al pago existente
                 $tarjetas = Tarjeta::where('user_id', $user->id)
-                    ->where('predeterminada', false)
-                    ->orWhere(fn($q) => $q->where('user_id', $user->id)->where('predeterminada', true))
                     ->orderByDesc('predeterminada')
                     ->get();
-
                 $subtotal = $items->sum('total_calculado');
                 return view('pago.index', compact('items', 'subtotal', 'tarjetas'))
                     ->with('pedido', $pedidoAnterior);
             }
         }
 
-        // Crear nuevo pedido pendiente
         DB::beginTransaction();
         try {
             $subtotal = $items->sum('total_calculado');
@@ -77,7 +68,7 @@ class PagoController extends BaseController
                 'folio'       => Pedido::generarFolio(),
                 'user_id'     => $user->id,
                 'subtotal'    => $subtotal,
-                'total'       => $subtotal, // sin impuestos en mock
+                'total'       => $subtotal,
                 'estado'      => 'pendiente',
                 'pago_limite' => now()->addMinutes(3),
             ]);
@@ -98,9 +89,6 @@ class PagoController extends BaseController
 
     // ── 2. PROCESAR pago ─────────────────────────────────────────────────────
 
-    /**
-     * POST /pago/procesar
-     */
     public function procesar(Request $request)
     {
         $user   = Auth::user();
@@ -108,7 +96,6 @@ class PagoController extends BaseController
             ->where('estado', 'pendiente')
             ->firstOrFail();
 
-        // Verificar timer
         if ($pedido->timerExpirado()) {
             $pedido->update(['estado' => 'cancelado']);
             Notificacion::crearCancelacion($user, $pedido);
@@ -124,44 +111,38 @@ class PagoController extends BaseController
                 ->where('user_id', $user->id)
                 ->firstOrFail();
         } else {
-            // Validar tarjeta nueva
             $request->validate([
-                'numero' => ['required', 'regex:/^[\d\s]{13,23}$/'],
-                'titular'   => ['required', 'string', 'max:100'],
-                'exp_mes'   => ['required', 'integer', 'between:1,12'],
-                'exp_anio'  => ['required', 'integer', 'min:' . date('Y')],
-                'cvv'       => ['required', 'digits_between:3,4'],
+                'numero'   => ['required', 'regex:/^[\d\s]{13,23}$/'],
+                'titular'  => ['required', 'string', 'max:100'],
+                'exp_mes'  => ['required', 'integer', 'between:1,12'],
+                'exp_anio' => ['required', 'integer', 'min:' . date('Y')],
+                'cvv'      => ['required', 'digits_between:3,4'],
             ], [
-                'numero.required'   => 'El número de tarjeta es obligatorio.',
-                'numero.digits_between' => 'El número de tarjeta debe tener entre 13 y 19 dígitos.',
-                'titular.required'  => 'El nombre del titular es obligatorio.',
-                'exp_mes.required'  => 'El mes de vencimiento es obligatorio.',
-                'exp_anio.required' => 'El año de vencimiento es obligatorio.',
-                'cvv.required'      => 'El CVV es obligatorio.',
-                'cvv.digits_between'=> 'El CVV debe tener 3 o 4 dígitos.',
+                'numero.required'  => 'El número de tarjeta es obligatorio.',
+                'titular.required' => 'El nombre del titular es obligatorio.',
+                'exp_mes.required' => 'El mes de vencimiento es obligatorio.',
+                'exp_anio.required'=> 'El año de vencimiento es obligatorio.',
+                'cvv.required'     => 'El CVV es obligatorio.',
+                'cvv.digits_between' => 'El CVV debe tener 3 o 4 dígitos.',
             ]);
 
-            $numeroLimpio   = preg_replace('/\D/', '', $request->numero);
-            $ultimosCuatro  = substr($numeroLimpio, -4);
-            $tipoDetectado  = Tarjeta::detectarTipo($numeroLimpio);
+            $numeroLimpio  = preg_replace('/\D/', '', $request->numero);
+            $tipoDetectado = Tarjeta::detectarTipo($numeroLimpio);
+            $tarjeta       = null;
 
-            // Guardar tarjeta si el usuario lo pidió
-            $tarjeta = null;
             if ($request->boolean('guardar_tarjeta')) {
-                // Si se marca predeterminada, desmarcar las anteriores
                 if ($request->boolean('predeterminada')) {
                     Tarjeta::where('user_id', $user->id)->update(['predeterminada' => false]);
                 }
-
                 $tarjeta = Tarjeta::create([
-                    'user_id'         => $user->id,
-                    'ultimos_cuatro'  => $ultimosCuatro,
-                    'tipo'            => $tipoDetectado,
-                    'titular'         => strtoupper(trim($request->titular)),
-                    'exp_mes'         => $request->exp_mes,
-                    'exp_anio'        => $request->exp_anio,
-                    'token_simulado'  => Tarjeta::generarToken(),
-                    'predeterminada'  => $request->boolean('predeterminada'),
+                    'user_id'        => $user->id,
+                    'ultimos_cuatro' => substr($numeroLimpio, -4),
+                    'tipo'           => $tipoDetectado,
+                    'titular'        => strtoupper(trim($request->titular)),
+                    'exp_mes'        => $request->exp_mes,
+                    'exp_anio'       => $request->exp_anio,
+                    'token_simulado' => Tarjeta::generarToken(),
+                    'predeterminada' => $request->boolean('predeterminada'),
                 ]);
             }
         }
@@ -178,11 +159,11 @@ class PagoController extends BaseController
 
         DB::beginTransaction();
         try {
-            // Actualizar pedido con datos de pago
-            $tarjetaId     = $tarjeta?->id;
-            $ultCuatro = $tarjeta?->ultimos_cuatro 
-    ?? substr(preg_replace('/\D/', '', $request->numero ?? ''), -4);
-            $tipoTarjeta   = $tarjeta?->tipo ?? ($usarTarjetaGuardada ? null : Tarjeta::detectarTipo(preg_replace('/\D/', '', $request->numero ?? '')));
+            $tarjetaId   = $tarjeta?->id;
+            $ultCuatro   = $tarjeta?->ultimos_cuatro
+                ?? substr(preg_replace('/\D/', '', $request->numero ?? ''), -4);
+            $tipoTarjeta = $tarjeta?->tipo
+                ?? ($usarTarjetaGuardada ? null : Tarjeta::detectarTipo(preg_replace('/\D/', '', $request->numero ?? '')));
 
             $pedido->update([
                 'tarjeta_id'             => $tarjetaId,
@@ -192,48 +173,52 @@ class PagoController extends BaseController
                 'pagado_at'              => now(),
             ]);
 
-            // Crear pedido_items y marcar productos como vendidos/ocupados
+            $comisionTotalPedido   = 0;
             $vendedoresNotificados = [];
 
             foreach ($items as $item) {
-                $producto = $item->producto;
+                $producto     = $item->producto;
+                $vendedor     = $producto->user;
+                $planVendedor = $vendedor->plan ?? 'free';
+
+                // ── Calcular comisión según plan del VENDEDOR ────────────────
+                $calc = PlanService::calcular($item->total_calculado, $planVendedor);
 
                 $pedidoItem = PedidoItem::create([
-                    'pedido_id'       => $pedido->id,
-                    'producto_id'     => $producto->id,
-                    'titulo'          => $producto->titulo,
-                    'tipo_accion'     => $item->tipo_accion,
-                    'precio_unitario' => $item->precio_unitario,
-                    'cantidad'        => $item->cantidad,
-                    'fecha_inicio'    => $item->fecha_inicio,
-                    'fecha_fin'       => $item->fecha_fin,
-                    'total_item'      => $item->total_calculado,
-                    'vendedor_id'     => $producto->user_id,
+                    'pedido_id'           => $pedido->id,
+                    'producto_id'         => $producto->id,
+                    'titulo'              => $producto->titulo,
+                    'tipo_accion'         => $item->tipo_accion,
+                    'precio_unitario'     => $item->precio_unitario,
+                    'cantidad'            => $item->cantidad,
+                    'fecha_inicio'        => $item->fecha_inicio,
+                    'fecha_fin'           => $item->fecha_fin,
+                    'total_item'          => $item->total_calculado,
+                    'comision_pct'        => $calc['comision_pct'],
+                    'comision_plataforma' => $calc['comision_monto'],
+                    'neto_vendedor'       => $calc['neto_vendedor'],
+                    'vendedor_id'         => $producto->user_id,
                 ]);
 
-                // Marcar producto como vendido si es venta o como pausado si es renta
-   if ($item->tipo_accion === 'comprar') {
-       // Venta: producto pasa a vendido definitivamente
-       $producto->update(['estado' => 'vendido']);
- 
-   } elseif ($item->tipo_accion === 'rentar') {
-       // Renta: producto se pausa para que no aparezca en búsquedas
-       // El arrendador podrá reactivarlo desde "Mis rentas" cuando termine el período
-       $producto->update(['estado' => 'pausado']);
-   }
+                $comisionTotalPedido += $calc['comision_monto'];
 
-                // Notificar al vendedor (una vez por vendedor por pedido)
+                if ($item->tipo_accion === 'comprar') {
+                    $producto->update(['estado' => 'vendido']);
+                } elseif ($item->tipo_accion === 'rentar') {
+                    $producto->update(['estado' => 'pausado']);
+                }
+
                 $vendedorId = $producto->user_id;
                 if (!in_array($vendedorId, $vendedoresNotificados)) {
-                    Notificacion::crearParaVendedor($producto->user, $pedidoItem, $pedido);
+                    Notificacion::crearParaVendedor($vendedor, $pedidoItem, $pedido);
                     $vendedoresNotificados[] = $vendedorId;
                 }
             }
 
-            // Notificar al comprador
-            Notificacion::crearParaComprador($user, $pedido);
+            // Guardar comisión total del pedido
+            $pedido->update(['comision_total' => round($comisionTotalPedido, 2)]);
 
-            // Vaciar carrito
+            Notificacion::crearParaComprador($user, $pedido);
             CarritoItem::where('user_id', $user->id)->delete();
 
             DB::commit();
@@ -248,24 +233,15 @@ class PagoController extends BaseController
 
     // ── 3. CONFIRMACIÓN ──────────────────────────────────────────────────────
 
-    /**
-     * GET /pago/{pedido}/confirmacion
-     */
     public function confirmacion(Pedido $pedido)
     {
-        // Solo el comprador puede ver su confirmación
         if ($pedido->user_id !== Auth::id()) abort(403);
-
         $pedido->load(['items.producto.imagenes', 'tarjeta']);
-
         return view('pago.confirmacion', compact('pedido'));
     }
 
-    // ── 4. VERIFICAR timer (AJAX) ────────────────────────────────────────────
+    // ── 4. TIMER (AJAX) ──────────────────────────────────────────────────────
 
-    /**
-     * GET /pago/timer-status  (llamada AJAX cada 5 segundos desde el frontend)
-     */
     public function timerStatus()
     {
         $pedido = Pedido::where('user_id', Auth::id())
@@ -291,14 +267,10 @@ class PagoController extends BaseController
 
     // ── 5. ELIMINAR tarjeta guardada ─────────────────────────────────────────
 
-    /**
-     * DELETE /pago/tarjetas/{tarjeta}
-     */
     public function eliminarTarjeta(Tarjeta $tarjeta)
     {
         if ($tarjeta->user_id !== Auth::id()) abort(403);
         $tarjeta->delete();
-
         return back()->with('success', 'Tarjeta eliminada correctamente.');
     }
 }

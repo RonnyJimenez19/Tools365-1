@@ -103,11 +103,7 @@
                         </button>
 
                         <ul class="dropdown-menu dropdown-menu-end shadow">
-                            <li>
-                                <a class="dropdown-item" href="#">
-                                    <i class="bi bi-person me-2"></i>Mi perfil
-                                </a>
-                            </li>
+                         
                             <li>
                                 <a class="dropdown-item" href="{{ route('dashboard') }}">
                                     <i class="bi bi-grid-1x2-fill me-2"></i>Mi panel

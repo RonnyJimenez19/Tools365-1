@@ -374,7 +374,9 @@
                 @foreach($usuarios as $user)
                 <tr>
                     {{-- ID --}}
-                    <td class="text-muted" style="font-size:.78rem;">{{ $user->id }}</td>
+                    <td class="text-muted" style="font-size:.78rem;">
+    {{ $loop->iteration }}
+</td>
 
                     {{-- Usuario --}}
                     <td>

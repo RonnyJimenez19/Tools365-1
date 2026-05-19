@@ -7,6 +7,7 @@ use App\Models\Producto;
 use App\Models\Categoria;
 use App\Models\ProductoImagen;
 use App\Models\ProductoDetalle;
+use App\Services\PlanService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
@@ -18,52 +19,83 @@ class PublicarController extends BaseController
         $this->middleware('auth');
     }
 
-    // ── Mis publicaciones ──────────────────────────────────────────────────────
+    // ── Mis publicaciones ───────────────────────────────────────────────────────
     public function index(Request $request)
     {
-        $query = Producto::where('user_id', Auth::id())
+        $user   = Auth::user();
+        $config = PlanService::deUsuario($user);
+
+        $query = Producto::where('user_id', $user->id)
             ->with(['categoria', 'imagenes'])
             ->latest();
 
-        // Filtro por estado
         if ($request->filled('estado') && $request->estado !== 'todos') {
             $query->where('estado', $request->estado);
         }
-
-        // Filtro por tipo
         if ($request->filled('tipo') && $request->tipo !== 'todos') {
             $query->where('tipo', $request->tipo);
         }
-
-        // Búsqueda por título
         if ($request->filled('q')) {
             $query->where('titulo', 'like', '%' . $request->q . '%');
         }
 
         $productos = $query->paginate(10)->withQueryString();
 
-        // Conteos por estado para las pestañas
         $conteos = [
-            'todos'     => Producto::where('user_id', Auth::id())->count(),
-            'activo'    => Producto::where('user_id', Auth::id())->where('estado', 'activo')->count(),
-            'pausado'   => Producto::where('user_id', Auth::id())->where('estado', 'pausado')->count(),
-            'vendido'   => Producto::where('user_id', Auth::id())->where('estado', 'vendido')->count(),
-            'eliminado' => Producto::where('user_id', Auth::id())->where('estado', 'eliminado')->count(),
+            'todos'     => Producto::where('user_id', $user->id)->count(),
+            'activo'    => Producto::where('user_id', $user->id)->where('estado', 'activo')->count(),
+            'pausado'   => Producto::where('user_id', $user->id)->where('estado', 'pausado')->count(),
+            'vendido'   => Producto::where('user_id', $user->id)->where('estado', 'vendido')->count(),
+            'eliminado' => Producto::where('user_id', $user->id)->where('estado', 'eliminado')->count(),
         ];
 
-        return view('publicar.index', compact('productos', 'conteos'));
+        // Info de límite para el banner de advertencia
+        $limiteInfo = [
+            'limite'    => $config['publicaciones'],
+            'actuales'  => $conteos['activo'],
+            'pct'       => PlanService::pctPublicaciones($user),
+            'plan'      => $user->plan ?? 'free',
+            'label'     => $config['label'],
+            'ilimitado' => $config['publicaciones'] === PHP_INT_MAX,
+        ];
+
+        return view('publicar.index', compact('productos', 'conteos', 'limiteInfo'));
     }
 
-    // ── Formulario de publicación ──────────────────────────────────────────────
+    // ── Formulario de publicación ───────────────────────────────────────────────
     public function create()
     {
+        $user   = Auth::user();
+        $config = PlanService::deUsuario($user);
+
+        // ¿Ya alcanzó el límite?
+        if (!PlanService::puedePublicar($user)) {
+            return redirect()->route('mis-publicaciones.index')
+                ->with('plan_limite', $this->mensajeLimite($user, $config));
+        }
+
         $categorias = Categoria::where('estado', 'activo')->orderBy('nombre')->get();
-        return view('publicar.create', compact('categorias'));
+
+        // Pasar límite de fotos para mostrarlo en el formulario
+        $maxFotos = $config['fotos'];
+
+        return view('publicar.create', compact('categorias', 'maxFotos'));
     }
 
-    // ── Guardar nueva publicación ──────────────────────────────────────────────
+    // ── Guardar nueva publicación ───────────────────────────────────────────────
     public function store(Request $request)
     {
+        $user   = Auth::user();
+        $config = PlanService::deUsuario($user);
+
+        // Validar límite de plan antes de proceder
+        if (!PlanService::puedePublicar($user)) {
+            return redirect()->route('mis-publicaciones.index')
+                ->with('plan_limite', $this->mensajeLimite($user, $config));
+        }
+
+        $maxFotos = $config['fotos'];
+
         $data = $request->validate([
             'titulo'           => 'required|string|max:200',
             'descripcion'      => 'required|string|min:20|max:2000',
@@ -73,12 +105,12 @@ class PublicarController extends BaseController
             'tipo'             => 'required|in:renta,venta,subasta',
             'categoria_id'     => 'required|exists:categorias,id',
             'timer_fin'        => 'nullable|date|after:now',
-            'imagenes'         => 'required|array|min:3',
+            'imagenes'         => "required|array|min:1|max:{$maxFotos}",
             'imagenes.*'       => 'image|mimes:jpeg,jpg,png,webp|max:4096',
             'detalles'         => 'required|array|min:2',
             'detalles.*.clave' => 'required|string|max:80',
             'detalles.*.valor' => 'required|string|max:150',
-        ], $this->mensajesValidacion());
+        ], $this->mensajesValidacion($maxFotos));
 
         $producto = Producto::create([
             'user_id'      => Auth::id(),
@@ -100,21 +132,32 @@ class PublicarController extends BaseController
             ->with('success', '¡Tu herramienta fue publicada exitosamente!');
     }
 
-    // ── Formulario de edición ──────────────────────────────────────────────────
+    // ── Formulario de edición ───────────────────────────────────────────────────
     public function edit(Producto $producto)
     {
         $this->autorizarPropietario($producto);
 
-        $categorias = Categoria::where('estado', 'activo')->orderBy('nombre')->get();
-        $producto->load(['imagenes' => fn($q) => $q->orderBy('orden'), 'detalles' => fn($q) => $q->orderBy('orden')]);
+        $user     = Auth::user();
+        $config   = PlanService::deUsuario($user);
+        $maxFotos = $config['fotos'];
 
-        return view('publicar.edit', compact('producto', 'categorias'));
+        $categorias = Categoria::where('estado', 'activo')->orderBy('nombre')->get();
+        $producto->load([
+            'imagenes' => fn($q) => $q->orderBy('orden'),
+            'detalles' => fn($q) => $q->orderBy('orden'),
+        ]);
+
+        return view('publicar.edit', compact('producto', 'categorias', 'maxFotos'));
     }
 
-    // ── Actualizar publicación ─────────────────────────────────────────────────
+    // ── Actualizar publicación ──────────────────────────────────────────────────
     public function update(Request $request, Producto $producto)
     {
         $this->autorizarPropietario($producto);
+
+        $user     = Auth::user();
+        $config   = PlanService::deUsuario($user);
+        $maxFotos = $config['fotos'];
 
         $data = $request->validate([
             'titulo'           => 'required|string|max:200',
@@ -125,16 +168,14 @@ class PublicarController extends BaseController
             'tipo'             => 'required|in:renta,venta,subasta',
             'categoria_id'     => 'required|exists:categorias,id',
             'timer_fin'        => 'nullable|date|after:now',
-            // imágenes opcionales en edición (puede no subir nuevas)
-            'imagenes'         => 'nullable|array|max:10',
+            'imagenes'         => "nullable|array|max:{$maxFotos}",
             'imagenes.*'       => 'image|mimes:jpeg,jpg,png,webp|max:4096',
             'detalles'         => 'nullable|array',
             'detalles.*.clave' => 'required_with:detalles|string|max:80',
             'detalles.*.valor' => 'required_with:detalles|string|max:150',
-            // IDs de imágenes existentes a eliminar
             'eliminar_imagenes'   => 'nullable|array',
             'eliminar_imagenes.*' => 'integer|exists:producto_imagenes,id',
-        ], $this->mensajesValidacion());
+        ], $this->mensajesValidacion($maxFotos));
 
         $producto->update([
             'titulo'       => $data['titulo'],
@@ -147,7 +188,6 @@ class PublicarController extends BaseController
             'timer_fin'    => $data['timer_fin'] ?? null,
         ]);
 
-        // Eliminar imágenes marcadas
         if (!empty($data['eliminar_imagenes'])) {
             foreach ($data['eliminar_imagenes'] as $imgId) {
                 $img = ProductoImagen::find($imgId);
@@ -159,13 +199,23 @@ class PublicarController extends BaseController
             }
         }
 
-        // Subir nuevas imágenes
+        // Verificar que el total de fotos no exceda el máximo del plan
+        $fotosActuales = $producto->imagenes()->count();
+        $nuevasFotos   = $request->hasFile('imagenes') ? count($request->file('imagenes')) : 0;
+
+        if ($fotosActuales + $nuevasFotos > $maxFotos) {
+            $permitidas = max(0, $maxFotos - $fotosActuales);
+            return back()->with('error',
+                "Tu plan {$config['label']} permite máximo {$maxFotos} fotos por publicación. "
+                . "Solo puedes agregar {$permitidas} foto(s) más."
+            );
+        }
+
         if ($request->hasFile('imagenes')) {
             $ordenActual = $producto->imagenes()->max('orden') + 1;
             $this->guardarImagenes($request, $producto, $ordenActual);
         }
 
-        // Reemplazar detalles
         if (!empty($data['detalles'])) {
             $producto->detalles()->delete();
             $this->guardarDetalles($data, $producto);
@@ -175,14 +225,23 @@ class PublicarController extends BaseController
             ->with('success', 'Publicación actualizada correctamente.');
     }
 
-    // ── Cambiar estado (pausar / reactivar / marcar vendido) ──────────────────
+    // ── Cambiar estado ─────────────────────────────────────────────────────────
     public function cambiarEstado(Request $request, Producto $producto)
     {
         $this->autorizarPropietario($producto);
+        $user = Auth::user();
 
         $request->validate([
             'estado' => 'required|in:activo,pausado,vendido',
         ]);
+
+        // Si quiere reactivar, verificar límite del plan
+        if ($request->estado === 'activo' && $producto->estado !== 'activo') {
+            if (!PlanService::puedePublicar($user)) {
+                $config = PlanService::deUsuario($user);
+                return back()->with('plan_limite', $this->mensajeLimite($user, $config));
+            }
+        }
 
         $producto->update(['estado' => $request->estado]);
 
@@ -195,44 +254,56 @@ class PublicarController extends BaseController
         return back()->with('success', $mensajes[$request->estado]);
     }
 
-    // ── Eliminar publicación (soft: estado = eliminado) ────────────────────────
+    // ── Eliminar publicación ────────────────────────────────────────────────────
     public function destroy(Producto $producto)
     {
         $this->autorizarPropietario($producto);
-
         $producto->update(['estado' => 'eliminado']);
 
         return redirect()->route('mis-publicaciones.index')
             ->with('success', 'Publicación eliminada.');
     }
 
-    // ── Vista de detalle de estado de UNA publicación ─────────────────────────
-public function show(Producto $producto)
-{
-    $this->autorizarPropietario($producto);
-    $producto->load(['imagenes' => fn($q) => $q->orderBy('orden'), 'detalles', 'categoria', 'user']);
+    // ── Vista de detalle ────────────────────────────────────────────────────────
+    public function show(Producto $producto)
+    {
+        $this->autorizarPropietario($producto);
+        $producto->load([
+            'imagenes' => fn($q) => $q->orderBy('orden'),
+            'detalles',
+            'categoria',
+            'user',
+        ]);
 
-    $relacionados = Producto::with(['imagenes', 'categoria'])
-        ->where('estado', 'activo')
-        ->where('id', '!=', $producto->id)
-        ->where(function ($q) use ($producto) {
-            $q->where('categoria_id', $producto->categoria_id)
-              ->orWhere('tipo', $producto->tipo);
-        })
-        ->latest()
-        ->take(4)
-        ->get();
+        $relacionados = Producto::with(['imagenes', 'categoria'])
+            ->where('estado', 'activo')
+            ->where('id', '!=', $producto->id)
+            ->where(function ($q) use ($producto) {
+                $q->where('categoria_id', $producto->categoria_id)
+                  ->orWhere('tipo', $producto->tipo);
+            })
+            ->latest()
+            ->take(4)
+            ->get();
 
-    return view('productos.show', compact('producto', 'relacionados'));
-}
+        return view('productos.show', compact('producto', 'relacionados'));
+    }
 
-    // ── Helpers privados ──────────────────────────────────────────────────────
+    // ── Helpers privados ───────────────────────────────────────────────────────
 
     private function autorizarPropietario(Producto $producto): void
     {
         if ($producto->user_id !== Auth::id()) {
             abort(403, 'No tienes permiso para gestionar esta publicación.');
         }
+    }
+
+    private function mensajeLimite(\App\Models\User $user, array $config): string
+    {
+        $actuales = $user->productos()->where('estado', 'activo')->count();
+        return "Has alcanzado el límite de {$config['publicaciones']} publicaciones activas "
+             . "de tu plan {$config['label']} ({$actuales}/{$config['publicaciones']}). "
+             . "Pausa o elimina una publicación, o mejora tu plan para continuar publicando.";
     }
 
     private function guardarImagenes(Request $request, Producto $producto, int $ordenBase = 0): void
@@ -288,7 +359,7 @@ public function show(Producto $producto)
         }
     }
 
-    private function mensajesValidacion(): array
+    private function mensajesValidacion(int $maxFotos = 10): array
     {
         return [
             'titulo.required'           => 'El título del anuncio es obligatorio.',
@@ -299,8 +370,8 @@ public function show(Producto $producto)
             'ubicacion.required'        => 'La ubicación es obligatoria.',
             'tipo.required'             => 'Selecciona el tipo de publicación.',
             'categoria_id.required'     => 'Selecciona una categoría.',
-            'imagenes.required'         => 'Debes subir al menos 3 fotos del producto.',
-            'imagenes.min'              => 'Debes subir al menos 3 fotos del producto.',
+            'imagenes.required'         => 'Debes subir al menos 1 foto del producto.',
+            'imagenes.max'              => "Tu plan permite máximo {$maxFotos} fotos por publicación.",
             'detalles.required'         => 'Debes agregar al menos 2 especificaciones técnicas.',
             'detalles.min'              => 'Debes agregar al menos 2 especificaciones técnicas.',
             'detalles.*.clave.required' => 'Completa el nombre de todas las especificaciones.',
