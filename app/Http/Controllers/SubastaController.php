@@ -176,9 +176,8 @@ class SubastaController extends BaseController
     public function cancelar(Producto $producto)
     {
         $user = Auth::user();
-        $esAdmin = $user->es_admin ?? $user->is_admin ?? $user->admin ?? false;
 
-        if ($producto->user_id !== $user->id && !$esAdmin) abort(403);
+        if ($producto->user_id !== $user->id && !$user->esAdmin()) abort(403);
         if ($producto->tipo !== 'subasta') {
             return back()->with('error', 'Este producto no es una subasta.');
         }
@@ -216,9 +215,8 @@ class SubastaController extends BaseController
     public function vender(Producto $producto)
     {
         $user = Auth::user();
-        $esAdmin = $user->es_admin ?? $user->is_admin ?? $user->admin ?? false;
 
-        if ($producto->user_id !== $user->id && !$esAdmin) abort(403);
+        if ($producto->user_id !== $user->id && !$user->esAdmin()) abort(403);
         if ($producto->tipo !== 'subasta') {
             return back()->with('error', 'Este producto no es una subasta.');
         }
