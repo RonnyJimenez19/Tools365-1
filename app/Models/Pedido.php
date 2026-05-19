@@ -19,6 +19,8 @@ class Pedido extends Model
         'estado',
         'pago_limite',
         'pagado_at',
+        'es_subasta',
+        'subasta_producto_id',
     ];
 
     protected $casts = [
@@ -26,6 +28,7 @@ class Pedido extends Model
         'pagado_at'   => 'datetime',
         'subtotal'    => 'float',
         'total'       => 'float',
+        'es_subasta'  => 'boolean',
     ];
 
     // ── Relaciones ───────────────────────────────────────────────────────────
@@ -44,6 +47,11 @@ class Pedido extends Model
     {
         return $this->hasMany(PedidoItem::class);
     }
+
+    public function subastaProducto()
+{
+    return $this->belongsTo(\App\Models\Producto::class, 'subasta_producto_id');
+}
 
     // ── Helpers ──────────────────────────────────────────────────────────────
 

@@ -66,13 +66,27 @@ Route::middleware(['auth','cuenta.activa'])->group(function () {
         Route::delete('/{producto}',       [PublicarController::class, 'destroy'])->name('destroy');
     });
 
-    Route::prefix('subastas')->name('subastas.')->group(function () {
-    Route::get('/',                              [SubastaController::class, 'index'])   ->name('index');
-    Route::post('/{producto}/pujar',             [SubastaController::class, 'pujar'])   ->name('pujar');
-    Route::get('/{producto}/historial',          [SubastaController::class, 'historial'])->name('historial');
-    Route::delete('/{producto}/cancelar',        [SubastaController::class, 'cancelar'])->name('cancelar');
-    Route::patch('/{producto}/vender',           [SubastaController::class, 'vender'])  ->name('vender');
+ Route::prefix('subastas')->name('subastas.')->group(function () {
+    Route::get('/',                              [SubastaController::class, 'index'])        ->name('index');
+    Route::post('/{producto}/pujar',             [SubastaController::class, 'pujar'])        ->name('pujar');
+    Route::get('/{producto}/historial',          [SubastaController::class, 'historial'])    ->name('historial');
+    Route::delete('/{producto}/cancelar',        [SubastaController::class, 'cancelar'])     ->name('cancelar');
+    Route::patch('/{producto}/vender',           [SubastaController::class, 'vender'])       ->name('vender');
+ 
+    // Pago de subasta ganada (flujo separado del carrito)
+    Route::get('/pagar/{pedido}',                [SubastaController::class, 'iniciarPago'])  ->name('pagar');
+    Route::post('/pagar/{pedido}/procesar',      [SubastaController::class, 'procesarPago']) ->name('pagar.procesar');
+    Route::get('/pagar/{pedido}/timer',          [SubastaController::class, 'timerSubasta']) ->name('pagar.timer');
 });
+
+Route::get('/dashboard/plan', [\App\Http\Controllers\DashboardController::class, 'plan'])->name('dashboard.plan');
+
+
+// Rentas
+Route::get('/dashboard/rentas', [\App\Http\Controllers\RentasController::class, 'index'])->name('dashboard.rentas');
+Route::patch('/dashboard/rentas/{pedidoItem}/reactivar', [\App\Http\Controllers\RentasController::class, 'reactivar'])->name('dashboard.rentas.reactivar');
+
+    });
  
 
     // ── Carrito ───────────────────────────────────────────────────────────────
@@ -131,4 +145,3 @@ Route::middleware(['auth','cuenta.activa'])->group(function () {
         Route::delete('/publicaciones/{producto}',       [AdminController::class, 'destroyPublicacion'])->name('publicaciones.destroy');
     });
 
-});

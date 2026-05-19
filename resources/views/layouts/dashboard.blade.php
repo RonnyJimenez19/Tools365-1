@@ -116,7 +116,7 @@
 
 <div class="nav-section-label">Actividad</div>
 
-<a href="#" class="nav-item">
+<a href="{{ route('dashboard.rentas') }}" class="nav-item">
     <i class="bi bi-clock-history"></i> Mis rentas
     <span class="nav-badge info">2</span>
 </a>
@@ -130,7 +130,7 @@
             <a href="#" class="nav-item {{ request()->routeIs('perfil.*') ? 'active' : '' }}">
                 <i class="bi bi-person-circle"></i> Mi perfil
             </a>
-            <a href="{{ route('planes.index') }}"
+            <a href="{{ route('dashboard.plan') }}"
                class="nav-item {{ request()->routeIs('planes.*') ? 'active' : '' }}">
                 <i class="bi bi-star-fill"></i> Mi plan
             </a>

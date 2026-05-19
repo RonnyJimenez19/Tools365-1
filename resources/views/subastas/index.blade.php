@@ -385,24 +385,44 @@
                                 </div>
                             @endif
 
-                            <div class="mt-auto pt-3 d-flex gap-1 flex-column">
-                                <button class="btn btn-outline-secondary btn-sm"
-                                        onclick="verHistorial({{ $p->id }}, '{{ addslashes($p->titulo) }}')">
-                                    <i class="bi bi-list-ol me-1"></i>Ver pujas
-                                </button>
+{{-- REEMPLAZA este bloque en tab-participando --}}
+<div class="mt-auto pt-3 d-flex gap-1 flex-column">
+    <button class="btn btn-outline-secondary btn-sm"
+            onclick="verHistorial({{ $p->id }}, '{{ addslashes($p->titulo) }}')">
+        <i class="bi bi-list-ol me-1"></i>Ver pujas
+    </button>
 
-                                @if($p->activa && !$p->voy_ganando)
-                                    <a href="{{ route('productos.show', $p) }}"
-                                       class="btn btn-warning btn-sm">
-                                        <i class="bi bi-hammer me-1"></i>Hacer nueva puja
-                                    </a>
-                                @elseif($p->activa && $p->voy_ganando)
-                                    <a href="{{ route('productos.show', $p) }}"
-                                       class="btn btn-outline-success btn-sm">
-                                        <i class="bi bi-eye me-1"></i>Ver subasta
-                                    </a>
-                                @endif
-                            </div>
+    {{-- ✅ BOTÓN PAGAR — aparece cuando ganaste y tienes pedido pendiente --}}
+    @if($p->pedido_pendiente)
+        @php
+            $limite = \Carbon\Carbon::parse($p->pedido_pendiente->pago_limite);
+            $segundos = max(0, now()->diffInSeconds($limite, false));
+            $horas = floor($segundos / 3600);
+            $mins  = floor(($segundos % 3600) / 60);
+        @endphp
+        <a href="{{ route('subastas.pagar', $p->pedido_pendiente) }}"
+           class="btn btn-success btn-sm w-100">
+            <i class="bi bi-credit-card-fill me-1"></i>
+            Pagar ahora
+        </a>
+        <div class="text-center" style="font-size:.72rem; color:#dc3545; font-weight:600;">
+            <i class="bi bi-clock me-1"></i>
+            Tiempo restante: {{ $horas }}h {{ $mins }}m
+        </div>
+
+    {{-- Si ya ganó pero aún activa (antes de que el vendedor adjudique) --}}
+    @elseif($p->activa && !$p->voy_ganando)
+        <a href="{{ route('productos.show', $p) }}"
+           class="btn btn-warning btn-sm">
+            <i class="bi bi-hammer me-1"></i>Hacer nueva puja
+        </a>
+    @elseif($p->activa && $p->voy_ganando)
+        <a href="{{ route('productos.show', $p) }}"
+           class="btn btn-outline-success btn-sm">
+            <i class="bi bi-eye me-1"></i>Ver subasta
+        </a>
+    @endif
+</div>
                         </div>
                     </div>
                 </div>

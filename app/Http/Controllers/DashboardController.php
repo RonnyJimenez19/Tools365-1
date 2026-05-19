@@ -73,4 +73,9 @@ class DashboardController extends Controller
 
         return view('dashboard.index');
     }
+
+    public function plan()
+{
+    return view('dashboard.plan');
+}
 }
