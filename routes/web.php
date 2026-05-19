@@ -14,6 +14,8 @@ use App\Http\Controllers\PagoController;
 use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\VentasController;
 use App\Http\Controllers\SubastaController;
+use App\Http\Controllers\PlanController;
+
 
 
 // ── Rutas públicas ────────────────────────────────────────────────────────────
@@ -79,8 +81,13 @@ Route::middleware(['auth','cuenta.activa'])->group(function () {
     Route::get('/pagar/{pedido}/timer',          [SubastaController::class, 'timerSubasta']) ->name('pagar.timer');
 });
 
-Route::get('/dashboard/plan', [\App\Http\Controllers\DashboardController::class, 'plan'])->name('dashboard.plan');
-
+// ── Plan / Suscripción ────────────────────────────────────────────────────
+Route::prefix('dashboard/plan')->name('dashboard.plan')->group(function () {
+    Route::get('/',                    [PlanController::class, 'index'])   ->name('');         // GET  /dashboard/plan
+    Route::get('/checkout/{plan}',     [PlanController::class, 'checkout'])->name('.checkout'); // GET  /dashboard/plan/checkout/pro
+    Route::post('/pagar',              [PlanController::class, 'pagar'])   ->name('.pagar');    // POST /dashboard/plan/pagar
+    Route::delete('/cancelar',         [PlanController::class, 'cancelar'])->name('.cancelar'); // DEL  /dashboard/plan/cancelar
+});
 
 // Rentas
 Route::get('/dashboard/rentas', [\App\Http\Controllers\RentasController::class, 'index'])->name('dashboard.rentas');
@@ -143,5 +150,26 @@ Route::patch('/dashboard/rentas/{pedidoItem}/reactivar', [\App\Http\Controllers\
         Route::get('/publicaciones',                     [AdminController::class, 'publicaciones'])->name('publicaciones');
         Route::patch('/publicaciones/{producto}',        [AdminController::class, 'updatePublicacion'])->name('publicaciones.update');
         Route::delete('/publicaciones/{producto}',       [AdminController::class, 'destroyPublicacion'])->name('publicaciones.destroy');
-    });
+    
+        Route::get('/ingresos', [AdminController::class, 'ingresos'])->name('ingresos');
+
+        // Opiniones / Comentarios
+        Route::get('/opiniones',                              [AdminController::class, 'opiniones'])->name('opiniones');
+        Route::patch('/opiniones/{comentario}/estado',        [AdminController::class, 'updateOpinion'])->name('opiniones.estado');
+        Route::patch('/opiniones/{comentario}/inicio',        [AdminController::class, 'toggleInicio'])->name('opiniones.inicio');
+        Route::delete('/opiniones/{comentario}',              [AdminController::class, 'destroyOpinion'])->name('opiniones.destroy');
+ 
+        // Todas las herramientas (admin ve todo)
+        Route::get('/herramientas',                           [AdminController::class, 'herramientas'])->name('herramientas');
+        Route::patch('/herramientas/{producto}',              [AdminController::class, 'updateHerramienta'])->name('herramientas.update');
+        Route::delete('/herramientas/{producto}',             [AdminController::class, 'destroyHerramienta'])->name('herramientas.destroy');
+ 
+        // Subastas activas
+        Route::get('/subastas',                               [AdminController::class, 'subastas'])->name('subastas');
+        Route::patch('/subastas/{producto}/cancelar',         [AdminController::class, 'cancelarSubasta'])->name('subastas.cancelar');
+ 
+        // Rentas activas
+        Route::get('/rentas',                                 [AdminController::class, 'rentas'])->name('rentas');
+ 
+        });
 

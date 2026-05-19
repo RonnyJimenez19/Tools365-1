@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('titulo_pagina', 'Planes y Precios – Tools365')
+@section('titulo_pagina', 'Planes y Precios — Tools365')
 
 @push('css')
 <link rel="stylesheet" href="{{ asset('css/planes.css') }}">
@@ -8,7 +8,7 @@
 
 @section('contenido')
 
-{{-- Hero ─────────────────────────────────────────── --}}
+{{-- Hero ────────────────────────────────────────────── --}}
 <div class="planes-hero">
     <div class="planes-hero-badge">
         <i class="bi bi-stars"></i> Planes y precios
@@ -26,7 +26,7 @@
 <div class="planes-page">
     <div class="container">
 
-        {{-- ── GRID DE PLANES ──────────────────────────────────── --}}
+        {{-- ── GRID DE PLANES ──────────────────────────────────────────── --}}
         <div class="plans-grid mb-5">
 
             {{-- FREE --}}
@@ -44,16 +44,21 @@
                 <ul class="plan-features">
                     <li><i class="bi bi-check-circle-fill check"></i> Hasta 5 publicaciones</li>
                     <li><i class="bi bi-check-circle-fill check"></i> 3 fotos por publicación</li>
-                    <li><i class="bi bi-check-circle-fill check"></i> Visibilidad estándar</li>
                     <li><i class="bi bi-check-circle-fill check"></i> Soporte por email (48 h)</li>
                     <li><i class="bi bi-check-circle-fill check"></i> Comisión venta: 12%</li>
                     <li><i class="bi bi-check-circle-fill check"></i> Comisión renta: 15%</li>
-                    <li class="disabled"><i class="bi bi-x-circle cross"></i> Sin publicaciones destacadas</li>
-                    <li class="disabled"><i class="bi bi-x-circle cross"></i> Sin estadísticas</li>
                 </ul>
-                <a href="{{ route('register') }}" class="btn-plan btn-plan-outline">
-                    Empezar gratis
-                </a>
+                @auth
+                    @if(auth()->user()->plan === null || auth()->user()->plan === 'free')
+                        <button class="btn-plan btn-plan-outline" disabled>Tu plan actual</button>
+                    @else
+                        <button class="btn-plan btn-plan-outline" disabled>Plan menor</button>
+                    @endif
+                @else
+                    <a href="{{ route('register') }}" class="btn-plan btn-plan-outline">
+                        Empezar gratis
+                    </a>
+                @endauth
             </div>
 
             {{-- BÁSICO --}}
@@ -71,17 +76,26 @@
                 <hr class="plan-divider">
                 <ul class="plan-features">
                     <li><i class="bi bi-check-circle-fill check"></i> Hasta 20 publicaciones</li>
-                    <li><i class="bi bi-check-circle-fill check"></i> 6 fotos + 1 video por publicación</li>
-                    <li><i class="bi bi-check-circle-fill check"></i> 2 publicaciones destacadas / mes</li>
-                    <li><i class="bi bi-check-circle-fill check"></i> Insignia <strong>Verificado</strong></li>
+                    <li><i class="bi bi-check-circle-fill check"></i> 6 fotos por publicación</li>
                     <li><i class="bi bi-check-circle-fill check"></i> Soporte por email (24 h)</li>
                     <li><i class="bi bi-check-circle-fill check"></i> Comisión venta: 10%</li>
                     <li><i class="bi bi-check-circle-fill check"></i> Comisión renta: 12%</li>
-                    <li class="disabled"><i class="bi bi-x-circle cross"></i> Sin estadísticas avanzadas</li>
                 </ul>
-                <a href="{{ route('register') }}" class="btn-plan btn-plan-primary">
-                    Elegir Básico
-                </a>
+                @auth
+                    @if(auth()->user()->plan === 'basico')
+                        <button class="btn-plan btn-plan-primary" disabled>Tu plan actual</button>
+                    @elseif(auth()->user()->plan === 'profesional')
+                        <button class="btn-plan btn-plan-primary" disabled>Plan menor</button>
+                    @else
+                        <a href="{{ route('dashboard.plan.checkout', 'basico') }}" class="btn-plan btn-plan-primary">
+                            Elegir Básico
+                        </a>
+                    @endif
+                @else
+                    <a href="{{ route('register') }}" class="btn-plan btn-plan-primary">
+                        Elegir Básico
+                    </a>
+                @endauth
             </div>
 
             {{-- PROFESIONAL --}}
@@ -98,21 +112,28 @@
                 <hr class="plan-divider">
                 <ul class="plan-features">
                     <li><i class="bi bi-check-circle-fill check"></i> Publicaciones <strong>ilimitadas</strong></li>
-                    <li><i class="bi bi-check-circle-fill check"></i> 10 fotos + 3 videos por publicación</li>
+                    <li><i class="bi bi-check-circle-fill check"></i> 10 fotos por publicación</li>
                     <li><i class="bi bi-check-circle-fill check"></i> 10 publicaciones destacadas / mes</li>
-                    <li><i class="bi bi-check-circle-fill check"></i> Insignia <strong>PRO</strong></li>
                     <li><i class="bi bi-check-circle-fill check"></i> Soporte prioritario 24/7</li>
-                    <li><i class="bi bi-check-circle-fill check"></i> Estadísticas avanzadas</li>
                     <li><i class="bi bi-check-circle-fill check"></i> Comisiones desde 8%</li>
-                    <li><i class="bi bi-check-circle-fill check"></i> API de integración</li>
                 </ul>
-                <a href="{{ route('register') }}" class="btn-plan btn-plan-outline">
-                    Elegir Profesional
-                </a>
+                @auth
+                    @if(auth()->user()->plan === 'profesional')
+                        <button class="btn-plan btn-plan-outline" disabled>Tu plan actual</button>
+                    @else
+                        <a href="{{ route('dashboard.plan.checkout', 'profesional') }}" class="btn-plan btn-plan-outline">
+                            Elegir Profesional
+                        </a>
+                    @endif
+                @else
+                    <a href="{{ route('register') }}" class="btn-plan btn-plan-outline">
+                        Elegir Profesional
+                    </a>
+                @endauth
             </div>
         </div>
 
-        {{-- ── TABLA COMPARATIVA ────────────────────────────────── --}}
+        {{-- ── TABLA COMPARATIVA ────────────────────────────────────────── --}}
         <div class="mb-5">
             <h2 class="fw-bold text-center mb-4">Comparativa detallada</h2>
             <div class="compare-table">
@@ -128,17 +149,17 @@
                     <tbody>
                         @php
                         $rows = [
-                            ['Publicaciones',          '5',         '20',        'Ilimitadas'],
-                            ['Fotos por publicación',  '3',         '6',         '10'],
-                            ['Videos',                 '—',         '1',         '3'],
-                            ['Publicaciones destacadas','—',        '2 / mes',   '10 / mes'],
-                            ['Insignia verificado',    false,       true,        true],
-                            ['Insignia PRO',           false,       false,       true],
-                            ['Estadísticas avanzadas', false,       false,       true],
-                            ['API de integración',     false,       false,       true],
-                            ['Soporte prioritario',    false,       false,       true],
-                            ['Comisión venta',         '12%',       '10%',       '8%'],
-                            ['Comisión renta',         '15%',       '12%',       'Desde 8%'],
+                            ['Publicaciones',           '5',        '20',       'Ilimitadas'],
+                            ['Fotos por publicación',   '3',        '6',        '10'],
+                            ['Videos',                  '—',        '1',        '3'],
+                            ['Publicaciones destacadas','—',        '2 / mes',  '10 / mes'],
+                            ['Insignia verificado',     false,      true,       true],
+                            ['Insignia PRO',            false,      false,      true],
+                            ['Estadísticas avanzadas',  false,      false,      true],
+                            ['API de integración',      false,      false,      true],
+                            ['Soporte prioritario',     false,      false,      true],
+                            ['Comisión venta',          '12%',      '10%',      '8%'],
+                            ['Comisión renta',          '15%',      '12%',      'Desde 8%'],
                         ];
                         @endphp
                         @foreach($rows as $row)
@@ -162,7 +183,7 @@
             </div>
         </div>
 
-        {{-- ── FAQ ─────────────────────────────────────────────── --}}
+        {{-- ── FAQ ──────────────────────────────────────────────────────── --}}
         <div class="faq-section mt-5">
             <h2 class="fw-bold">Preguntas frecuentes</h2>
 
@@ -201,7 +222,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-    // ── Toggle anual / mensual ───────────────────────────────────────
+    // ── Toggle anual / mensual ────────────────────────────────────────────
     const toggle  = document.getElementById('billing-toggle');
     const btns    = toggle.querySelectorAll('span[data-period]');
     const precios = document.querySelectorAll('.precio-display');
@@ -231,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btns.forEach(b => b.addEventListener('click', () => setPeriod(b.dataset.period)));
 
-    // ── FAQ accordion ────────────────────────────────────────────────
+    // ── FAQ accordion ─────────────────────────────────────────────────────
     document.querySelectorAll('.faq-question').forEach(q => {
         q.addEventListener('click', () => {
             const item = q.closest('.faq-item');

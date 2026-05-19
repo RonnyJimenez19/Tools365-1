@@ -1,4 +1,3 @@
-{{-- resources/views/dashboard/plan.blade.php --}}
 @extends('layouts.dashboard')
 
 @section('titulo_pagina', 'Mi Plan — Tools365')
@@ -10,54 +9,78 @@
 
 @section('contenido')
 @php
-    $user     = auth()->user();
-    $plan     = $user->plan ?? 'basico';   // basico | pro | empresarial
+    use App\Services\PlanService;
 
-    // Límites según plan (ajusta a tu lógica real)
+    $user = auth()->user();
+    $plan = $user->plan ?? 'free';
+
+    // ── Límites alineados con PlanService ─────────────────────────────────────
     $limites = [
-        'basico'      => ['publicaciones' => 5,  'rentas' => 10,  'precio' => 0],
-        'pro'         => ['publicaciones' => 30, 'rentas' => 100, 'precio' => 299],
-        'empresarial' => ['publicaciones' => 999,'rentas' => 999, 'precio' => 799],
+        'free'         => ['publicaciones' => 5,   'rentas' => 10,  'precio' => 0],
+        'basico'       => ['publicaciones' => 20,  'rentas' => 50,  'precio' => 199],
+        'profesional'  => ['publicaciones' => 999, 'rentas' => 999, 'precio' => 599],
     ];
-    $limite = $limites[$plan];
 
-    // Uso actual
-    $pubsActivas = $user->productos()->where('estado','activo')->count();
-    $rentasActivas = \App\Models\PedidoItem::where('vendedor_id',$user->id)
-        ->where('tipo_accion','rentar')
-        ->whereHas('pedido',fn($q)=>$q->where('estado','pagado'))
+    // Fallback seguro: si el plan en BD es un valor inesperado, usamos 'free'
+    $limite = $limites[$plan] ?? $limites['free'];
+
+    $pubsActivas   = $user->productos()->where('estado', 'activo')->count();
+    $rentasActivas = \App\Models\PedidoItem::where('vendedor_id', $user->id)
+        ->where('tipo_accion', 'rentar')
+        ->whereHas('pedido', fn($q) => $q->where('estado', 'pagado'))
         ->count();
-    $ventasTotal = \App\Models\PedidoItem::where('vendedor_id',$user->id)
-        ->whereHas('pedido',fn($q)=>$q->where('estado','pagado'))
+    $ventasTotal = \App\Models\PedidoItem::where('vendedor_id', $user->id)
+        ->whereHas('pedido', fn($q) => $q->where('estado', 'pagado'))
         ->count();
 
-    // Fecha renovación simulada (en producción vendría de la BD)
-    $renovacion = now()->addDays(18);
-    $diasRestantes = now()->diffInDays($renovacion);
-    $vencePronto = $diasRestantes <= 7;
+$ultimoPagoPlan = \App\Models\Pedido::where('user_id', $user->id)
+    ->where('folio', 'like', 'PLAN-%')
+    ->where('estado', 'pagado')
+    ->latest('pagado_at')
+    ->first();
 
+$renovacion    = $ultimoPagoPlan
+    ? \Carbon\Carbon::parse($ultimoPagoPlan->pagado_at)->addDays(30)
+    : now()->addDays(30);
+
+$diasRestantes = (int) max(0, now()->diffInDays($renovacion, false));
+$vencePronto   = $diasRestantes <= 7;
+
+    // ── Info visual por plan ───────────────────────────────────────────────────
     $planInfo = [
-        'basico'      => ['emoji'=>'⚡','label'=>'Básico','desc'=>'Perfecto para empezar a publicar y rentar en Tools365.','color'=>'basico'],
-        'pro'         => ['emoji'=>'🚀','label'=>'Pro','desc'=>'Más publicaciones, más rentas y soporte prioritario.','color'=>'pro'],
-        'empresarial' => ['emoji'=>'👑','label'=>'Empresarial','desc'=>'Sin límites. Para empresas y arrendadoras profesionales.','color'=>'empresarial'],
+        'free'        => ['emoji' => '🌱', 'label' => 'Free',        'desc' => 'Plan gratuito para empezar en Tools365.',                          'color' => 'free'],
+        'basico'      => ['emoji' => '⚡', 'label' => 'Básico',      'desc' => 'Perfecto para vendedores y arrendadores activos.',                  'color' => 'basico'],
+        'profesional' => ['emoji' => '💎', 'label' => 'Profesional', 'desc' => 'Sin límites. Para empresas y arrendadoras de alto volumen.',        'color' => 'profesional'],
     ];
-    $info = $planInfo[$plan];
+    $info = $planInfo[$plan] ?? $planInfo['free'];
 
-    $pctPubs  = $limite['publicaciones'] >= 999 ? 100 : min(100, round($pubsActivas/$limite['publicaciones']*100));
-    $pctRents = $limite['rentas'] >= 999 ? 100 : min(100, round($rentasActivas/$limite['rentas']*100));
+    $pctPubs  = $limite['publicaciones'] >= 999 ? 100 : min(100, $limite['publicaciones'] > 0 ? round($pubsActivas  / $limite['publicaciones'] * 100) : 0);
+    $pctRents = $limite['rentas']         >= 999 ? 100 : min(100, $limite['rentas']         > 0 ? round($rentasActivas / $limite['rentas']         * 100) : 0);
 @endphp
 
 <div class="container py-4">
 
-    {{-- ══ HERO PLAN ACTIVO ══════════════════════════════════════════ --}}
+    {{-- ╔═ HERO PLAN ACTIVO ══════════════════════════════════════════════════ --}}
     <div class="plan-hero">
         <div class="plan-hero-bg {{ $info['color'] }}"></div>
         <div class="plan-hero-content">
             <div>
-                <div class="plan-hero-badge">Plan activo</div>
-                <div class="plan-hero-name">{{ $info['emoji'] }} {{ $info['label'] }}</div>
-                <p class="plan-hero-desc">{{ $info['desc'] }}</p>
-                @if($plan !== 'basico')
+               <div class="plan-hero-badge" style="color:#000;">
+    Plan activo
+</div>
+
+<div class="plan-hero-name" style="color:#000;">
+    {{ $info['emoji'] }} {{ $info['label'] }}
+</div>
+
+<p class="plan-hero-desc" style="color:#000;">
+    {{ $info['desc'] }}
+</p>
+                @if($plan === 'free')
+                    <div class="plan-renew-pill" style="color:#000;">
+                        <i class="bi bi-infinity"></i> Plan gratuito — sin fecha de vencimiento
+                    </div>
+                @else
                     <div class="plan-renew-pill {{ $vencePronto ? 'vence-pronto' : '' }}">
                         <i class="bi bi-arrow-repeat"></i>
                         @if($vencePronto)
@@ -66,21 +89,13 @@
                             Se renueva el {{ $renovacion->format('d \d\e F, Y') }}
                         @endif
                     </div>
-                @else
-                    <div class="plan-renew-pill">
-                        <i class="bi bi-infinity"></i> Plan gratuito — sin fecha de vencimiento
-                    </div>
                 @endif
             </div>
-            <div class="plan-hero-icon">
-                @if($plan==='basico') ⚡
-                @elseif($plan==='pro') 🚀
-                @else 👑 @endif
-            </div>
+            <div class="plan-hero-icon">{{ $info['emoji'] }}</div>
         </div>
     </div>
 
-    {{-- ══ STATS ══════════════════════════════════════════════════════ --}}
+    {{-- ╔═ STATS ══════════════════════════════════════════════════════════════ --}}
     <div class="plan-stats">
         <div class="plan-stat">
             <div class="plan-stat-icon icon-blue"><i class="bi bi-megaphone-fill"></i></div>
@@ -107,19 +122,22 @@
         <div class="plan-stat">
             <div class="plan-stat-icon icon-amber"><i class="bi bi-calendar3"></i></div>
             <div class="plan-stat-label">
-                @if($plan !== 'basico') Días restantes @else Días en Tools365 @endif
+                @if($plan !== 'free') Días restantes @else Días en Tools365 @endif
             </div>
-            <div class="plan-stat-val">
-                @if($plan !== 'basico') {{ $diasRestantes }}
-                @else {{ $user->created_at->diffInDays(now()) }} @endif
-            </div>
+<div class="plan-stat-val">
+    @if($plan !== 'free')
+        {{ $diasRestantes }}
+    @else
+        {{ (int) $user->created_at->diffInDays(now()) }}
+    @endif
+</div>
             <div class="plan-stat-sub">
-                @if($plan !== 'basico') hasta renovación @else desde que te registraste @endif
+                @if($plan !== 'free') hasta renovación @else desde que te registraste @endif
             </div>
         </div>
     </div>
 
-    {{-- ══ USO DEL PLAN ════════════════════════════════════════════════ --}}
+    {{-- ╔═ USO DEL PLAN ══════════════════════════════════════════════════════ --}}
     <div class="uso-wrap">
         <h3><i class="bi bi-bar-chart-fill me-2" style="color:var(--plan-muted)"></i>Uso del plan</h3>
         <div class="uso-row">
@@ -150,57 +168,52 @@
         @endif
     </div>
 
-    {{-- ══ COMPARATIVA / MEJORA ════════════════════════════════════════ --}}
+    {{-- ╔═ PLANES DISPONIBLES ════════════════════════════════════════════════ --}}
     <h3 class="section-title"><i class="bi bi-layers"></i> Planes disponibles</h3>
     <div class="planes-grid">
 
-        {{-- Básico --}}
-        <div class="plan-card {{ $plan==='basico' ? 'actual' : '' }}">
-            @if($plan==='basico') <div class="plan-card-badge badge-actual">Tu plan</div> @endif
-            <div class="plan-card-icon">⚡</div>
-            <div class="plan-card-name">Básico</div>
+        {{-- FREE --}}
+        <div class="plan-card {{ $plan === 'free' ? 'actual' : '' }}">
+            @if($plan === 'free') <div class="plan-card-badge badge-actual">Tu plan</div> @endif
+            <div class="plan-card-icon">🌱</div>
+            <div class="plan-card-name">Free</div>
             <div class="plan-card-free">Gratis</div>
             <ul class="plan-features">
                 <li><i class="bi bi-check-lg fi"></i> 5 publicaciones activas</li>
-                <li><i class="bi bi-check-lg fi"></i> 10 rentas simultáneas</li>
-                <li><i class="bi bi-check-lg fi"></i> Subastas habilitadas</li>
-                <li><i class="bi bi-x-lg fx"></i> Soporte prioritario</li>
-                <li><i class="bi bi-x-lg fx"></i> Estadísticas avanzadas</li>
-                <li><i class="bi bi-x-lg fx"></i> Badge de vendedor verificado</li>
+                <li><i class="bi bi-check-lg fi"></i> 3 fotos por publicación</li>
+                <li><i class="bi bi-check-lg fi"></i> Soporte por email (48 h)</li>
+                <li><i class="bi bi-x-lg fx"></i> Comisión venta: 12%</li>
             </ul>
             <button class="btn-plan btn-plan-current" disabled>
                 <i class="bi bi-check-circle-fill"></i>
-                @if($plan==='basico') Plan actual @else Plan menor @endif
+                @if($plan === 'free') Plan actual @else Plan menor @endif
             </button>
         </div>
 
-        {{-- Pro --}}
-        <div class="plan-card {{ $plan==='pro' ? 'actual pro' : '' }}">
-            <div class="plan-card-badge {{ $plan==='pro' ? 'badge-actual' : 'badge-popular' }}">
-                {{ $plan==='pro' ? 'Tu plan' : 'Popular' }}
+        {{-- BÁSICO --}}
+        <div class="plan-card {{ $plan === 'basico' ? 'actual' : '' }}">
+            <div class="plan-card-badge {{ $plan === 'basico' ? 'badge-actual' : 'badge-popular' }}">
+                {{ $plan === 'basico' ? 'Tu plan' : 'Popular' }}
             </div>
-            <div class="plan-card-icon">🚀</div>
-            <div class="plan-card-name">Pro</div>
+            <div class="plan-card-icon">⚡</div>
+            <div class="plan-card-name">Básico</div>
             <div class="plan-card-price">
-                <span class="cur">$</span>299
+                <span class="cur">$</span>199
                 <span class="per">/mes</span>
             </div>
             <ul class="plan-features">
-                <li><i class="bi bi-check-lg fi"></i> 30 publicaciones activas</li>
-                <li><i class="bi bi-check-lg fi"></i> 100 rentas simultáneas</li>
-                <li><i class="bi bi-check-lg fi"></i> Subastas habilitadas</li>
-                <li><i class="bi bi-check-lg fi"></i> Soporte prioritario</li>
-                <li><i class="bi bi-check-lg fi"></i> Estadísticas avanzadas</li>
-                <li><i class="bi bi-x-lg fx"></i> Badge de vendedor verificado</li>
+                <li><i class="bi bi-check-lg fi"></i> 20 publicaciones activas</li>
+                <li><i class="bi bi-check-lg fi"></i> 6 fotos por publicación</li>
+                <li><i class="bi bi-check-lg fi"></i> Soporte por email (24 h)</li>
+                <li><i class="bi bi-check-lg fi"></i> Comisión venta: 10%</li>
             </ul>
-            @if($plan==='pro')
+            @if($plan === 'basico')
                 <button class="btn-plan btn-plan-current" disabled>
                     <i class="bi bi-check-circle-fill"></i> Plan actual
                 </button>
-            @elseif($plan==='basico')
-                <a href="#" class="btn-plan btn-plan-upgrade"
-                   onclick="confirmarUpgrade('Pro','$299/mes')">
-                    <i class="bi bi-arrow-up-circle-fill"></i> Mejorar a Pro
+            @elseif($plan === 'free')
+                <a href="{{ route('dashboard.plan.checkout', 'basico') }}" class="btn-plan btn-plan-upgrade">
+                    <i class="bi bi-arrow-up-circle-fill"></i> Mejorar a Básico — $199/mes
                 </a>
             @else
                 <button class="btn-plan btn-plan-current" disabled>
@@ -209,65 +222,58 @@
             @endif
         </div>
 
-        {{-- Empresarial --}}
-        <div class="plan-card {{ $plan==='empresarial' ? 'actual empresarial' : '' }}">
-            <div class="plan-card-badge {{ $plan==='empresarial' ? 'badge-actual' : 'badge-top' }}">
-                {{ $plan==='empresarial' ? 'Tu plan' : 'Premium' }}
+        {{-- PROFESIONAL --}}
+        <div class="plan-card {{ $plan === 'profesional' ? 'actual profesional' : '' }}">
+            <div class="plan-card-badge {{ $plan === 'profesional' ? 'badge-actual' : 'badge-top' }}">
+                {{ $plan === 'profesional' ? 'Tu plan' : 'Premium' }}
             </div>
-            <div class="plan-card-icon">👑</div>
-            <div class="plan-card-name">Empresarial</div>
+            <div class="plan-card-icon">💎</div>
+            <div class="plan-card-name">Profesional</div>
             <div class="plan-card-price">
-                <span class="cur">$</span>799
+                <span class="cur">$</span>599
                 <span class="per">/mes</span>
             </div>
             <ul class="plan-features">
                 <li><i class="bi bi-check-lg fi"></i> Publicaciones ilimitadas</li>
-                <li><i class="bi bi-check-lg fi"></i> Rentas ilimitadas</li>
-                <li><i class="bi bi-check-lg fi"></i> Subastas habilitadas</li>
-                <li><i class="bi bi-check-lg fi"></i> Soporte 24/7 dedicado</li>
-                <li><i class="bi bi-check-lg fi"></i> Estadísticas avanzadas</li>
-                <li><i class="bi bi-check-lg fi"></i> Badge de vendedor verificado</li>
+                <li><i class="bi bi-check-lg fi"></i> 10 fotos por publicación</li>
+                <li><i class="bi bi-check-lg fi"></i> 10 publicaciones destacadas / mes</li>
+                <li><i class="bi bi-check-lg fi"></i> Soporte prioritario 24/7</li>
             </ul>
-            @if($plan==='empresarial')
+            @if($plan === 'profesional')
                 <button class="btn-plan btn-plan-current" disabled>
                     <i class="bi bi-check-circle-fill"></i> Plan actual
                 </button>
             @else
-                <a href="#" class="btn-plan btn-plan-top"
-                   onclick="confirmarUpgrade('Empresarial','$799/mes')">
-                    <i class="bi bi-stars"></i> Mejorar a Empresarial
+                <a href="{{ route('dashboard.plan.checkout', 'profesional') }}" class="btn-plan btn-plan-top">
+                    <i class="bi bi-stars"></i> Mejorar a Profesional — $599/mes
                 </a>
             @endif
         </div>
 
     </div>
 
-    {{-- ══ HISTORIAL DE PAGOS ══════════════════════════════════════════ --}}
+    {{-- ╔═ HISTORIAL DE PAGOS ════════════════════════════════════════════════ --}}
     <div class="card-base">
         <h3 class="section-title mb-3">
             <i class="bi bi-receipt"></i> Historial de pagos del plan
         </h3>
         @php
-            // En producción esto vendría de una tabla plan_pagos o suscripciones
-            $historial = [
-                ['tipo'=>'pagado',  'desc'=>'Renovación Plan Pro',      'fecha'=>now()->subMonth(),    'monto'=>'$299.00'],
-                ['tipo'=>'upgrade', 'desc'=>'Upgrade Básico → Pro',      'fecha'=>now()->subMonths(2),  'monto'=>'$299.00'],
-                ['tipo'=>'pagado',  'desc'=>'Plan Básico activado',      'fecha'=>now()->subMonths(6),  'monto'=>'Gratis'],
-            ];
+            $historialDB = \App\Models\Pedido::where('user_id', $user->id)
+                ->where('folio', 'like', 'PLAN-%')
+                ->orderByDesc('created_at')
+                ->get();
         @endphp
-        @if(count($historial))
-            @foreach($historial as $h)
+        @if($historialDB->count())
+            @foreach($historialDB as $h)
             <div class="historial-item">
-                <div class="historial-dot dot-{{ $h['tipo'] }}">
-                    @if($h['tipo']==='pagado') <i class="bi bi-check-lg"></i>
-                    @elseif($h['tipo']==='upgrade') <i class="bi bi-arrow-up-circle"></i>
-                    @else <i class="bi bi-x-lg"></i> @endif
+                <div class="historial-dot dot-pagado">
+                    <i class="bi bi-check-lg"></i>
                 </div>
                 <div class="historial-info">
-                    <strong>{{ $h['desc'] }}</strong>
-                    <small>{{ \Carbon\Carbon::parse($h['fecha'])->format('d/m/Y \a \l\a\s H:i') }}</small>
+                    <strong>Suscripción — {{ $h->folio }}</strong>
+                    <small>{{ $h->created_at->format('d/m/Y \a \l\a\s H:i') }}</small>
                 </div>
-                <div class="historial-monto">{{ $h['monto'] }}</div>
+                <div class="historial-monto">${{ number_format($h->total, 2) }} MXN</div>
             </div>
             @endforeach
         @else
@@ -275,8 +281,8 @@
         @endif
     </div>
 
-    {{-- ══ ZONA DE PELIGRO ═════════════════════════════════════════════ --}}
-    @if($plan !== 'basico')
+    {{-- ╔═ ZONA DE PELIGRO ═══════════════════════════════════════════════════ --}}
+    @if($plan !== 'free')
     <div class="danger-zone">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
             <div>
@@ -284,7 +290,7 @@
                 <p>
                     Si cancelas, tu plan seguirá activo hasta el
                     <strong>{{ $renovacion->format('d/m/Y') }}</strong>.
-                    Después regresarás al plan Básico gratuito y tus publicaciones
+                    Después regresarás al plan Free y tus publicaciones
                     podrían pausarse si superas el límite.
                 </p>
             </div>
@@ -297,31 +303,7 @@
 
 </div>
 
-{{-- ══ MODAL UPGRADE ═══════════════════════════════════════════════════ --}}
-<div class="modal fade" id="modalUpgrade" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:16px;border:none;overflow:hidden;">
-            <div style="background:linear-gradient(135deg,#3b0764,#7c3aed);padding:2rem;text-align:center;color:#fff;">
-                <div style="font-size:3rem;">🚀</div>
-                <h4 class="fw-bold mt-2 mb-1">¡Mejora tu plan!</h4>
-                <p class="mb-0" style="opacity:.85;" id="upgradeSubtitle">Desbloquea más funcionalidades</p>
-            </div>
-            <div class="modal-body p-4">
-                <p style="font-size:.88rem;color:var(--plan-muted);text-align:center;margin:0;">
-                    Esta función está en desarrollo. Por ahora contacta al equipo de soporte para cambiar tu plan.
-                </p>
-                <div class="d-flex gap-2 mt-4">
-                    <button class="btn btn-secondary flex-fill" data-bs-dismiss="modal">Cancelar</button>
-                    <a href="{{ route('contacto.index') }}" class="btn btn-primary flex-fill">
-                        <i class="bi bi-chat-dots me-1"></i> Contactar soporte
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-{{-- ══ MODAL CANCELAR ══════════════════════════════════════════════════ --}}
+{{-- ╔═ MODAL CANCELAR ════════════════════════════════════════════════════════ --}}
 <div class="modal fade" id="modalCancelar" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content" style="border-radius:16px;border:none;overflow:hidden;">
@@ -334,14 +316,14 @@
                 <ul style="font-size:.86rem;color:var(--plan-muted);padding-left:1.2rem;margin:0 0 1.2rem;">
                     <li>Tu plan sigue activo hasta el <strong style="color:var(--plan-text)">{{ $renovacion->format('d/m/Y') }}</strong></li>
                     <li>No se realizará ningún cobro adicional</li>
-                    <li>Al vencer, regresarás al plan Básico</li>
+                    <li>Al vencer, regresarás al plan Free</li>
                     <li>Publicaciones que superen el límite serán pausadas</li>
                 </ul>
                 <div class="d-flex gap-2">
                     <button class="btn btn-secondary flex-fill" data-bs-dismiss="modal">
                         Mantener plan
                     </button>
-                    <form method="POST" action="#" class="flex-fill">
+                    <form method="POST" action="{{ route('dashboard.plan.cancelar') }}" class="flex-fill">
                         @csrf @method('DELETE')
                         <button type="submit" class="btn btn-danger w-100">
                             <i class="bi bi-x-circle me-1"></i> Sí, cancelar
@@ -356,18 +338,7 @@
 
 @push('scripts')
 <script>
-const modalUpgrade  = new bootstrap.Modal(document.getElementById('modalUpgrade'));
 const modalCancelar = new bootstrap.Modal(document.getElementById('modalCancelar'));
-
-function confirmarUpgrade(nombre, precio) {
-    event.preventDefault();
-    document.getElementById('upgradeSubtitle').textContent =
-        `Cambiar a Plan ${nombre} — ${precio}`;
-    modalUpgrade.show();
-}
-
-function confirmarCancelacion() {
-    modalCancelar.show();
-}
+function confirmarCancelacion() { modalCancelar.show(); }
 </script>
 @endpush

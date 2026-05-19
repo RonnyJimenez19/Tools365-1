@@ -325,7 +325,8 @@
                 @foreach($publicaciones as $pub)
                 <tr>
                     {{-- ID --}}
-                    <td class="text-muted" style="font-size:.78rem;">{{ $pub->id }}</td>
+                    <td class="text-muted" style="font-size:.78rem;">{{ $publicaciones->firstItem() + $loop->index }}</td>
+                    
 
                     {{-- Publicación --}}
                     <td>

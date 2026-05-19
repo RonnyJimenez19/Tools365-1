@@ -57,31 +57,38 @@
 
         {{-- ── ADMIN / GERENTE ── --}}
         @if(auth()->user()->puedeEditar())
-            <div class="nav-section-label">Gestión del sistema</div>
-            <a href="{{ route('publicar.create') }}" class="nav-item">
-                <i class="bi bi-plus-circle-fill"></i> Publicar herramienta
-            </a>
-            <a href="#" class="nav-item">
-                <i class="bi bi-box-seam-fill"></i> Todas las herramientas
-            </a>
+           
 
 
-            @if(auth()->user()->esAdmin())
-                <div class="nav-section-label">Administración</div>
-<a href="{{ route('admin.usuarios') }}" class="nav-item {{ request()->routeIs('admin.usuarios') ? 'active' : '' }}">
-    <i class="bi bi-people-fill"></i> Usuarios
-</a>
+@if(auth()->user()->esAdmin())
+    <div class="nav-section-label">Administración</div>
+    <a href="{{ route('admin.usuarios') }}"
+       class="nav-item {{ request()->routeIs('admin.usuarios') ? 'active' : '' }}">
+        <i class="bi bi-people-fill"></i> Usuarios
+    </a>
+    <a href="{{ route('admin.herramientas') }}"
+       class="nav-item {{ request()->routeIs('admin.herramientas') ? 'active' : '' }}">
+        <i class="bi bi-wrench-adjustable-circle-fill"></i> Herramientas
+    </a>
+    <a href="{{ route('admin.subastas') }}"
+       class="nav-item {{ request()->routeIs('admin.subastas') ? 'active' : '' }}">
+        <i class="bi bi-hammer"></i> Subastas
+    </a>
+    <a href="{{ route('admin.rentas') }}"
+       class="nav-item {{ request()->routeIs('admin.rentas') ? 'active' : '' }}">
+        <i class="bi bi-clock-history"></i> Rentas
+    </a>
+    <a href="{{ route('admin.opiniones') }}"
+       class="nav-item {{ request()->routeIs('admin.opiniones') ? 'active' : '' }}">
+        <i class="bi bi-chat-quote-fill"></i> Opiniones
+    </a>
+    <a href="{{ route('admin.ingresos') }}"
+       class="nav-item {{ request()->routeIs('admin.ingresos') ? 'active' : '' }}">
+        <i class="bi bi-bar-chart-fill"></i> Ingresos
+    </a>
+@endif
+ 
 
-                {{--<a href="#" class="nav-item">
-                    <i class="bi bi-file-earmark-text-fill"></i> Contenido de la página
-                </a>--}}
-                <a href="#" class="nav-item">
-                    <i class="bi bi-bar-chart-fill"></i> Reportes
-                </a>
-                {{--<a href="#" class="nav-item">
-                    <i class="bi bi-gear-fill"></i> Configuración
-                </a>--}}
-            @endif
         @endif
 
         {{-- ── USUARIO INVITADO ── --}}
@@ -93,7 +100,6 @@
             <a href="{{ route('mis-publicaciones.index') }}"
                class="nav-item {{ request()->routeIs('mis-publicaciones.*') ? 'active' : '' }}">
                 <i class="bi bi-box-seam-fill"></i> Mis publicaciones
-                <span class="nav-badge info">3</span>
             </a>
 
 <div class="nav-section-label">Ventas</div>
@@ -118,7 +124,6 @@
 
 <a href="{{ route('dashboard.rentas') }}" class="nav-item">
     <i class="bi bi-clock-history"></i> Mis rentas
-    <span class="nav-badge info">2</span>
 </a>
 
 <a href="{{ route('subastas.index') }}"
@@ -127,9 +132,7 @@
 </a>
 
             <div class="nav-section-label">Cuenta</div>
-            <a href="#" class="nav-item {{ request()->routeIs('perfil.*') ? 'active' : '' }}">
-                <i class="bi bi-person-circle"></i> Mi perfil
-            </a>
+ 
             <a href="{{ route('dashboard.plan') }}"
                class="nav-item {{ request()->routeIs('planes.*') ? 'active' : '' }}">
                 <i class="bi bi-star-fill"></i> Mi plan
@@ -141,9 +144,7 @@
         <a href="{{ route('inicio') }}" class="nav-item">
             <i class="bi bi-shop"></i> Ir a la tienda
         </a>
-        <a href="#" class="nav-item">
-            <i class="bi bi-question-circle-fill"></i> Ayuda & FAQ
-        </a>
+   
 
         @if(auth()->user()->puedeEditar())
             <div class="sidebar-role-badge">
