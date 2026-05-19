@@ -51,7 +51,7 @@ class AdminController extends Controller
 
         $validated = $request->validate([
             'rol'    => 'sometimes|in:admin,gerente,invitado',
-            'plan'   => 'sometimes|in:basico,pro,enterprise',
+            'plan' => 'sometimes|in:free,basico,profesional',
             'status' => 'sometimes|in:activo,bloqueado,inactivo',
         ]);
 

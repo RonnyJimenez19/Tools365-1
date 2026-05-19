@@ -33,9 +33,18 @@
         ->whereHas('pedido', fn($q) => $q->where('estado', 'pagado'))
         ->count();
 
-    $renovacion    = now()->addDays(18);
-    $diasRestantes = now()->diffInDays($renovacion);
-    $vencePronto   = $diasRestantes <= 7;
+$ultimoPagoPlan = \App\Models\Pedido::where('user_id', $user->id)
+    ->where('folio', 'like', 'PLAN-%')
+    ->where('estado', 'pagado')
+    ->latest('pagado_at')
+    ->first();
+
+$renovacion    = $ultimoPagoPlan
+    ? \Carbon\Carbon::parse($ultimoPagoPlan->pagado_at)->addDays(30)
+    : now()->addDays(30);
+
+$diasRestantes = (int) max(0, now()->diffInDays($renovacion, false));
+$vencePronto   = $diasRestantes <= 7;
 
     // ── Info visual por plan ───────────────────────────────────────────────────
     $planInfo = [
@@ -56,11 +65,19 @@
         <div class="plan-hero-bg {{ $info['color'] }}"></div>
         <div class="plan-hero-content">
             <div>
-                <div class="plan-hero-badge">Plan activo</div>
-                <div class="plan-hero-name">{{ $info['emoji'] }} {{ $info['label'] }}</div>
-                <p class="plan-hero-desc">{{ $info['desc'] }}</p>
+               <div class="plan-hero-badge" style="color:#000;">
+    Plan activo
+</div>
+
+<div class="plan-hero-name" style="color:#000;">
+    {{ $info['emoji'] }} {{ $info['label'] }}
+</div>
+
+<p class="plan-hero-desc" style="color:#000;">
+    {{ $info['desc'] }}
+</p>
                 @if($plan === 'free')
-                    <div class="plan-renew-pill">
+                    <div class="plan-renew-pill" style="color:#000;">
                         <i class="bi bi-infinity"></i> Plan gratuito — sin fecha de vencimiento
                     </div>
                 @else
@@ -107,10 +124,13 @@
             <div class="plan-stat-label">
                 @if($plan !== 'free') Días restantes @else Días en Tools365 @endif
             </div>
-            <div class="plan-stat-val">
-                @if($plan !== 'free') {{ $diasRestantes }}
-                @else {{ $user->created_at->diffInDays(now()) }} @endif
-            </div>
+<div class="plan-stat-val">
+    @if($plan !== 'free')
+        {{ $diasRestantes }}
+    @else
+        {{ (int) $user->created_at->diffInDays(now()) }}
+    @endif
+</div>
             <div class="plan-stat-sub">
                 @if($plan !== 'free') hasta renovación @else desde que te registraste @endif
             </div>
