@@ -24,6 +24,7 @@
     </script>
 
     <link rel="stylesheet" href="{{ asset('css/app_blade.css') }}">
+    
     @stack('css')
 
 </head>
