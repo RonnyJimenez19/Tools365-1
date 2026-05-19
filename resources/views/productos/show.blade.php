@@ -506,11 +506,10 @@
                     </a>
                 @endif
 
-                <a href="#" class="btn-cta-primary"
-                   style="background: var(--color-surface, #f8f9fa); border: 1.5px solid var(--color-border, #dee2e6); color: var(--color-text, #212529);">
-                    <i class="bi bi-whatsapp" style="color:#25d366;"></i> Contactar por WhatsApp
-                </a>
-            </div>
+               <a href="https://wa.me/529991234567?text=Hola,%20me%20interesa%20este%20producto" target="_blank"
+                class="btn-cta-primary"
+                style="background: var(--color-surface, #f8f9fa); border: 1.5px solid var(--color-border, #dee2e6); color: var(--color-text, #212529);">
+                <i class="bi bi-whatsapp" style="color:#25d366;"></i>Contactar por WhatsApp</a>
 
             {{-- Compartir --}}
             <div style="font-size:.82rem; color:#999; text-align:center;">
