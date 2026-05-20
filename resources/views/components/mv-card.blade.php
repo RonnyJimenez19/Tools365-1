@@ -27,8 +27,8 @@
         @endif
 
         <div class="mv-card-body">
-            <h3>{{ $titulo }}</h3>
-            <p>{{ $texto }}</p>
+            <h3>{!! $titulo !!}</h3>
+            <p>{!! $texto !!}</p>
             @if(count($valores))
                 <div class="mv-values">
                     @foreach($valores as $valor)

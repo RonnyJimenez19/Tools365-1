@@ -72,7 +72,7 @@
                     [$badge, $badgeTipo] = match($producto->tipo) {
                         'renta'   => ['🕐 Renta',   'primary'],
                         'venta'   => ['🛒 Venta',   'success'],
-                        'subasta' => ['🔨 Subasta', 'danger'],
+                        'subasta' => ['🔨 Subasta', 'info'],
                         default   => [$producto->tipo, 'secondary'],
                     };
                 @endphp
@@ -136,18 +136,7 @@
         <form method="POST" action="{{ route('carrito.store') }}" id="form-agregar-carrito">
             @csrf
             <input type="hidden" name="producto_id" value="{{ $producto->id }}">
-            <div class="d-flex align-items-center gap-3 mb-3">
-                <label class="fw-semibold" style="font-size:.85rem;">Cantidad</label>
-                <div class="input-group" style="width:130px;">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"
-                            onclick="let i=document.getElementById('qty-show');i.value=Math.max(1,+i.value-1)">−</button>
-                    <input type="number" id="qty-show" name="cantidad"
-                           value="1" min="1" max="99"
-                           class="form-control form-control-sm text-center">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"
-                            onclick="let i=document.getElementById('qty-show');i.value=Math.min(99,+i.value+1)">+</button>
-                </div>
-            </div>
+
             <button type="submit" class="btn btn-primary w-100">
                 <i class="bi bi-cart-plus me-2"></i>Agregar al carrito
             </button>

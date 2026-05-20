@@ -184,16 +184,21 @@
             <p class="lead text-muted">Construyendo el futuro del mercado de herramientas en México</p>
         </div>
         <div class="row g-4">
-            <x-mv-card
-                tipo="mision" imagen="Imagenes/mision.jpg" titulo="Nuestra Misión"
-                texto="Democratizar el acceso a maquinaria y herramientas industriales en México, conectando a propietarios y usuarios a través de una plataforma segura, transparente y eficiente. Creemos que cualquier persona o empresa merece acceso a las mejores herramientas para crecer."
-                :valores="['Accesibilidad', 'Transparencia', 'Confianza', 'Innovación']"
-            />
-            <x-mv-card
-                tipo="vision" imagen="Imagenes/vision.jpg" titulo="Nuestra Visión"
-                texto="Ser la plataforma líder en Latinoamérica para la renta, compra y subasta de herramientas y maquinaria industrial para 2030. Un ecosistema donde el equipo siempre está en uso, generando valor para quien lo posee y para quien lo necesita."
-                :valores="['Liderazgo', 'Sustentabilidad', 'Impacto social']"
-            />
+<x-mv-card
+    tipo="mision"
+    imagen="Imagenes/mision.jpg"
+    titulo="<span style='color:#000;'>Nuestra Misión</span>"
+    texto="Democratizar el acceso a maquinaria y herramientas industriales en México, conectando a propietarios y usuarios a través de una plataforma segura, transparente y eficiente. Creemos que cualquier persona o empresa merece acceso a las mejores herramientas para crecer."
+    :valores="['Accesibilidad', 'Transparencia', 'Confianza', 'Innovación']"
+/>
+
+<x-mv-card
+    tipo="vision"
+    imagen="Imagenes/vision.jpg"
+    titulo="<span style='color:#000;'>Nuestra Visión</span>"
+    texto="Ser la plataforma líder en Latinoamérica para la renta, compra y subasta de herramientas y maquinaria industrial para 2030. Un ecosistema donde el equipo siempre está en uso, generando valor para quien lo posee y para quien lo necesita."
+    :valores="['Liderazgo', 'Sustentabilidad', 'Impacto social']"
+/>
         </div>
     </div>
 </section>

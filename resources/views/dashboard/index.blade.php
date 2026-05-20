@@ -357,9 +357,8 @@
         <div class="stat-card">
             <div class="stat-icon blue"><i class="bi bi-box-seam-fill"></i></div>
             <div>
-                <div class="stat-num">3</div>
+                <div class="stat-num">{{ $publicacionesActivas }}</div>
                 <div class="stat-lbl">Publicaciones activas</div>
-                <div class="stat-delta up"><i class="bi bi-arrow-up-short"></i> +1 este mes</div>
             </div>
         </div>
     </div>
@@ -367,9 +366,8 @@
         <div class="stat-card">
             <div class="stat-icon green"><i class="bi bi-bag-heart-fill"></i></div>
             <div>
-                <div class="stat-num">8</div>
+                <div class="stat-num">{{ $comprasRealizadas }}</div>
                 <div class="stat-lbl">Compras realizadas</div>
-                <div class="stat-delta up"><i class="bi bi-arrow-up-short"></i> +2 esta semana</div>
             </div>
         </div>
     </div>
@@ -377,9 +375,8 @@
         <div class="stat-card">
             <div class="stat-icon orange"><i class="bi bi-hammer"></i></div>
             <div>
-                <div class="stat-num">2</div>
-                <div class="stat-lbl">Ofertas activas</div>
-                <div class="stat-delta down"><i class="bi bi-arrow-down-short"></i> Cierra en 4h</div>
+                <div class="stat-num">{{ $subastasActivas }}</div>
+                <div class="stat-lbl">Subastas activas</div>
             </div>
         </div>
     </div>
@@ -387,9 +384,8 @@
         <div class="stat-card">
             <div class="stat-icon red"><i class="bi bi-wallet2"></i></div>
             <div>
-                <div class="stat-num">$4,280</div>
+                <div class="stat-num">${{ number_format($ingresosMes, 2) }}</div>
                 <div class="stat-lbl">Ingresos este mes</div>
-                <div class="stat-delta up"><i class="bi bi-arrow-up-short"></i> +18%</div>
             </div>
         </div>
     </div>
