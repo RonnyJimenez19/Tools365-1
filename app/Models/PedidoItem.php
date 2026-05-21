@@ -18,6 +18,9 @@ class PedidoItem extends Model
         'fecha_fin',
         'total_item',
         'vendedor_id',
+        'comision_pct',           
+        'comision_plataforma',    
+        'neto_vendedor',         
     ];
 
     protected $casts = [
@@ -25,6 +28,9 @@ class PedidoItem extends Model
         'fecha_fin'       => 'date',
         'precio_unitario' => 'float',
         'total_item'      => 'float',
+        'comision_pct'        => 'float',        
+        'comision_plataforma' => 'float',        
+        'neto_vendedor'       => 'float',         
     ];
 
     public function pedido(): BelongsTo

@@ -38,12 +38,12 @@
                 'subasta' => 'Subasta',
                 default   => null,
             };
-            $badgeTipo = match($producto->tipo) {
-                'renta'   => 'primary',
-                'venta'   => 'success',
-                'subasta' => 'danger',
-                default   => 'secondary',
-            };
+$badgeTipo = match($producto->tipo) {
+    'renta'   => 'primary',
+    'venta'   => 'success',
+    'subasta' => 'info',
+    default   => 'secondary',
+};
         }
         if (!$timer && $producto->tipo === 'subasta' && $producto->timer_fin) {
             $timer = \Carbon\Carbon::parse($producto->timer_fin)
